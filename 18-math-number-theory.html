@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 18 — Math &amp; Number Theory | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 140px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.closing{
+  margin-top:56px; padding:36px 32px; background:var(--accent-deep); color:#f0ede4;
+  border-radius:12px;
+}
+.closing h3{color:#f0ede4; font-size:22px; margin-top:0;}
+.closing p{color:#d8dcd6; font-size:16.5px;}
+.closing .chapters-list{font-family:var(--sans); font-size:13px; color:#b8c4bf; line-height:2; margin-top:20px; columns:2; column-gap:24px;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+  .closing .chapters-list{columns:1;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Eighteen · Final Chapter</div>
+    <div class="toc-title">Math &amp; Number Theory</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">18.1 &nbsp;GCD — the measuring-rod trick</a></li>
+      <li><a href="#s2" data-target="s2">18.2 &nbsp;The Sieve of Eratosthenes</a></li>
+      <li><a href="#s3" data-target="s3">18.3 &nbsp;Modular arithmetic — the clock</a></li>
+      <li><a href="#s4" data-target="s4">18.4 &nbsp;Fast exponentiation</a></li>
+      <li><a href="#s5" data-target="s5">18.5 &nbsp;Combinatorics — counting without listing</a></li>
+      <li><a href="#s6" data-target="s6">18.6 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s7" data-target="s7">18.7 &nbsp;Check your understanding</a></li>
+      <li><a href="#s8" data-target="s8">18.8 &nbsp;Closing this book</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 17: Bit Manipulation</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER EIGHTEEN · FINAL CHAPTER · INTUITION FIRST</div>
+      <h1>Math &amp; Number Theory</h1>
+      <p>The last chapter, fittingly, is the one where the habit this whole book has tried to build — never trust a technique you can't re-derive — gets applied to ideas that are two thousand years old and still airtight for exactly the same reasons.</p>
+      <div class="meta">Closes the loop back to Chapter 1's very first promise</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.1</span>GCD — the measuring-rod trick</h2>
+          <p class="section-sub">Euclid's algorithm, genuinely ancient and still completely correct</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The greatest common divisor of two numbers is the largest number that divides both evenly. The Euclidean algorithm finds it astonishingly fast: <code>gcd(a, b) = gcd(b, a % b)</code>, base case <code>gcd(a, 0) = a</code>.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📏 THE MEASURING-ROD PICTURE, FROM EUCLID HIMSELF</span>
+            <p>Imagine two rods of different lengths, and you want the longest possible shorter rod that can measure both original rods an exact whole number of times, with nothing left over. Lay the shorter rod against the longer one repeatedly, marking off its length until less than one shorter-rod-length remains — that leftover bit is exactly <code>a % b</code>. Here's the key realization: <strong>any rod that can measure both original rods must also be able to measure this leftover bit</strong> — since the leftover is just the original longer rod with some whole number of shorter-rod-lengths removed, and anything that evenly divides both the longer rod and the shorter rod must also evenly divide their difference. So the problem "find the GCD of the two original rods" has exactly the same answer as the smaller problem "find the GCD of the shorter rod and this leftover bit" — you've shrunk the problem without losing any information at all, and can repeat this shrinking until the leftover hits zero, at which point whatever rod remains is the answer.</p>
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS CONVERGES SO FAST — GENUINELY ONE OF THE BEST-KNOWN RESULTS IN ALL OF ALGORITHMS</span>
+            <p>It's provable (though the full proof is a bit involved) that this process converges in O(log(min(a,b))) steps — genuinely fast, related to the growth rate of Fibonacci numbers in the worst case (the slowest-converging inputs are, delightfully, consecutive Fibonacci numbers themselves). This is a direct callback to Chapter 1.4's Shape 4 — a process that shrinks the problem by a significant, non-trivial fraction at every step lands in logarithmic territory, exactly the same halving-family reasoning that's shown up in binary search, merge sort, and now, a 2000-year-old measuring trick.</p>
+          </div>
+
+          <p>LCM (least common multiple) follows immediately once GCD is known: <code>lcm(a,b) = a*b / gcd(a,b)</code> — worth seeing why this formula is true, not just memorized: for any two numbers, the product of their GCD and their LCM always exactly equals the product of the two numbers themselves, a direct consequence of how prime factorizations combine (the GCD captures the "shared" factors, the LCM captures "every factor, counted the maximum number of times either number needs it," and together they account for exactly the full multiset of prime factors present across both numbers, no more, no less).</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.2</span>The Sieve of Eratosthenes</h2>
+          <p class="section-sub">Finding every prime up to n, without testing any of them individually</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Checking whether a single number is prime, by trial division, costs roughly O(√n). Checking every number from 2 to n this way would cost O(n√n) total — but if you need <em>every</em> prime up to n at once, there's a dramatically faster, genuinely different approach.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎯 THE "CROSS OUT EVERY MULTIPLE" ANALOGY</span>
+            <p>Imagine writing every number from 2 to n on a wall, then walking through them in order. The first uncrossed number you reach, 2, is definitely prime (nothing smaller could have crossed it out) — so cross out every multiple of 2 from 4 onward (they're all definitely composite, since 2 divides them). Move to the next uncrossed number, 3 — also definitely prime, by the same logic — cross out every multiple of 3. Continue this way, and whatever numbers remain uncrossed at the end are exactly the primes.</p>
+          </div>
+
+          <pre><code>is_prime = [<span class="kw">True</span>] * (n + 1)
+is_prime[0] = is_prime[1] = <span class="kw">False</span>
+<span class="kw">for</span> p <span class="kw">in</span> range(2, int(n**0.5) + 1):
+    <span class="kw">if</span> is_prime[p]:
+        <span class="kw">for</span> multiple <span class="kw">in</span> range(p*p, n+1, p):    <span class="comment"># start at p*p, not 2*p — see below</span>
+            is_prime[multiple] = <span class="kw">False</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY STARTING AT p*p, NOT 2p, IS THE ENTIRE REASON THIS BEATS THE NAIVE APPROACH</span>
+            <p>This detail is genuinely worth understanding, not just copying. When you're processing prime p and about to cross out its multiples, every multiple <em>smaller</em> than p*p has already necessarily been crossed out by some <em>smaller</em> prime factor — for instance, when p=5, the multiple 10 (=2×5) was already crossed out back when p=2 was processed, and 15 (=3×5) was already crossed out when p=3 was processed. The very first multiple of p that could only have been reached by p itself, with no smaller prime having already caught it, is p×p — every multiple below that already has a smaller prime factor that got to it first. Starting the crossing-out at p*p instead of 2p skips redundant work that's already been done, and this small optimization is a real part of why the total work across the entire sieve comes out to O(n log log n) — a growth rate so close to linear that it's often treated as "practically O(n)" for real-world purposes.</p>
+          </div>
+
+          <p>The <code>for p in range(2, int(n**0.5)+1)</code> outer bound is its own small piece of the same reasoning: any composite number up to n must have <em>at least one</em> factor that's ≤ √n (if both factors were bigger than √n, their product would exceed n) — so once you've crossed out multiples using every prime up to √n, every composite number up to n has necessarily been caught by at least one of them.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.3</span>Modular arithmetic — the clock</h2>
+          <p class="section-sub">Why "wrapping around" is a genuinely useful, not just a cute, idea</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Competitive programming and interview problems constantly ask for an answer "modulo 10^9+7" — this isn't arbitrary cruelty, it's a genuine, necessary tool for keeping numbers bounded when the true answer would otherwise grow astronomically large (far beyond what fits comfortably in standard integer types, or simply too slow to compute directly).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🕐 THE CLOCK-FACE PICTURE</span>
+            <p>A 12-hour clock is modular arithmetic in daily disguise: 9 o'clock plus 5 hours doesn't give you "14 o'clock," it wraps back around to 2 o'clock — you've computed <code>(9+5) % 12</code> without ever calling it that. The clock doesn't care about the true, unwrapped total elapsed hours; it only cares about the <em>remainder</em> after removing every complete 12-hour cycle. Modular arithmetic in programming does exactly this, just with whatever "cycle length" (the modulus) the problem specifies, instead of 12.</p>
+          </div>
+
+          <p>The genuinely useful property that makes this practical: you can take the modulus at <em>every intermediate step</em> of a computation, not just at the very end, and still get the correct final wrapped answer — <code>(a + b) % m = ((a % m) + (b % m)) % m</code>, and the equivalent holds for multiplication too. This is precisely what keeps intermediate values from ever growing unboundedly large during a long computation, since you're constantly wrapping back into a small, bounded range rather than letting the true value balloon.</p>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ THE ONE GENUINE GOTCHA — SUBTRACTION</span>
+            <p>Subtraction under a modulus can produce a negative intermediate result in many languages, even though the "true" mathematical answer, once wrapped, should be non-negative — <code>(a - b) % m</code> can come out negative if a < b, which is often not the mathematically intended wrapped value. The standard, reliable fix: <code>((a - b) % m + m) % m</code> — adding m before the final mod guarantees landing back in the proper non-negative range, regardless of whether the intermediate subtraction went negative.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.4</span>Fast exponentiation</h2>
+          <p class="section-sub">Chapter 17's shifting, arriving to solve one more problem</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Computing <code>a^b</code> by multiplying <code>a</code> by itself b times is an honest O(b) — fine for small b, genuinely too slow when b is large (millions, or needs to happen many times over). There's a way to do this in O(log b) instead, and it directly reuses Chapter 17.1's light-switch picture.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">💡 WRITING THE EXPONENT ITSELF AS A ROW OF SWITCHES</span>
+            <p>Any exponent b can be written in binary — a row of switches, exactly like Chapter 17. And <code>a^b</code> can be decomposed as a product of <code>a</code> raised to each individual switch's power-of-2 value, but only including the ones that are actually "on." For example, 13 in binary is 1101 (8+4+1), so <code>a^13 = a^8 · a^4 · a^1</code>. If you precompute <code>a^1, a^2, a^4, a^8, ...</code> by repeated squaring (each one just the square of the previous, a single multiplication each time), you can assemble the final answer by multiplying together only the ones corresponding to "on" switches in b's binary representation.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> fast_pow(a, b, mod):
+    result = 1
+    <span class="kw">while</span> b > 0:
+        <span class="kw">if</span> b & 1:                  <span class="comment"># is the lowest switch of b currently on?</span>
+            result = (result * a) % mod
+        a = (a * a) % mod         <span class="comment"># square it — moves to the next power-of-2 term</span>
+        b >>= 1                    <span class="comment"># Chapter 17.5's shift — move to the next switch</span>
+    <span class="kw">return</span> result</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS IS THE SAME O(log n) STORY AS BINARY SEARCH, ONE MORE TIME</span>
+            <p>The loop runs exactly once per bit of b — and a number with value b has roughly log₂(b) bits, by the exact same reasoning as Chapter 1.4's Shape 4 and Chapter 17.1's switch-counting logic. Each iteration does a small, constant amount of work (one or two multiplications), so the whole computation is O(log b) — a genuinely dramatic improvement over the naive O(b) loop, and worth explicitly recognizing as the fourth or fifth time this exact "halving/doubling gives log n" shape has reappeared across this book, from binary search to merge sort to the Euclidean algorithm to here.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.5</span>Combinatorics — counting without listing</h2>
+          <p class="section-sub">The final callback to Chapter 7's "honest count of real output" idea</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p><code>nCr</code> — "n choose r," the number of ways to pick r items from n without regard to order — is defined as <code>n! / (r! · (n-r)!)</code>. The direct formula involves factorials that grow explosively large, which is precisely where the modular arithmetic from Section 18.3 and the fast exponentiation from Section 18.4 come together to make this genuinely computable at scale.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY YOU CAN'T JUST "DIVIDE" UNDER A MODULUS THE ORDINARY WAY</span>
+            <p>Here's a genuine subtlety worth understanding, not glossing over: Section 18.3 established that addition and multiplication distribute cleanly across a modulus, but <em>division does not</em> — <code>(a / b) % m</code> is generally not the same as <code>(a % m) / (b % m)</code>, because division isn't guaranteed to even produce a whole number in modular arithmetic the way ordinary division does. The actual fix relies on a genuinely elegant piece of number theory called the <strong>modular multiplicative inverse</strong> — a special number that behaves like "1/b" specifically under the given modulus, computable efficiently using Section 18.4's fast exponentiation (via a classical result called Fermat's Little Theorem, when the modulus is prime, which is exactly why competitive programming problems love the specific modulus 10^9+7 — it's prime, making this inverse trick available). The full derivation of that theorem is beyond this book's scope, but the shape of the solution is worth seeing: multiplying by the modular inverse of b replaces "dividing by b" with an operation that genuinely does distribute correctly across the modulus.</p>
+          </div>
+
+          <p>In practice, for many queries against the same modulus, it's standard to precompute every factorial (and its modular inverse) up to the maximum needed value once, in O(n), and then answer any individual nCr query in O(1) by simple lookup and multiplication — precisely Chapter 2.4's prefix-sum trade-off one final time: pay a one-time upfront cost to buy fast repeated queries afterward.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.6</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Forgetting the "+m" fix on modular subtraction</span>
+            <p>Section 18.3's specific warning, worth repeating directly: a negative intermediate result from subtraction under a modulus is a genuinely common, easy-to-miss source of wrong answers — the code runs without crashing, silently producing a value outside the intended non-negative wrapped range. Always use <code>((a - b) % m + m) % m</code> for modular subtraction, as a reflexive habit, not a case-by-case judgment call.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Starting the sieve's inner loop at 2p instead of p*p</span>
+            <p>It still produces a correct final answer either way — the "start at 2p" version just redundantly re-crosses-out numbers that smaller primes already handled — but it meaningfully slows the sieve down without providing any benefit. Since the whole point of the optimization was speed, missing this detail defeats a real part of what makes the sieve worth using over naive trial division in the first place.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Attempting straightforward division under a modulus</span>
+            <p>Section 18.5's core warning: computing something like nCr under a modulus by directly dividing factorials (rather than using the modular inverse) produces silently wrong results whenever the division doesn't happen to work out to a clean integer relationship under that specific modulus — a subtle, easy-to-miss class of bug precisely because it can appear to work correctly on small test cases where the numbers happen to divide evenly, then fail on others.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Assuming fast exponentiation's "square and check the bit" order doesn't matter</span>
+            <p>Section 18.4's loop specifically checks the current bit of b <em>before</em> squaring a and shifting b — reversing this order (squaring first, then checking) would check the wrong bit against the wrong power of a, since squaring a has already moved it to represent the <em>next</em> power-of-2 term before the current bit's contribution has been accounted for. As with Chapter 8.5's linked-list reversal, the specific order of operations here isn't a style choice — it's load-bearing for correctness.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.7</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the measuring-rod picture, explain why gcd(a, b) equals gcd(b, a % b), rather than this being an arbitrary rule to memorize.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Anything that evenly divides both a and b must also evenly divide the leftover remainder (a % b), since that remainder is just a with some whole number of b-lengths removed — dividing evenly into both a whole quantity and a whole multiple removed from it means dividing evenly into what's left too. This means the exact same set of common divisors is shared between (a, b) and (b, a % b) — so their greatest common divisor must be identical, and the problem has genuinely been shrunk without losing any information about what the answer could be.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why does starting the sieve's crossing-out at p*p, rather than 2p, not miss any composite numbers?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Any multiple of p smaller than p*p must have some other factor smaller than p multiplying with p to produce it — and that smaller factor, being itself a smaller prime (or reducible to one), would already have crossed this multiple out during its own, earlier turn in the sieve. So every multiple of p below p*p was already guaranteed to be handled by some earlier, smaller prime — starting at p*p just skips redundant, already-completed work, not any genuinely uncovered composite numbers.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Why can you safely take the modulus at every intermediate step of a computation involving addition and multiplication, and still get the correct final wrapped answer?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Addition and multiplication both distribute cleanly across the modulus — (a+b) % m equals ((a%m)+(b%m)) % m, and the same holds for multiplication — which means wrapping early and wrapping late are mathematically guaranteed to produce the same final result. This is exactly what lets you keep intermediate values bounded and small throughout a long computation, rather than letting the true, unwrapped value grow to some astronomically large size before finally taking the modulus once at the very end.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Using the binary-exponent picture, explain why fast exponentiation is O(log b) rather than O(b).</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The exponent b, written in binary, has roughly log₂(b) bits/switches — and the algorithm does one loop iteration per bit of b, not per unit of b's actual value. Each iteration does a small, constant amount of work (a squaring, and possibly one multiplication), so the total work scales with the number of bits in b, which is logarithmic in b's value, not linear in it — the same halving/doubling-family reasoning that's produced O(log n) results throughout this entire book.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why does computing nCr under a modulus specifically require a modular inverse, rather than just directly dividing the factorials?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Unlike addition and multiplication, division does not distribute cleanly across a modulus — (a/b) % m is generally not the same as doing the division after separately reducing a and b modulo m, and it isn't even guaranteed to correspond to a whole number the way ordinary division within the modulus's bounded range would need. The modular inverse is a specially-computed value that behaves like "1/b" specifically under that modulus, letting you replace division with a multiplication that does correctly distribute — sidestepping the broken direct-division approach entirely.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why does the order of operations in fast exponentiation's loop (check the bit, then square) matter, rather than being an arbitrary style choice?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Checking the current bit is meant to account for a's contribution at the <em>current</em> power-of-2 position, before a gets squared to represent the <em>next</em> power-of-2 position. Squaring first would mean a no longer represents the value the current bit is actually supposed to correspond to by the time you check it — you'd be pairing the wrong bit with the wrong power of a, producing an incorrect final product, exactly the same "order isn't a style choice, it's load-bearing" lesson Chapter 8.5 taught for linked-list reversal.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">18.8</span>Closing this book</h2>
+          <p class="section-sub">What was actually being taught, underneath eighteen different topics</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Eighteen chapters ago, the very first section asked a single question — as the pile of stuff grows, does the effort grow slowly, or does it grow fast — and promised that everything afterward would exist to make that question precise enough to actually answer. Looking back, that promise held in a way worth naming directly: almost nothing in this book was really eighteen separate ideas. It was one habit, worn eighteen different costumes.</p>
+
+          <p>The habit: <strong>whenever something seems to work, ask why it's allowed to work, and check whether that "why" actually holds in the situation in front of you.</strong> Binary search needed a no-flickering property, not just sortedness. Dijkstra's greedy trust needed non-negative weights, provably, or it silently breaks. A monotonic stack's nested loop wasn't secretly O(n²) once you tracked total pushes and pops instead of counting syntactically. Every "trick" in this book, without exception, was a specific answer to "why is this actually safe" — never a shortcut to be taken on faith.</p>
+
+          <p>That habit is the actual, transferable skill. Specific algorithms will keep changing — new ones will be invented, old ones will fall out of fashion, and no single problem you memorize the solution to will show up verbatim in whatever comes next. But the instinct to ask "why does this work, specifically, and does that reason still apply here" travels with you into every unfamiliar problem you'll ever meet, in a way that memorized solutions never could.</p>
+
+        </div></div>
+      </section>
+
+      <div class="closing">
+        <h3>The complete series</h3>
+        <p>Eighteen chapters, one continuous thread — worth genuinely re-reading any of them once the later chapters make the earlier callbacks click into place differently.</p>
+        <div class="chapters-list">
+          1. Complexity Analysis<br>
+          2. Arrays<br>
+          3. Strings<br>
+          4. Two Pointers &amp; Sliding Window<br>
+          5. Searching<br>
+          6. Sorting<br>
+          7. Recursion &amp; Backtracking<br>
+          8. Linked Lists<br>
+          9. Stacks &amp; Queues<br>
+          10. Trees<br>
+          11. Binary Search Trees<br>
+          12. Heaps / Priority Queues<br>
+          13. Tries<br>
+          14. Graphs<br>
+          15. Dynamic Programming<br>
+          16. Greedy Algorithms<br>
+          17. Bit Manipulation<br>
+          18. Math &amp; Number Theory
+        </div>
+      </div>
+
+      <div class="divider-quote">
+        Every chapter in this book asked the same question in a new costume: not "does this work," but "why is this allowed to work, and does that reason still hold here." That question is the whole book. Everything else was just examples of asking it well.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

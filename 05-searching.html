@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 5 — Searching | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{min-width:44px; height:38px; padding:0 6px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+.ch.dim{opacity:0.35;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Five</div>
+    <div class="toc-title">Searching</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">5.1 &nbsp;Beyond "finding a book"</a></li>
+      <li><a href="#s2" data-target="s2">5.2 &nbsp;Where off-by-one bugs actually come from</a></li>
+      <li><a href="#s3" data-target="s3">5.3 &nbsp;The predicate — binary search's true shape</a></li>
+      <li><a href="#s4" data-target="s4">5.4 &nbsp;Binary search on the answer</a></li>
+      <li><a href="#s5" data-target="s5">5.5 &nbsp;Rotated sorted arrays</a></li>
+      <li><a href="#s6" data-target="s6">5.6 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s7" data-target="s7">5.7 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 4: Two Pointers &amp; Sliding Window</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER FIVE OF TEN · INTUITION FIRST</div>
+      <h1>Searching</h1>
+      <p>Binary search is one of the first algorithms anyone learns, and also one of the most quietly misunderstood — most people know it as "the halving trick for sorted arrays" and stop there. The real idea underneath it is bigger, stranger, and far more useful than that, and this chapter is about actually seeing it.</p>
+      <div class="meta">Builds directly on the "library shelf" picture from Chapter 1</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.1</span>Beyond "finding a book"</h2>
+          <p class="section-sub">What binary search is actually doing, underneath the array</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 1 introduced binary search through the library-shelf picture: sorted books, check the middle, throw away half. That's the right starting intuition, but it accidentally makes binary search look like it's fundamentally <em>about arrays</em> — and that's the exact misconception this chapter needs to dismantle, because it's what stops people from recognizing binary search in situations where there's no array in sight at all.</p>
+
+          <p>Here's the real, underlying shape of what's happening. Imagine you're not searching a row of books at all — imagine you're standing at one end of a very long hallway of light switches, and every switch to your left is definitely OFF, and every switch from some unknown point onward, all the way to the right, is definitely ON. You don't know where the transition happens. Your job: find the exact first switch that's ON.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">💡 THE LIGHT-SWITCH HALLWAY</span>
+            <p>You don't need the switches to be "sorted numbers" for this to work — you just need one property: everything behaves like OFF-OFF-OFF...OFF-ON-ON-ON...ON, with a single clean transition point somewhere in the middle, never flickering back and forth. Walk to the middle switch. If it's ON, you know the transition point is at this switch or somewhere to its left — everything to the right is irrelevant, you can ignore it entirely. If it's OFF, the transition is somewhere strictly to the right — everything up to and including this switch is irrelevant. Either way, you've just thrown away half the hallway with a single check, and you didn't need "sorted numbers" to do it — you needed exactly one thing: a clean, one-directional transition from OFF to ON.</p>
+          </div>
+
+          <p>This is the real, general shape of binary search: given a sequence where some property is <code>False, False, False, ..., False, True, True, True, ..., True</code> — false for a while, then true for the rest, with exactly one transition point and no flickering back and forth — you can find that transition point in O(log n) checks, by repeatedly testing the middle and throwing away the half that can't contain it.</p>
+
+          <p>A sorted array searching for a target is just <em>one specific instance</em> of this general shape: define the property as "is this element ≥ target?" On a sorted array, this property is guaranteed to be False for a stretch and then True for the rest — exactly the OFF-then-ON pattern — which is <em>why</em> binary search works on sorted arrays in the first place, not a separate, unrelated fact you have to memorize alongside it.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.2</span>Where off-by-one bugs actually come from</h2>
+          <p class="section-sub">Slowing down on the part everyone gets wrong under pressure</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Binary search has a well-earned reputation for being simple to describe and surprisingly easy to get subtly wrong in code — infinite loops, missing the answer by one position, that sort of thing. The good news: almost all of these bugs come from the same root cause, and once you see it clearly, you can basically stop making this mistake for good.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚪 THE "WHICH DOOR STAYS OPEN" QUESTION</span>
+            <p>Every binary search bug ultimately traces back to a single, un-asked question: after checking the middle, exactly which positions am I certain are safe to throw away, and which one might I still need to check again? If you throw away a position you actually still needed, you silently miss the answer. If you never throw away the position you just checked, you can loop forever, checking the same middle repeatedly without making progress. The entire discipline of writing correct binary search is just answering this one question honestly, every single time you shrink the search range.</p>
+          </div>
+
+          <p>Concretely: if you've just checked <code>mid</code> and confirmed the property is True there, and you're searching for the <em>first</em> True (the transition point), then <code>mid</code> itself might <em>be</em> the answer — so it would be wrong to throw it away entirely. But everything to the right of <code>mid</code> is definitely True too (no flickering, remember) and definitely not the <em>first</em> True, so it's safe to throw those away. That means your new search range should be <code>[lo, mid]</code>, not <code>[lo, mid-1]</code> — keeping <code>mid</code> in play.</p>
+
+          <p>Compare that to searching for an <em>exact</em> value in a sorted array: once you've checked <code>mid</code> and confirmed <code>arr[mid] != target</code>, you know for certain <code>mid</code> itself can never be the answer — so this time it genuinely is safe, and necessary, to exclude it: <code>[lo, mid-1]</code> or <code>[mid+1, hi]</code>.</p>
+
+          <table>
+            <tr><th>Situation</th><th>Is mid itself still a candidate?</th><th>Correct narrowing</th></tr>
+            <tr><td>Exact match search, mid is wrong</td><td>No — ruled out for certain</td><td>exclude mid: <code>hi=mid-1</code> or <code>lo=mid+1</code></td></tr>
+            <tr><td>"Find first True," mid is True</td><td>Yes — mid might BE the first True</td><td>keep mid: <code>hi=mid</code></td></tr>
+            <tr><td>"Find first True," mid is False</td><td>No — False can't be the answer</td><td>exclude mid: <code>lo=mid+1</code></td></tr>
+          </table>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY "KEEPING MID IN PLAY" CAN CAUSE INFINITE LOOPS — AND THE FIX</span>
+            <p>Here's the subtle trap: if you write <code>mid = (lo+hi)//2</code> (which always rounds <em>down</em>) and your narrowing step is <code>hi = mid</code> (keeping mid in play), consider what happens when <code>lo</code> and <code>hi</code> are adjacent, say <code>lo=3, hi=4</code>. Then <code>mid = 3</code> (rounds down to lo). If the check says "keep mid in play," you'd set <code>hi = mid = 3</code> — but <code>lo</code> was <em>already</em> 3! Nothing moved. The range never shrank, and you loop forever. The fix, once you see the trap: when you're keeping mid in play (the "find first True" style), round mid <em>up</em> instead — <code>mid = (lo+hi+1)//2</code> — so that when lo and hi are adjacent, mid lands on hi instead of lo, and the range is guaranteed to actually shrink on every iteration, no exceptions.</p>
+          </div>
+
+          <p>This single "round up vs. round down, matched to which side you might keep" detail is responsible for the overwhelming majority of binary search infinite-loop bugs. It's not a mysterious, unpredictable bug — it's a direct, mechanical consequence of not matching your rounding direction to your narrowing direction.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.3</span>The predicate — binary search's true shape</h2>
+          <p class="section-sub">Naming the general pattern explicitly, once and for all</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Let's name the general template explicitly, because once it's named, you'll start spotting it in places that don't look anything like "search a sorted array" on the surface.</p>
+
+          <pre><code><span class="comment"># find the first position where check(x) is True,
+# given that check() is False...False True...True (no flickering)</span>
+lo, hi = search_space_start, search_space_end
+<span class="kw">while</span> lo < hi:
+    mid = (lo + hi) // 2
+    <span class="kw">if</span> check(mid):
+        hi = mid       <span class="comment"># mid might be the answer — keep it</span>
+    <span class="kw">else</span>:
+        lo = mid + 1   <span class="comment"># mid definitely isn't — exclude it</span>
+<span class="comment"># lo == hi now — this is the first position where check() is True</span></code></pre>
+
+          <p>Everything about a specific binary search problem lives entirely inside the function <code>check()</code> — what you're actually testing. The surrounding loop skeleton never changes. This is worth genuinely internalizing as a mental template: <strong>binary search isn't really "an algorithm for arrays," it's a strategy for efficiently locating the transition point of any True/False-shaped question</strong>, and recognizing a new problem as "oh, this is secretly a False...False, True...True shape" is the actual transferable skill — the code itself is almost always this same handful of lines once you've correctly identified <code>check()</code>.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 WHY THIS REFRAME MATTERS SO MUCH GOING FORWARD</span>
+            <p>The moment you stop thinking "binary search = sorted array lookup" and start thinking "binary search = find the transition point of a monotonic yes/no question," an entire category of problems that initially look nothing like searching suddenly become approachable. Section 5.4 is the single biggest, most common example of exactly this reframe in action.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.4</span>Binary search on the answer</h2>
+          <p class="section-sub">Using binary search when there's no array to search at all</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a problem that, on first read, doesn't look like a searching problem at all: "a bakery has to ship n boxes of cake to a shop within D days, one or more boxes per day, boxes shipped on a given day must be in their original order, and a truck has some maximum weight capacity per day. Find the <em>minimum</em> possible truck capacity that still gets everything shipped within D days."</p>
+
+          <p>There's no array of "capacities" sitting around to search through. But here's the reframe: instead of asking "which array index has my answer," ask a completely different question — <strong>"if I guessed a specific capacity, could I quickly check whether that guess actually works?"</strong> And separately: <strong>"as my guessed capacity increases, does the problem only get easier, never harder?"</strong> If both answers are yes, you don't need to search an array — you can binary search directly over the space of <em>possible guesses</em>.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📦 THE BAKERY, WORKED THROUGH</span>
+            <p>Imagine you guess "capacity = 500 kg" and check: can all the boxes ship within D days using trucks of that capacity? This check is easy — just greedily load boxes onto today's truck until adding the next one would exceed 500kg, then start a new day, and count how many days it takes. Now here's the key monotonic property: if capacity 500kg works (ships within D days), would capacity 600kg also work? Obviously yes — more capacity per day can only ever need the same number of days or fewer, never more. That's the False...False, True...True shape from Section 5.3 in disguise: "does this capacity work" is False for small capacities and True for capacities large enough, with a single clean transition — exactly the shape binary search needs, even though we're searching over possible <em>capacities</em>, not array positions.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> check(capacity):
+    days_needed = simulate_shipping(boxes, capacity)
+    <span class="kw">return</span> days_needed <= D
+
+lo, hi = max(boxes), sum(boxes)   <span class="comment"># smallest possible / largest possible capacity</span>
+<span class="kw">while</span> lo < hi:
+    mid = (lo + hi) // 2
+    <span class="kw">if</span> check(mid):
+        hi = mid
+    <span class="kw">else</span>:
+        lo = mid + 1
+<span class="comment"># lo is now the minimum capacity that works</span></code></pre>
+
+          <p>Notice this is <em>exactly</em> the same skeleton from Section 5.3, verbatim — nothing changed except what <code>check()</code> means and what <code>lo, hi</code> represent. This exact reframe — "minimize the maximum," "maximize the minimum," "find the smallest X such that condition holds" — covers a genuinely huge category of problems (Koko eating bananas, splitting an array to minimize the largest sum, aggressive cows / minimum distance problems) that all reduce to the identical template once you correctly identify what the monotonic <code>check()</code> function should be.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE TWO QUESTIONS THAT TELL YOU THIS TECHNIQUE APPLIES</span>
+            <p>Before reaching for binary search on the answer, honestly ask: (1) can I write a reasonably fast <code>check(guess)</code> function that tells me whether a specific guessed value works? (2) is it true that if a smaller/larger guess works, every even-larger/smaller guess also works — i.e., is there a single clean transition point, no flickering? If both are yes, you have a monotonic predicate exactly like Section 5.1's light-switch hallway, just measured over possible answers instead of array positions — and the entire problem collapses from "how do I even approach this" to "just binary search the answer space."</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.5</span>Rotated sorted arrays</h2>
+          <p class="section-sub">What to do when "sorted" is only true in pieces</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A rotated sorted array is what you get if you take a normal sorted array and "cut" it at some point, then swap the two pieces — like <code>[4,5,6,7,0,1,2]</code>, which was originally <code>[0,1,2,4,5,6,7]</code> before the front chunk got moved to the back. It's not globally sorted anymore, so naive binary search seems broken. But here's the rescue:</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">✂️ THE CUT-DECK-OF-CARDS ANALOGY</span>
+            <p>Picture a sorted deck of numbered cards that's been cut once — the bottom portion moved to the top. If you look at any single split point in this cut deck, one of the two halves you're looking at is guaranteed to still be a normal, boringly sorted run, and the other half contains the "seam" where the cut happened. You just don't know <em>which</em> half has the seam until you check — but once you compare the leftmost, middle, and rightmost cards, it's always immediately obvious which side is the clean, sorted one.</p>
+          </div>
+
+          <div class="strchars">
+            <div class="ch hi">4</div><div class="ch hi">5</div><div class="ch">6</div><div class="ch">7</div><div class="ch">0</div><div class="ch">1</div><div class="ch">2</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">Checking mid=6 (value 0): left half [4,5,6,7] is cleanly sorted (arr[lo] ≤ arr[mid]); the seam is hiding in the right half instead.</p>
+
+          <p>The check: compare <code>arr[lo]</code> against <code>arr[mid]</code>. If <code>arr[lo] <= arr[mid]</code>, the left half from <code>lo</code> to <code>mid</code> must be the clean, normally-sorted side (if it contained the seam, values would drop somewhere in the middle, breaking that ordering) — so the seam, if it exists at all in this sub-range, must be hiding in the right half instead. Once you know which half is genuinely sorted, you can ask a completely ordinary question: does the target fall within that clean half's value range? If yes, recurse into it with standard binary search logic. If no, the target must be in the other half — recurse there instead, even though that half still potentially contains the seam (you'll just re-ask the same "which side is clean" question again next round).</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS STILL FINISHES IN O(log n)</span>
+            <p>Even though the seam might survive into the recursive call, notice the search range itself still exactly halves on every single check, regardless of which side turns out to be clean — you're always discarding exactly one half based on the sorted-half comparison. The seam moving around doesn't change the fact that half the remaining positions get eliminated every time, which is the only thing that actually determines the O(log n) bound. The rotation adds one extra comparison per step (figuring out which half is clean) but doesn't change the fundamental halving rhythm at all.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.6</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Assuming binary search only applies to sorted arrays</span>
+            <p>This is the exact misconception Section 5.1 was written to dismantle, and it's worth naming directly as a pitfall: people miss "binary search on the answer" opportunities constantly because they're mentally searching for an array to binary search over, when the real signal is a monotonic True/False-shaped question, which might not involve an array at all. Whenever a problem asks for a "minimum X such that condition holds" or "maximum X such that condition holds," pause and check for the monotonic-predicate shape before assuming you need a completely different technique.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Mismatching the rounding direction and the narrowing direction</span>
+            <p>Covered in depth in Section 5.2, but worth flagging again as the single most common concrete bug: using <code>mid = (lo+hi)//2</code> (rounds down) together with a narrowing step that keeps <code>mid</code> in play (<code>hi = mid</code>) creates a genuine infinite-loop risk when <code>lo</code> and <code>hi</code> become adjacent. Always explicitly check: if I'm keeping mid in play, am I rounding up? If I'm always excluding mid, rounding down is fine either way. This is a mechanical check, not a matter of luck.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Forgetting that "no flickering" is a real requirement, not a formality</span>
+            <p>Binary search's entire correctness depends on the property being checked having exactly one clean transition — False for a while, then True for the rest, never flickering back and forth. If a problem's condition doesn't actually have this shape (it's True, then False, then True again, unpredictably), binary search will run without crashing and confidently return a wrong answer, because it'll throw away a half that might still have contained a valid answer. Always sanity-check the monotonicity assumption on a small example by hand before trusting it on a new problem — don't just assume every "find X such that condition" problem automatically qualifies.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — On rotated arrays, checking arr[mid] against arr[hi] and arr[lo] inconsistently</span>
+            <p>It's easy to get the "which half is sorted" comparison backward under pressure — comparing against the wrong boundary, or using a strict inequality where a non-strict one was needed (or vice versa), especially in arrays with duplicate values, which can break the clean "which half is sorted" determination entirely in edge cases. Trace through a small 5-6 element rotated example by hand, including a case where the target equals a boundary value, before trusting a general implementation.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">5.7</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the light-switch hallway, explain why binary search needs "no flickering," not just "sorted."</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Binary search's safety comes from being able to throw away an entire half based on a single check at the middle. That's only valid if you can be sure the half you're discarding contains no answers — which requires the property to be cleanly False-then-True with one transition, never switching back and forth. If it flickered (True, then False, then True again), checking the middle and seeing False wouldn't tell you the answer can't be to the left — it might flicker back to True further left too, and you'd wrongly discard a valid region. "Sorted" is just one common way to guarantee this no-flickering property, not the requirement itself.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why can <code>hi = mid</code> (keeping mid in play) cause an infinite loop specifically when paired with rounding down, but not when paired with rounding up?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>When lo and hi become adjacent (say lo=3, hi=4), rounding down gives mid=3=lo. If the narrowing step sets hi=mid, hi becomes 3 — but lo was already 3, so nothing actually moved and the loop spins forever on the same range. Rounding up instead gives mid=4=hi in that same situation, so setting hi=mid keeps hi at 4 — still no progress on hi, but crucially the loop condition lo<hi would need checking; the real fix is that rounding up makes mid land on hi rather than lo, guaranteeing that if lo advances (the other branch) it always changes something, and pairing round-up with "keep mid in play via hi=mid" specifically avoids the stuck-at-lo scenario that round-down creates.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — In "binary search on the answer," what do lo and hi represent, if there's no array being searched?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>They represent the boundaries of the space of possible <em>answers</em> — the smallest and largest values the final result could plausibly be (like the smallest and largest possible truck capacity in the bakery example) — rather than array indices. The binary search machinery doesn't actually care whether it's narrowing down array positions or narrowing down a range of possible numeric answers; it only needs a monotonic check() function and a well-defined lo/hi range to shrink.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — What two questions should you ask before deciding a problem is a "binary search on the answer" candidate?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>First: can I write a reasonably efficient check(guess) function that tells me whether a specific guessed answer works? Second: is the property monotonic — does every guess beyond a certain threshold also work, with a single clean transition and no flickering? If both hold, you have the False...False,True...True shape and can binary search directly over the space of possible answers instead of needing some other approach.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — On a rotated sorted array, why does the search still finish in O(log n) even though the array isn't globally sorted?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because at every single check, regardless of which half turns out to contain the "seam" from the rotation, you can always identify which half is cleanly sorted and definitively rule out (or rule in) that entire half based on whether the target's value falls in its range. The search range still exactly halves on every check — the only change from ordinary binary search is one extra comparison to figure out which side is clean, not a change to the fundamental halving rhythm that determines the O(log n) bound.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Someone says "binary search always needs the data to physically exist in a sorted array in memory." Is this true?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>No — this is exactly the misconception this chapter set out to correct. Binary search only needs a monotonic (no-flickering) True/False-shaped check over some ordered range of candidates; that range could be array indices, but it could equally be a range of possible numeric answers (capacities, days, distances) with no array involved at all, as long as you can efficiently evaluate the check function for any given candidate value.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Binary search was never really "the halving trick for sorted arrays" — it was always "the halving trick for any clean False...False, True...True question." The array was just the first place most people happen to meet it.
+      </div>
+
+      <div class="endnote">
+        Chapter 5 of 10 — Searching, intuition-first. Ready for Chapter 6 (Sorting) whenever you are — it revisits Chapter 1's Master Theorem derivations with the same slow, picture-first treatment.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

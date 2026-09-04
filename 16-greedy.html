@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 16 — Greedy Algorithms | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{min-width:44px; height:38px; padding:0 6px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Sixteen</div>
+    <div class="toc-title">Greedy Algorithms</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">16.1 &nbsp;The burden of proof</a></li>
+      <li><a href="#s2" data-target="s2">16.2 &nbsp;The exchange argument, formalized</a></li>
+      <li><a href="#s3" data-target="s3">16.3 &nbsp;Activity selection — proved end to end</a></li>
+      <li><a href="#s4" data-target="s4">16.4 &nbsp;Why fractional knapsack works and 0/1 doesn't</a></li>
+      <li><a href="#s5" data-target="s5">16.5 &nbsp;Huffman coding — greedy merging</a></li>
+      <li><a href="#s6" data-target="s6">16.6 &nbsp;The actual greedy-vs-DP test</a></li>
+      <li><a href="#s7" data-target="s7">16.7 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s8" data-target="s8">16.8 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 15: Dynamic Programming</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER SIXTEEN · INTUITION FIRST</div>
+      <h1>Greedy Algorithms</h1>
+      <p>Every earlier "why is this greedy step safe" moment — Kadane's cut-your-losses, Dijkstra's finalized minimum, Kruskal's cheapest edge — was this chapter, showing up early. Here, that recurring question finally gets a name and a proper method: the exchange argument.</p>
+      <div class="meta">Builds directly on the greedy-safety proofs scattered through Chapters 2, 6, 14, and 15</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.1</span>The burden of proof</h2>
+          <p class="section-sub">Why greedy is the one technique in this book you're never allowed to just trust</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A greedy algorithm makes the locally best-looking choice at every step, never reconsidering it, and hopes that stacking up these local choices produces the globally best answer. Here's the uncomfortable truth worth sitting with before anything else in this chapter: <strong>this hope is sometimes completely wrong</strong>, and greedy algorithms that "feel right" can produce confidently incorrect answers with no error, no warning — the code just runs and returns the wrong number.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧗 THE MOUNTAIN-CLIMBING ANALOGY</span>
+            <p>Imagine trying to reach the highest peak in a mountain range by always walking uphill from wherever you currently stand, never once walking downhill even briefly. This greedy strategy guarantees you'll reach <em>a</em> peak — you'll stop climbing once every direction around you goes down. But it offers no guarantee whatsoever that you've reached the <em>highest</em> peak in the whole range — you might be standing on a modest foothill, with the true summit visible in the distance, reachable only by first walking downhill into a valley you refused to ever enter. "Locally best, every step" and "globally best, overall" are genuinely different claims, and greedy algorithms only coincidentally deliver both when the specific problem's structure happens to guarantee it.</p>
+          </div>
+
+          <p>This is exactly why Chapter 15.1 treated DP's optimal-substructure requirement as something to <em>check</em>, not assume — and greedy demands the identical discipline, just even more strictly, because a greedy algorithm never revisits a choice once made, so there's no safety net if the local choice turns out to be wrong. <strong>Every greedy algorithm in this chapter comes with an actual proof of why it works</strong> — not because proofs are academically nice to have, but because an unproven greedy claim is, honestly, just a guess wearing an algorithm's clothing.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.2</span>The exchange argument, formalized</h2>
+          <p class="section-sub">The one proof technique that shows up in every greedy problem in this book</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>You've actually already seen this exact proof technique multiple times — Chapter 14.9's minimum spanning tree argument, Chapter 15.5's LCS matching-pair argument — without it being named. Time to name it properly, because recognizing the pattern is what lets you construct one yourself on a brand-new problem.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🔄 THE "SWAP AND SHOW IT'S NEVER WORSE" TEMPLATE</span>
+            <p>The exchange argument always follows the same shape: assume, for the sake of argument, that some optimal solution exists which does <em>not</em> make the greedy choice at some point. Show that you can always <strong>swap</strong> that solution's actual choice for the greedy choice instead, and prove this swap never makes the solution worse (and sometimes strictly improves it). If swapping in the greedy choice is always safe — never a downgrade — then there's always <em>some</em> optimal solution that agrees with the greedy choice, which means making the greedy choice can never cost you the optimal answer. Repeat this reasoning at every single step, and the entire greedy strategy, choice by choice, is provably safe.</p>
+          </div>
+
+          <p>This is genuinely the same "leap of faith" spirit as Chapter 7.1, applied to proof rather than to trust in recursion: instead of trusting a smaller call blindly, you're proving that a specific local choice can always be substituted in without loss — a rigorous, checkable claim rather than an assumption.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.3</span>Activity selection — proved end to end</h2>
+          <p class="section-sub">The cleanest possible worked example of the exchange argument in action</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Given a set of activities, each with a start and end time, and a single resource that can only host one activity at a time, select the maximum <em>number</em> of non-overlapping activities possible. The greedy strategy: sort by <em>end time</em>, and repeatedly pick the next activity whose start time is at or after the last picked activity's end time.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📅 THE MEETING-ROOM ANALOGY</span>
+            <p>Picture a single meeting room and a long list of people wanting to book it, each with their own preferred start and end time. Intuitively, why would picking the meeting that <em>ends soonest</em> (among all currently available options) be the smart move, rather than picking, say, the one that starts soonest, or the shortest one? Because a meeting ending sooner leaves the most possible remaining time free for everyone else — it's the choice that <em>constrains your future options the least</em>.</p>
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THE FULL EXCHANGE-ARGUMENT PROOF</span>
+            <p>Sort all activities by end time. Suppose some optimal solution exists whose <em>first</em> chosen activity is not the one with the earliest end time overall — call the optimal solution's first choice A, and the true earliest-ending activity (greedy's choice) G. Since G ends no later than A (that's exactly what "earliest-ending" means), you can always <strong>swap</strong> A out for G in the optimal solution: G doesn't overlap with anything that came after A in that solution, precisely because G finishes at least as early as A did, so everything that was compatible with A remains compatible with G too. This swap produces a solution that's still valid, and still exactly the same size (one-for-one substitution) — meaning it's still optimal. So there always exists an optimal solution that starts with the greedy choice. Now the exact same argument applies recursively to the remaining sub-problem (activities that start after G ends) — the greedy choice is always safe to make first, at every single step, by this same swapping logic reapplied.</p>
+          </div>
+
+          <p>This is worth appreciating as a genuinely complete, rigorous proof — not a hand-wave. It's the template every other greedy proof in this chapter (and the ones you met earlier without the name, in Chapters 14 and 15) follows: identify what the greedy choice is, show a hypothetical better alternative can always be swapped for it without loss, conclude the greedy choice was safe.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.4</span>Why fractional knapsack works and 0/1 doesn't</h2>
+          <p class="section-sub">Two nearly identical-sounding problems, one genuine dividing line between them</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 15.4 solved 0/1 knapsack with DP, deliberately not greedy — worth now understanding precisely why greedy fails there, by contrasting it against a problem that looks almost identical on the surface but genuinely does yield to greedy: <strong>fractional</strong> knapsack, where items can be broken into any fraction (like sacks of grain, rather than indivisible treasures).</p>
+
+          <p>The fractional greedy strategy: sort items by value-per-weight ratio, descending, and take as much as possible of the best-ratio item first, then the next-best, and so on, until the bag is full (possibly taking only a fraction of the final item that doesn't fully fit).</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY DIVISIBILITY IS THE ENTIRE DIVIDING LINE, PROVEN</span>
+            <p>The exchange argument here: suppose an optimal fractional solution doesn't fully use the best-ratio item before touching any lower-ratio item. Take a small amount of some lower-ratio item currently in the bag, and swap in an equal <em>weight</em> of the higher-ratio item instead (there's room, since we assumed the higher-ratio item wasn't yet fully used) — this swap keeps total weight identical but strictly increases total value, since you're replacing weight from a worse ratio with weight from a better one. This proves any solution not greedily prioritizing the best ratio can always be improved by such a swap — so the greedy order is genuinely optimal. Crucially, this entire swap depended on being able to take an <em>arbitrary small amount</em> — divisibility is what makes "swap a little bit" a valid move at all. In 0/1 knapsack, items can't be fractionally swapped this way — you either have the whole item's weight available to trade, or none of it, and that all-or-nothing granularity is exactly what breaks the clean exchange argument, forcing a genuine trade-off between competing whole items that greedy has no way to resolve correctly, which is precisely why Chapter 15.4 needed DP's exhaustive-but-organized comparison instead.</p>
+          </div>
+
+          <p>This is a genuinely illuminating pair to hold side by side: two problems, nearly identical in their statement, where one small structural fact — can items be split? — is the entire, complete explanation for why one yields to a simple greedy pass and the other genuinely requires DP's more careful bookkeeping.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.5</span>Huffman coding — greedy merging</h2>
+          <p class="section-sub">Building an optimal structure from the bottom up, one greedy merge at a time</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Huffman coding builds an optimal way to compress data by assigning shorter binary codes to more frequent symbols — the greedy strategy: repeatedly take the <em>two least frequent</em> remaining symbols (or groups), merge them into a single combined group (frequency = sum of the two), and repeat until only one group remains, forming a tree exactly like Chapter 10's structures, with more frequent symbols naturally ending up closer to the root (shorter code) and rarer ones farther out (longer code).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🥉 THE "PAIR OFF THE WEAKEST FIRST" TOURNAMENT ANALOGY</span>
+            <p>Picture a strange tournament bracket-building exercise where, instead of pairing strong competitors against each other, you specifically pair the two <em>weakest</em> remaining competitors together at every round, merging them into a combined "team" that then re-enters the pool with combined strength. Intuitively, this ensures the weakest individuals get "used up" — merged into the structure — as early as possible, which pushes them toward the deepest, most-merged parts of the eventual bracket. In Huffman's case, "deepest in the tree" directly corresponds to "longest code" — and it's precisely the least-frequent symbols that can most afford a long code, since they show up rarely, while the most-frequent symbols end up minimally merged, staying shallow, earning the shortest codes where it matters most for overall compression.</p>
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY MERGING THE TWO WEAKEST, SPECIFICALLY, IS PROVABLY OPTIMAL AT EVERY STEP</span>
+            <p>The exchange argument again: in any optimal Huffman tree, the two least-frequent symbols can always be shown to be siblings at the deepest level of the tree — because if they weren't, you could always swap one of them with whatever symbol currently <em>is</em> sitting at that deepest, sibling position, and this swap can never increase the total weighted code length (moving a low-frequency symbol deeper and a comparatively higher-frequency symbol shallower can only help or stay neutral, never hurt, since you're trading a small frequency for a longer depth and vice versa). Since this swap is always safe, there's always an optimal tree where the two least-frequent symbols are merged together first — exactly what the greedy algorithm does at every single step, recursively.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.6</span>The actual greedy-vs-DP test</h2>
+          <p class="section-sub">A concrete question to ask, not a vague feeling to develop</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapters 15 and 16 have circled the same underlying question from two directions — worth landing it plainly, as an actual test you can apply to a new, unfamiliar problem.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE QUESTION TO ASK</span>
+            <p>"If I make the locally best choice right now, could it <em>ever</em> backfire on some later decision?" If you can construct — or even just plausibly imagine — a scenario where today's locally-best choice locks you out of a better overall outcome, greedy is unsafe, and you need DP's willingness to keep multiple possibilities alive and compare them properly (0/1 knapsack: taking the best-ratio item might use up exactly the wrong amount of capacity, locking out a much better combination later — a real, constructible failure case). If you can instead construct a genuine exchange-argument proof — showing any hypothetical alternative can always be swapped for the greedy choice without loss — greedy is not just faster, it's provably correct, and reaching for DP's extra bookkeeping would just be unneeded overhead (activity selection, fractional knapsack, Huffman, Kruskal's MST, Dijkstra's non-negative-weight expansion — every one of them survived exactly this test).</p>
+          </div>
+
+          <p>The practical payoff of greedy, when it's genuinely proven safe, is real and worth wanting: activity selection is O(n log n) (dominated by the sort) instead of a DP table; Huffman is O(n log n) using a heap instead of exploring combinations; Kruskal's is O(E log E). Greedy, when it legitimately applies, is almost always faster and simpler than the DP alternative — which is exactly why it's worth the extra proof effort to confirm it applies, rather than defaulting to DP's safety net out of caution alone.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.7</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Trusting a greedy strategy because it "feels obviously right"</span>
+            <p>Section 16.1's entire point, worth restating as the central warning of this chapter: a greedy strategy that intuitively feels correct can still be wrong, with no warning, no crash — just a confidently wrong number. Sorting by the wrong key (start time instead of end time, for instance, in activity selection) still produces a plausible-looking, non-obviously-broken answer on many test cases, which is exactly what makes greedy bugs so dangerous — they don't announce themselves.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Sorting by the wrong key for the specific problem at hand</span>
+            <p>Activity selection needs sorting by end time specifically — not start time, not duration — and the exchange-argument proof in Section 16.3 only holds for that exact choice. Superficially similar scheduling problems (weighted activity selection, where activities have different values, not just a plain count to maximize) often need a genuinely different approach entirely, sometimes DP, because the clean "earliest end time is always safe" proof depended specifically on maximizing plain <em>count</em>, not weighted value.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Applying fractional knapsack's ratio-greedy logic to 0/1 knapsack</span>
+            <p>Section 16.4's whole point: this is a specific, well-known trap precisely because the two problems look so similar. Sorting 0/1 knapsack items by value-per-weight ratio and greedily taking whole items in that order can produce a genuinely suboptimal answer, because the "swap a small amount" move that made the fractional proof work simply isn't available when items are indivisible — there's no small exchange-argument step to fall back on here, which is exactly why DP earns its keep.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Skipping the proof because the problem "seems like" a known greedy pattern</span>
+            <p>Recognizing surface-level similarity to a previously-proven greedy problem (another scheduling problem, another "pick the best-ratio thing" problem) isn't the same as confirming the new problem shares the exact structural property that made the original proof work. Always at least sketch the exchange argument for the <em>specific</em> new problem — even a quick, informal version — rather than assuming a pattern transfers just because the surface description sounds familiar.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">16.8</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the mountain-climbing picture, explain the gap between "locally best at every step" and "globally best overall."</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Always walking uphill guarantees you'll stop at some peak — a point where every immediate direction is worse — but says nothing about whether that peak is the tallest in the entire range. Reaching the true highest peak might require briefly walking downhill into a valley first, a move a purely local, never-reconsider strategy would never make. "Locally best" only accidentally coincides with "globally best" when the specific landscape (or problem) has a structure that rules out this kind of trap — which is exactly what an exchange-argument proof needs to confirm, not assume.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — In your own words, what does an exchange argument actually prove, structurally?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>It proves that for any hypothetical optimal solution that doesn't make the greedy choice, you can always swap in the greedy choice instead without making the solution any worse. Since this swap is always safe, there's always some optimal solution that agrees with the greedy choice — meaning making that choice can never cost you the true optimal answer. Repeating this argument at every step is what justifies trusting the greedy strategy all the way through, rather than just at one isolated point.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Why does activity selection specifically need sorting by end time, and why would sorting by start time break the exchange-argument proof?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The proof's key step relies on the greedy choice (earliest end time) finishing no later than any alternative — guaranteeing it leaves at least as much remaining time free for everything else. Sorting by start time offers no such guarantee: an activity that starts earliest could still run for an extremely long time, blocking out far more future options than a later-starting but quicker-ending activity would have. The specific property "ends soonest" is what the swap step in the proof actually depends on — swapping in an early-starting-but-long activity wouldn't preserve compatibility with everything that came after.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Why does divisibility specifically make fractional knapsack solvable by greedy, when 0/1 knapsack (identical otherwise) isn't?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The fractional proof relies on being able to swap an arbitrarily small <em>amount</em> of a worse-ratio item for an equal weight of a better-ratio item, strictly improving value while keeping weight fixed — a move only possible because items can be split into any fraction. In 0/1 knapsack, items are all-or-nothing — there's no small partial exchange available, only swapping whole items, which can't preserve the exact weight balance the same way and forces a genuine trade-off between competing whole items that a simple ratio-based greedy pass has no mechanism to resolve correctly.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In Huffman coding, why does merging the two least-frequent symbols first lead to them ending up deepest in the tree, and why is that desirable?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Merging early means those two symbols get folded into combined groups sooner, and each subsequent merge nests them one level deeper inside the growing tree — the earlier something is merged, the more additional merges happen "above" it before the tree is finished, pushing it deeper. Deeper in the tree means a longer binary code, which is exactly the right trade-off for the least-frequent symbols, since they're used rarely — spending a few extra bits on them, in exchange for keeping the most-frequent symbols shallow (short codes), minimizes the total number of bits used across the whole message.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — What's the single concrete question Section 16.6 says you should ask to decide between greedy and DP on a new, unfamiliar problem?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Ask whether making the locally best choice right now could ever backfire on some later decision — if you can construct even a plausible scenario where it would, greedy is unsafe and DP's willingness to compare multiple kept-alive possibilities is needed instead. If you can instead construct an actual exchange-argument proof showing any alternative can always be swapped for the greedy choice without loss, greedy is both safe and typically faster, making the extra DP bookkeeping unnecessary overhead.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Every greedy algorithm that's ever felt like a clever shortcut in this book — Kadane's, Dijkstra's, Kruskal's, LCS's matching pairs — was quietly running this exact same exchange-argument proof underneath. This chapter didn't teach a new technique so much as it finally named the one that had been hiding in plain sight since Chapter 2.
+      </div>
+
+      <div class="endnote">
+        Chapter 16 — Greedy Algorithms, intuition-first. Ready for Chapter 17 (Bit Manipulation) whenever you are — a shorter, sharper chapter after two dense ones, picking up Chapter 15.8's bitmask DP preview.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

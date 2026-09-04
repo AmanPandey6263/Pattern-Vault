@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 4 — Two Pointers & Sliding Window | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{width:38px; height:38px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:15px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+.ch.lo{outline:2px solid var(--accent); outline-offset:2px;}
+.ch.rp{outline:2px solid var(--warn); outline-offset:2px;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Four</div>
+    <div class="toc-title">Two Pointers &amp; Sliding Window</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">4.1 &nbsp;The one idea underneath both tricks</a></li>
+      <li><a href="#s2" data-target="s2">4.2 &nbsp;Two pointers, converging</a></li>
+      <li><a href="#s3" data-target="s3">4.3 &nbsp;Two pointers, same direction</a></li>
+      <li><a href="#s4" data-target="s4">4.4 &nbsp;Sliding window — the fixed caterpillar</a></li>
+      <li><a href="#s5" data-target="s5">4.5 &nbsp;Sliding window — the stretchy rubber band</a></li>
+      <li><a href="#s6" data-target="s6">4.6 &nbsp;Walking through a real problem, slowly</a></li>
+      <li><a href="#s7" data-target="s7">4.7 &nbsp;Why this is O(n), proven properly</a></li>
+      <li><a href="#s8" data-target="s8">4.8 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s9" data-target="s9">4.9 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 3: Strings</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER FOUR OF TEN · INTUITION FIRST</div>
+      <h1>Two Pointers &amp; Sliding Window</h1>
+      <p>This is, more than any chapter so far, a single idea wearing many outfits. Once you actually see the one underlying reason these techniques work, an entire category of "how is this possible in O(n)?" problems stops feeling like separate tricks to memorize and starts feeling like the same realization, applied again and again.</p>
+      <div class="meta">Builds directly on the amortized reasoning from Chapters 1–3</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.1</span>The one idea underneath both tricks</h2>
+          <p class="section-sub">Why these techniques are really the same realization, twice</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a problem type that shows up constantly: given an array, find some pair, or some contiguous stretch, satisfying a condition — a pair that sums to a target, the shortest stretch with a big enough sum, the longest stretch without a repeated character. The obvious brute-force approach is to check every possible pair or every possible stretch — and you already know, from Chapter 1's triangle loop, that "check every pair" is an O(n²) shape.</p>
+
+          <p>Two pointers and sliding window are both about the same realization: <strong>in a lot of these problems, once you move one boundary of your search forward, you can prove you'll never need to look backward again.</strong> If that's true, you never have to re-examine the same piece of the array twice, and the whole search collapses from O(n²) down to O(n).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚶 THE ONE-WAY HALLWAY ANALOGY</span>
+            <p>Imagine searching a long hallway of rooms for something, but with one rule: once you walk past a room, you're physically not allowed to go back into it — the door locks behind you. This sounds like it should make your search worse, not better. But if you can <em>prove</em>, ahead of time, that nothing you'd ever need is sitting in a room you've already passed, then the locked door costs you nothing — and in exchange, you're guaranteed to finish your walk through the hallway in a single, forward-only pass, no backtracking, ever. That guarantee — "I will never need to revisit this" — is the entire engine behind both two pointers and sliding window. The specific reason the guarantee holds is different in each case (sortedness, for two pointers; a shrinkable/growable window property, for sliding window) — but the shape of the argument is identical.</p>
+          </div>
+
+          <p>This chapter is really about two different situations where you can make that "I'll never need to go back" promise, and how to recognize which one applies to a given problem.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.2</span>Two pointers, converging</h2>
+          <p class="section-sub">When a sorted array lets two ends walk toward each other</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The classic setup: given a <em>sorted</em> array, find two numbers that add up to exactly some target. Place one pointer, <code>l</code>, at the very start, and another, <code>r</code>, at the very end.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎚️ THE MIXING-DESK ANALOGY</span>
+            <p>Picture a mixing desk with the smallest possible value on the far left and the largest on the far right. You check the sum of the two ends. If it's too small, you know the "smallest" element you're holding is dragging the total down too much — sliding <code>l</code> rightward (toward bigger numbers) is the only sensible move, since <code>r</code> is already the biggest available. If the sum is too big, symmetric logic says slide <code>r</code> leftward. You never need to move <code>l</code> backward or <code>r</code> forward again — every move only ever narrows the desk from the outside in.</p>
+          </div>
+
+          <p>Here's the part worth actually proving to yourself, not just accepting: <strong>why is it safe to permanently rule out <code>l</code>'s current position once the sum is too small?</strong> Because the array is sorted, every other value to the right of <code>r</code>... wait, there's nothing right of <code>r</code>, <code>r</code> is already the maximum available partner. So pairing the current <code>l</code> with <em>anything</em> smaller than <code>arr[r]</code> would only make the sum even smaller, never bigger. There is no possible partner for the current <code>l</code> that could ever produce a big-enough sum — so it's genuinely, provably safe to abandon <code>l</code>'s current position forever and move on.</p>
+
+          <pre><code>l, r = 0, len(arr) - 1
+<span class="kw">while</span> l < r:
+    s = arr[l] + arr[r]
+    <span class="kw">if</span> s == target: <span class="kw">return</span> (l, r)
+    <span class="kw">elif</span> s < target: l += 1   <span class="comment"># current l can never work with anyone — abandon it</span>
+    <span class="kw">else</span>: r -= 1              <span class="comment"># current r can never work with anyone — abandon it</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 THE KEY REQUIREMENT, MADE EXPLICIT</span>
+            <p>This whole argument leaned entirely on the array being <strong>sorted</strong>. Sortedness is exactly what let us say "moving r further right is impossible, and moving l further left is impossible, so the only options are l-forward or r-backward, and we've just ruled out one of them for the current position permanently." Try this same technique on an unsorted array and the entire safety argument collapses — you'd have no way to know a smaller-index pair couldn't secretly work. This is precisely why "is the input sorted, or can I cheaply sort it?" is the very first question worth asking when you suspect two pointers might apply.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.3</span>Two pointers, same direction</h2>
+          <p class="section-sub">A different flavor — both pointers marching the same way</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Not every two-pointer setup converges from opposite ends. A common alternative: both pointers start at the beginning and only ever move forward, but at different speeds or under different conditions — a "slow" pointer marking where the next valid element should be written, and a "fast" pointer scanning ahead to find it.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧹 THE SORTING-CLERK ANALOGY</span>
+            <p>Picture a clerk re-shelving a row of labeled boxes, removing duplicates as they go, using only the row itself (no separate table to set boxes on). The clerk keeps one hand (<code>slow</code>) pointing at "the last confirmed-good spot," and walks down the row with the other hand (<code>fast</code>), inspecting each box in turn. Whenever <code>fast</code> finds a genuinely new, non-duplicate box, the clerk moves it into the spot right after <code>slow</code>, then advances <code>slow</code>. Boxes that <code>fast</code> has already inspected and rejected (duplicates) are simply never revisited — the clerk's <code>fast</code> hand never needs to walk backward, because once a box has been judged, that judgment never changes.</p>
+          </div>
+
+          <pre><code><span class="comment"># remove duplicates from a sorted array, in place</span>
+slow = 0
+<span class="kw">for</span> fast <span class="kw">in</span> range(1, len(arr)):
+    <span class="kw">if</span> arr[fast] != arr[slow]:
+        slow += 1
+        arr[slow] = arr[fast]
+<span class="comment"># the first slow+1 elements are now the deduplicated result</span></code></pre>
+
+          <p>Notice the shape here is genuinely different from Section 4.2's converging pointers — both <code>slow</code> and <code>fast</code> only ever move forward, never toward each other. But the underlying justification is the same "I will never need to revisit this" promise: once <code>fast</code> has judged a box as a duplicate or genuinely new, that judgment is final and never needs re-checking, so there's no reason to ever walk <code>fast</code> backward.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.4</span>Sliding window — the fixed caterpillar</h2>
+          <p class="section-sub">When you're always looking at exactly k elements at once</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Now for a genuinely different flavor of problem: instead of finding a pair, you're asked something about every contiguous stretch of a <em>fixed</em> length k — "find the maximum sum of any 4 consecutive elements," for instance.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🐛 THE CATERPILLAR ANALOGY</span>
+            <p>Picture a caterpillar exactly k segments long, inching its way along a row of numbered leaves, one leaf at a time. At every position, you want to know the total "value" of the leaves currently under the caterpillar's body. The naive way — re-adding up all k leaves from scratch every single time the caterpillar shifts — is wasteful, because when the caterpillar inches forward by one leaf, k-1 of the k leaves underneath it are <em>exactly the same</em> as a moment ago; only one leaf left the tail end, and one new leaf entered at the head. Why re-add everything, when you could just: subtract the value of the leaf that just left the tail, and add the value of the leaf that just entered the head?</p>
+          </div>
+
+          <pre><code>window_sum = sum(arr[0:k])   <span class="comment"># pay full price once, up front</span>
+best = window_sum
+<span class="kw">for</span> i <span class="kw">in</span> range(k, len(arr)):
+    window_sum += arr[i] - arr[i - k]   <span class="comment"># add new leaf, remove old leaf — O(1)</span>
+    best = max(best, window_sum)</code></pre>
+
+          <p>This should feel genuinely familiar — it's the exact same "update incrementally instead of recomputing from scratch" move as Chapter 3's rolling hash in Rabin-Karp, and Chapter 2's prefix sums before that. The pattern keeps reappearing throughout this book precisely because it's such a broadly useful idea: whenever consecutive things-you're-computing overlap heavily, look for a cheap way to update rather than a full recompute.</p>
+
+          <p>One honest full-price payment happens right at the start (summing the very first window), and after that, every single slide costs a constant O(1) — total cost across the whole array, <strong>O(n)</strong>, instead of the naive O(n·k) from re-summing every window from scratch.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.5</span>Sliding window — the stretchy rubber band</h2>
+          <p class="section-sub">When the window's size itself is part of what you're solving for</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The fixed caterpillar only worked because the window size k was handed to you upfront. A much larger, richer category of problems asks something where the "right" window size isn't known ahead of time at all — "find the <em>longest</em> substring without a repeated character," "find the <em>smallest</em> subarray whose sum is at least some target." Here, the window itself needs to stretch and shrink as you go.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎈 THE RUBBER BAND ANALOGY</span>
+            <p>Picture a rubber band stretched across part of the array, with a left end and a right end you control independently. Your strategy: keep stretching the <em>right</em> end forward, pulling more elements into the window, for as long as the window stays "valid" according to whatever condition you care about. The moment the window becomes invalid (or, for a different flavor of problem, the moment it becomes valid and you're now hunting for the smallest valid version), you start pulling the <em>left</em> end forward too, shrinking the window from behind, until it's valid again (or as small as it can be while staying valid) — then resume stretching the right end. The right end only ever stretches forward; the left end only ever creeps forward too, chasing behind it. Neither end ever needs to retreat backward.</p>
+          </div>
+
+          <p>The general shape of the code, worth internalizing as a template rather than memorizing problem-by-problem:</p>
+
+          <pre><code>left = 0
+<span class="kw">for</span> right <span class="kw">in</span> range(len(arr)):
+    add arr[right] <span class="kw">to</span> the window's running state
+
+    <span class="kw">while</span> window violates the condition:
+        remove arr[left] <span class="kw">from</span> the window's running state
+        left += 1
+
+    update the answer using the current window [left, right]</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 THE ONE QUESTION THAT TELLS YOU WHICH VARIANT YOU'RE IN</span>
+            <p>Before writing any code, ask: as the window grows, does the condition you care about get easier to satisfy, or harder? "Longest substring without a repeat" gets <em>harder</em> to keep valid as the window grows (more characters, more chance of a repeat) — so you shrink from the left specifically when it becomes <em>invalid</em>, hunting for the longest window that's still valid. "Smallest subarray with sum ≥ target" gets <em>easier</em> to satisfy as the window grows (bigger window, bigger sum) — so here you shrink from the left specifically when it's <em>already valid</em>, actively trying to make it smaller while it stays valid, updating your answer at each successful shrink. Both are the same rubber-band shape, but which direction "shrink" happens relative to validity flips depending on which of these two stories you're in — misidentifying this is the single most common way people get sliding window code backward.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.6</span>Walking through a real problem, slowly</h2>
+          <p class="section-sub">Longest substring without repeating characters, traced step by step</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Let's actually trace this by hand on <code>"abcabcbb"</code>, so the rubber band picture stops being abstract.</p>
+
+          <p><strong>right=0 ("a"):</strong> window is "a" — no repeats. Length 1. Best so far: 1.</p>
+          <p><strong>right=1 ("b"):</strong> window is "ab" — no repeats. Length 2. Best so far: 2.</p>
+          <p><strong>right=2 ("c"):</strong> window is "abc" — no repeats. Length 3. Best so far: 3.</p>
+          <p><strong>right=3 ("a"):</strong> window would be "abca" — but 'a' is already inside! <em>Now</em> we shrink from the left: remove the leftmost 'a', left moves to index 1. Window is now "bca" — no repeats. Length 3. Best stays 3.</p>
+
+          <div class="strchars">
+            <div class="ch">a</div><div class="ch lo">b</div><div class="ch">c</div><div class="ch rp">a</div><div class="ch">b</div><div class="ch">c</div><div class="ch">b</div><div class="ch">b</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">Right just landed on the second "a" (circled) — a repeat of the first "a." Left (circled) creeps forward past the old "a" until the repeat is resolved.</p>
+
+          <p><strong>right=4 ("b"):</strong> window would be "bcab" — but 'b' is already inside (from index 1)! Shrink from the left again: remove 'b' at index 1, left moves to index 2. Window is now "cab" — no repeats. Length 3.</p>
+
+          <p>Keep going in this fashion — the point worth noticing, having traced it by hand, is that <strong>left only ever moved forward</strong>, never backward, across this entire walk. Even though we "shrank" the window several times, we never re-examined a character we'd already ruled out — each shrink just continues advancing left from wherever it last stopped, exactly the one-way-hallway promise from Section 4.1.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE IMPLEMENTATION DETAIL THAT MAKES THIS FAST</span>
+            <p>To check "is this character already inside the window" in O(1) instead of re-scanning the window every time (which would quietly reintroduce an O(n) cost inside the loop, turning the whole thing back into O(n²)), keep a hash map remembering the most recent index at which each character was seen. When <code>right</code> lands on a repeat, jump <code>left</code> directly to just past that character's last known position — no need to creep forward one step at a time re-checking membership; you already know exactly where to jump.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.7</span>Why this is O(n), proven properly</h2>
+          <p class="section-sub">Not just "trust me" — the actual amortized argument</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The sliding window template has a <code>while</code> loop nested inside a <code>for</code> loop — and by now, that shape should immediately make you think back to Chapter 1's monotonic stack and Chapter 2's cyclic sort, both of which <em>looked</em> like they might be O(n²) but genuinely weren't. Same story here, and worth actually proving rather than just pattern-matching to "looked similar before, must be fine now."</p>
+
+          <div class="derivation">
+right moves forward at most n times total (bounded by the for-loop, straightforward)<br>
+left moves forward at most n times total <em>across the entire run</em> — because left only ever increases, and it can't exceed n<br><br>
+Total pointer movements, summed across the WHOLE algorithm ≤ n + n = 2n<br>
+<strong>→ O(n) total, not O(n) per iteration of the outer loop</strong>
+          </div>
+
+          <p>The subtlety worth being explicit about: it's tempting to look at "a while loop inside a for loop" and assume worst case is (for loop iterations) × (while loop iterations) = O(n²), the same way Chapter 1's naive nested-loop analysis would suggest. But that analysis is only valid when the inner loop's work is <em>independent</em> across outer iterations — here, it isn't. The <code>left</code> pointer carries forward across iterations of the outer loop rather than resetting, so the <em>total</em> number of times the inner while loop's body can possibly execute, summed across the entire run of the algorithm, is capped by how far <code>left</code> can travel in total — which is n, not n-per-outer-iteration.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THE GENERAL LESSON, WORTH CARRYING FORWARD PAST THIS CHAPTER</span>
+            <p>Whenever you see a loop nested inside another loop and you're tempted to multiply their iteration counts, first ask: does the inner loop's progress <em>reset</em> on every outer iteration, or does it <em>carry forward</em>? If it resets, multiplication is the right analysis — genuine O(n²). If it carries forward and only ever moves in one direction, you likely have an amortized O(n) situation in disguise, and the right move is to sum total movements across the whole run, not multiply per-iteration counts. This single question has now shown up as the hidden key behind the monotonic stack, cyclic sort, Manacher's algorithm, and sliding window — it's genuinely one of the highest-leverage habits you can build from this entire book.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.8</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens, not just "watch out for X"</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Reaching for two pointers on unsorted data without sorting first</span>
+            <p>Section 4.2's entire safety argument — "abandoning this position is provably fine" — depended completely on sortedness. Applying converging two pointers directly to unsorted data without first sorting (when sorting is actually allowed by the problem) silently produces wrong answers, because the core justification for "never go back" simply isn't true anymore. If sorting is off the table for the specific problem (say, because you need to preserve original indices), you likely need a different tool entirely — a hash map storing "value → index," typically — rather than forcing two pointers where they don't belong.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Re-scanning the window's contents instead of maintaining running state</span>
+            <p>As flagged in Section 4.6: if checking "is this valid" or "what's in the window right now" requires re-examining every element currently inside the window, you've quietly reintroduced an O(window size) cost inside what's supposed to be an O(1) per-step operation — turning the overall algorithm back into O(n²) even though the pointer-movement logic itself is correct. Always maintain a running summary of the window's state (a sum, a frequency map, a count of violations) that updates incrementally as elements enter and leave, rather than recomputing that summary from scratch.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Getting the shrink direction backward (from Section 4.5's key question)</span>
+            <p>Confusing "shrink while invalid" with "shrink while valid" is an extremely easy mistake under time pressure, because both involve a while loop shrinking the left edge, and the code skeletons look nearly identical. Before writing a single line, explicitly answer the question from Section 4.5 out loud: does growing the window make the condition easier or harder to satisfy? Get this backward and the algorithm will often still run without crashing — it'll just silently produce the wrong answer, which is a much harder bug to catch than a crash.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Forgetting to update the answer at the right moment</span>
+            <p>For "longest valid window" problems, the answer should typically be updated <em>after</em> the shrinking while-loop finishes (once the window is guaranteed valid again). For "smallest valid window" problems, the answer often needs updating <em>inside</em> the shrinking while-loop, at every single successful shrink — because the window might still be valid even after shrinking further, and you want to capture the smallest one, not just the first valid one you happen to land on. Mixing these up produces an answer that's valid-looking but not actually optimal.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">4.9</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — In your own words, what's the "one-way hallway" promise, and why does it matter for complexity?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>It's the guarantee that once a pointer moves past a certain position, you'll genuinely never need to go back and re-examine it — the "door locks behind you," and that's provably fine. It matters because without this guarantee, you'd potentially need to re-check earlier positions repeatedly as later positions change, giving O(n²). With the guarantee, total pointer movement across the entire run is bounded by n (or 2n with two pointers), collapsing the whole thing to O(n).</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why does converging two pointers specifically require a sorted array — what breaks without it?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The safety of abandoning a pointer's current position relies on knowing that no value further in the "ruled out" direction could possibly help — and that reasoning only holds because sortedness guarantees every value past a certain point is definitely bigger (or smaller) than the current one. Without sortedness, you'd have no way to know a smaller-index or larger-index element couldn't secretly complete a valid pair — the entire "this can never work" argument collapses, and you could skip right past a valid answer.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — What's the actual difference between the "fixed caterpillar" and "stretchy rubber band" versions of sliding window?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The fixed caterpillar has a window size (k) handed to you upfront and fixed for the entire problem — both edges move together, always staying k apart. The stretchy rubber band doesn't know the right window size ahead of time at all — it's actively part of what the problem is asking you to discover, so the left and right edges move somewhat independently, with the right edge growing the window and the left edge shrinking it in response to whether the window is currently valid.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — A sliding window solution has a while loop inside a for loop. Someone assumes this is automatically O(n²). What's the flaw in that assumption?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Multiplying the outer and inner loop counts is only valid when the inner loop's work resets on every outer iteration. Here, the left pointer carries forward across outer iterations rather than resetting — it only ever increases, so its <em>total</em> movement across the entire run is capped at n, not n-per-outer-iteration. The correct analysis sums total movements across the whole run (right's n moves plus left's n moves ≤ 2n) rather than multiplying per-iteration counts.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — For "smallest subarray with sum ≥ target," should you shrink the window while it's valid, or while it's invalid? Why?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Shrink while it's <em>valid</em>. Growing the window here makes the sum bigger, which makes the condition (sum ≥ target) <em>easier</em> to satisfy, not harder — so once you've reached a valid window, you actively want to try shrinking it further from the left to see if it can get smaller while staying valid, updating your best answer at each successful shrink, and only stopping once shrinking would make it invalid again.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why does checking "is this character in the window" need a hash map, rather than just looking at the window's characters directly?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because scanning the window's actual characters to check membership would cost O(window size) every single time, and doing that inside the main loop would quietly turn an intended O(1)-per-step operation into an O(n)-per-step one — reintroducing an O(n²) cost overall despite the pointer logic itself being correct. A hash map gives O(1) membership checking and, as a bonus, O(1) lookup of exactly where the previous occurrence was, letting left jump directly there instead of creeping forward one step at a time.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Every technique in this chapter is the same sentence, said in a different accent: "prove you'll never need to look back, and the search collapses from O(n²) to O(n)." That sentence is worth carrying into every later chapter — it's the engine behind more famous algorithms than almost any other single idea in this book.
+      </div>
+
+      <div class="endnote">
+        Chapter 4 of 10 — Two Pointers &amp; Sliding Window, intuition-first. Ready for Chapter 5 (Searching) whenever you are — it picks up the "library shelf halving" thread from Chapter 1 and goes much deeper.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 8 — Linked Lists | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.chain{display:flex; align-items:center; gap:4px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.node{padding:8px 12px; border:1px solid var(--rule); background:var(--paper-raised); border-radius:6px; font-size:14px; display:flex; align-items:center; gap:6px;}
+.node.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.node.warn{background:var(--warn-soft); border-color:var(--warn);}
+.arrow-r{color:var(--ink-faint); font-size:15px;}
+.node .ptr{font-size:10px; color:var(--ink-faint); font-family:var(--sans);}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Eight</div>
+    <div class="toc-title">Linked Lists</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">8.1 &nbsp;The treasure hunt picture</a></li>
+      <li><a href="#s2" data-target="s2">8.2 &nbsp;The trade-off, made concrete</a></li>
+      <li><a href="#s3" data-target="s3">8.3 &nbsp;Fast &amp; slow pointers — the two joggers</a></li>
+      <li><a href="#s4" data-target="s4">8.4 &nbsp;Finding exactly where the loop begins</a></li>
+      <li><a href="#s5" data-target="s5">8.5 &nbsp;Reversal — turning every signpost around</a></li>
+      <li><a href="#s6" data-target="s6">8.6 &nbsp;The dummy node trick</a></li>
+      <li><a href="#s7" data-target="s7">8.7 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s8" data-target="s8">8.8 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 7: Recursion &amp; Backtracking</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER EIGHT OF TEN · INTUITION FIRST</div>
+      <h1>Linked Lists</h1>
+      <p>Everything about linked lists makes sense the moment you stop thinking of them as "a worse array" and start seeing them as solving a genuinely different problem — one where the trade-off from Chapter 2 flips almost completely on its head.</p>
+      <div class="meta">Builds directly on Chapter 2's parking-lot trade-off</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.1</span>The treasure hunt picture</h2>
+          <p class="section-sub">What a linked list actually is, and why it's structured this way</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 2 opened with a parking lot — cars sitting right next to each other, numbered, letting you jump straight to any spot through simple arithmetic. A linked list throws that entire picture away, on purpose, and replaces it with something completely different.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🗺️ THE TREASURE HUNT ANALOGY</span>
+            <p>Imagine a treasure hunt where each clue is hidden somewhere in a big park, and each clue, once found, tells you exactly where to find the <em>next</em> clue — but gives you zero information about where any of the other clues are. The clues aren't laid out in a neat row you could walk along; they could be scattered anywhere in the park, in any order, with no relationship between "clue 5's location" and "clue 6's location" except the note inside clue 5 pointing you to clue 6. To reach clue 6, you have no choice but to first find clue 5, and read its note — there's no way to jump straight to clue 6 without walking the whole chain from the start.</p>
+          </div>
+
+          <p>That's a linked list. Each "clue" is a node, containing some data plus a pointer (the note) telling you where the next node lives in memory. Unlike the array's contiguous parking lot, nodes can be scattered anywhere — there's no address arithmetic that could ever compute "where's the 6th node," because a node's position in memory carries zero information about its position in the sequence. The only way to reach it is to walk the chain, one pointer at a time, starting from the head.</p>
+
+          <div class="chain">
+            <div class="node">7<span class="ptr">next→</span></div><span class="arrow-r">→</span>
+            <div class="node">3<span class="ptr">next→</span></div><span class="arrow-r">→</span>
+            <div class="node hi">19<span class="ptr">next→</span></div><span class="arrow-r">→</span>
+            <div class="node">2<span class="ptr">next→</span></div><span class="arrow-r">→</span>
+            <div class="node">null</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">To reach the highlighted node (value 19), you must walk through 7 and 3 first — there's no address math that skips ahead.</p>
+
+          <p>This one structural difference — no contiguity, no address arithmetic, pure chain-following — is the root of literally everything in this chapter, both the costs and the benefits. Reading <code>arr[47]</code> was O(1) because of contiguity; reading the 47th node of a linked list is O(n), because the only way to find it is to walk 46 pointers first. That's a genuine loss. But the rest of this chapter is about what you get back in exchange.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.2</span>The trade-off, made concrete</h2>
+          <p class="section-sub">Why insertion, which was expensive for arrays, becomes cheap here</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Recall Chapter 2's parking lot problem: inserting a new car into the middle of a full lot meant physically shuffling every single car after it forward by one spot, to preserve the gapless, contiguous layout that made fast lookups possible in the first place. Linked lists don't have that constraint at all, because they were never contiguous to begin with — there's no "gaplessness" to preserve.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📝 THE "REWRITE ONE NOTE" ANALOGY</span>
+            <p>Back to the treasure hunt: suppose you want to insert a brand-new clue between clue 3 and clue 4, without disturbing anything else in the park. You don't need to move clue 4, clue 5, or any clue after it — they can all stay exactly where they physically are. All you actually need to do is: place your new clue somewhere (anywhere — it doesn't matter where, since position no longer carries meaning), write "go to my new clue" on clue 3's note, replacing what used to say "go to clue 4," and write "go to clue 4" on your new clue's note. Two notes rewritten, and the entire rest of the hunt is completely undisturbed.</p>
+          </div>
+
+          <pre><code><span class="comment"># insert new_node right after existing_node</span>
+new_node.next = existing_node.next
+existing_node.next = new_node</code></pre>
+
+          <p>Two pointer rewrites, full stop — genuinely <strong>O(1)</strong>, regardless of whether the list has 10 nodes or 10 million, and regardless of <em>where</em> in the list this insertion happens, as long as you already have a direct reference to <code>existing_node</code>. Compare this to the array's O(n) middle-insertion, which had to shuffle every downstream element specifically because of the contiguity constraint — a constraint linked lists simply never had in the first place.</p>
+
+          <table>
+            <tr><th>Operation</th><th>Array</th><th>Linked List</th><th>Why the difference</th></tr>
+            <tr><td>Access by position</td><td>O(1)</td><td>O(n)</td><td>arrays have address math; linked lists must walk the chain</td></tr>
+            <tr><td>Insert/delete given a direct node reference</td><td>O(n)</td><td>O(1)</td><td>arrays must shift to preserve contiguity; linked lists just rewrite pointers</td></tr>
+            <tr><td>Search for a value</td><td>O(n)</td><td>O(n)</td><td>both must check elements one by one — neither has a shortcut here</td></tr>
+          </table>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 THE HONEST TAKEAWAY, NOT A "WINNER"</span>
+            <p>This is Chapter 2's parking-lot trade-off, almost perfectly mirrored: what was expensive for arrays (middle insertion) is cheap here, and what was free for arrays (random access) is expensive here. Neither structure is "better" in general — the right choice depends entirely on which operations your actual situation needs most. A situation with frequent insertions/deletions at known positions and rare random access favors linked lists; frequent random access with rare insertions favors arrays. This mirrors Chapter 2.8's honest framing exactly: nothing in this field is free, it's trade-offs, chosen deliberately for the situation at hand.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.3</span>Fast &amp; slow pointers — the two joggers</h2>
+          <p class="section-sub">A genuinely clever trick for a problem that looks like it needs extra memory</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a problem: given a linked list, determine whether it contains a cycle — some node's "next" pointer loops back to an earlier node instead of eventually reaching a clean end. The naive approach would be to remember every node you've visited (in a hash set) and check, at each step, whether you've been here before — which works, but costs O(n) extra memory. Is there a way to detect a cycle using no extra memory at all, just pointers?</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🏃 THE TWO-JOGGERS-ON-A-TRACK ANALOGY</span>
+            <p>Imagine two joggers starting at the same point on a path: one jogs at normal pace, one jogs at exactly double speed. If the path is a straight line with a clear end, the faster jogger simply reaches the end first — no surprises. But if the path is actually a <em>loop</em> (a circular track, unknown to the joggers beforehand), something interesting happens: the faster jogger will eventually lap the slower one, catching up from behind and meeting them again on the track. This has to happen — on a genuine loop, the gap between a faster and slower jogger, both going around and around, can only shrink over time, and it must eventually hit zero.</p>
+          </div>
+
+          <pre><code>slow = head
+fast = head
+<span class="kw">while</span> fast <span class="kw">and</span> fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    <span class="kw">if</span> slow == fast:
+        <span class="kw">return</span> <span class="kw">True</span>   <span class="comment"># they met — there's a cycle</span>
+<span class="kw">return</span> <span class="kw">False</span>              <span class="comment"># fast reached a clean end — no cycle</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THEY'RE GUARANTEED TO MEET, PROVEN PROPERLY</span>
+            <p>This is worth actually proving, not just accepting on faith. Once both joggers are inside the loop portion of the track, think about the <em>gap</em> between them (how many steps apart they are, measured going around the loop). Every single step, the slow jogger advances by 1 and the fast jogger advances by 2 — so the fast jogger closes the gap by exactly 1 step, every single iteration, relative to the slow jogger. A gap that shrinks by exactly 1 every step, starting from some finite number (at most the length of the loop), must eventually reach exactly 0 — it can't skip over 0, because it only ever shrinks by 1 at a time. When the gap hits 0, they're standing on the same node — they've met. This is genuinely guaranteed, not a lucky coincidence, and it's guaranteed to happen within at most one full loop-length's worth of steps.</p>
+          </div>
+
+          <p>This trick — Floyd's cycle detection, sometimes called "tortoise and hare" — achieves the same correctness as the hash-set approach while using <strong>O(1) extra memory</strong> instead of O(n), a genuinely elegant trade Chapter 8.2's "no free lunch" framing might make you skeptical of at first glance — but the trade here isn't magic, it's using the pointers' own relative movement as the "memory," instead of a separate data structure.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.4</span>Finding exactly where the loop begins</h2>
+          <p class="section-sub">A second, genuinely surprising piece of math hiding in the same trick</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Knowing <em>that</em> a cycle exists is useful, but a natural follow-up question is: exactly which node is the <em>start</em> of the cycle — the specific node where the chain first loops back on itself? Remarkably, there's a second clever trick hiding right inside the same fast/slow setup.</p>
+
+          <p><strong>The move:</strong> once the two joggers meet (from Section 8.3), reset one of them back to the very start of the list, and from that point on, move <em>both</em> joggers at the same, normal, one-step-at-a-time pace. The node where they meet <em>this time</em> is exactly the start of the cycle.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📐 WHY THIS ISN'T A COINCIDENCE — THE DISTANCE BOOKKEEPING</span>
+            <p>Call the distance from the very start of the list to the cycle's entrance <strong>L</strong>, and call the distance from the cycle's entrance to the meeting point (going forward around the loop) <strong>k</strong>. By the time the joggers first met in Section 8.3, the slow jogger had traveled exactly L + k steps total. The fast jogger, moving twice as fast, had traveled 2(L+k) steps — and because the fast jogger's "extra" distance beyond the slow jogger's is entirely made up of whole extra trips around the loop, that extra distance (L+k) must be a whole multiple of the loop's length. A bit of algebra on that relationship reveals something clean: starting fresh from the head and walking L steps lands you exactly at the cycle's entrance — and, remarkably, walking L steps forward from the meeting point (continuing around the loop) lands you at that exact same spot too, because the remaining distance around the loop from the meeting point back to the entrance works out to be exactly L as well, a direct consequence of that "whole multiple of the loop length" fact. That's precisely why resetting one pointer to the head and advancing both one step at a time causes them to meet exactly at the cycle's entrance — both are walking the same distance, L, from two different starting points that happen to land on the same node after exactly L steps.</p>
+          </div>
+
+          <pre><code><span class="comment"># slow and fast have already met (Section 8.3)</span>
+slow = head
+<span class="kw">while</span> slow != fast:
+    slow = slow.next
+    fast = fast.next   <span class="comment"># note: now moving at the SAME pace</span>
+<span class="comment"># slow (== fast) is now sitting exactly at the cycle's start</span></code></pre>
+
+          <p>This is worth sitting with as a genuinely beautiful piece of reasoning — not something to memorize as a magic incantation, but a real consequence of doing the distance bookkeeping honestly. It's a good example of a broader lesson worth carrying forward: some algorithms that look like unexplainable "tricks" are actually just careful arithmetic, dressed up — the cleverness is in noticing what to measure, not in any actual magic.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.5</span>Reversal — turning every signpost around</h2>
+          <p class="section-sub">A deceptively simple operation that's a genuine gotcha to get right</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Reversing a linked list means flipping every "next" pointer to point the opposite direction — the old last node becomes the new first node, and vice versa. It sounds trivial, and the underlying idea genuinely is simple, but it's a classic place where people fumble the implementation under pressure.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚩 THE SIGNPOST-FLIPPING ANALOGY</span>
+            <p>Picture a hiking trail with signposts at every junction, each one currently pointing "onward" to the next junction. To reverse the whole trail's direction, you need to walk the entire trail once, and at every single signpost, physically turn it around to point backward instead of forward. Here's the catch that trips people up: the moment you turn a signpost around, it no longer tells you how to reach the <em>next</em> junction going the old-forward direction — so you'd better have already remembered where that next junction was, <em>before</em> you flipped the sign, or you'll lose your way and be unable to continue walking the trail at all.</p>
+          </div>
+
+          <p>That's exactly the shape of the classic iterative reversal — you need to remember "where next used to point" <em>before</em> overwriting it, which is why the standard implementation carries three pointers at once: <code>prev</code> (the already-reversed portion, trailing behind), <code>curr</code> (the signpost you're currently flipping), and a temporary variable to remember where <code>curr</code> was originally pointing before you overwrite it.</p>
+
+          <pre><code>prev = None
+curr = head
+<span class="kw">while</span> curr:
+    next_node = curr.next    <span class="comment"># remember where we were headed, BEFORE flipping</span>
+    curr.next = prev          <span class="comment"># flip the signpost to point backward</span>
+    prev = curr                <span class="comment"># the reversed portion now includes curr</span>
+    curr = next_node            <span class="comment"># move on to the junction we remembered earlier</span>
+<span class="comment"># prev is now the new head of the reversed list</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THE ORDER OF THESE FOUR LINES IS NOT ARBITRARY</span>
+            <p>Try mentally swapping the first two lines — flipping <code>curr.next = prev</code> before saving <code>next_node = curr.next</code> — and see what breaks: the moment you overwrite <code>curr.next</code>, you've permanently lost the only reference to the rest of the still-unreversed trail. You'd have no way to continue walking forward, because the very information telling you "what comes next" just got overwritten with "what came before." This single ordering — save the forward path before you destroy it — is the entire crux of getting linked list reversal right, and it's a specific, nameable instance of a much more general rule worth carrying forward: whenever you're about to overwrite a pointer, ask whether you'll still need its old value for anything later in this same step, and if so, save it first.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.6</span>The dummy node trick</h2>
+          <p class="section-sub">A small piece of scaffolding that quietly eliminates a whole category of bugs</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A recurring headache with linked list problems: what happens when the operation you're performing might need to change the <em>head</em> itself — removing the very first node, for instance? Suddenly your code needs a special case: "if this is the head, do X; otherwise, do the normal thing." Special cases are exactly where bugs like to hide.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎭 THE "HIRE A STAND-IN" ANALOGY</span>
+            <p>Imagine you're directing a scene where a character might need to be swapped out partway through — but rewriting your directions every time to handle "what if it's the very first actor who needs replacing" is a hassle, and it's easy to forget that special case under pressure. The clean fix: hire a placeholder stand-in to stand just <em>before</em> the actual first actor, purely for bookkeeping purposes — they never actually appear in the final scene, but their presence means "replace the actor standing right after X" is now a <em>single, uniform</em> instruction that works identically whether X is the stand-in or a genuine cast member. You've eliminated the special case entirely, just by inserting one extra, throwaway placeholder at the very front.</p>
+          </div>
+
+          <pre><code>dummy = Node(0)      <span class="comment"># the stand-in — never part of the real answer</span>
+dummy.next = head
+<span class="comment"># ... perform operations relative to `dummy`, uniformly,
+#     even ones that might otherwise need to touch the real head ...</span>
+<span class="kw">return</span> dummy.next   <span class="comment"># skip past the stand-in when you're done</span></code></pre>
+
+          <div class="callout callout-good">
+            <span class="label">✅ WHY THIS IS WORTH REACHING FOR BY DEFAULT, NOT JUST WHEN STUCK</span>
+            <p>The dummy node doesn't change what the algorithm fundamentally does — it changes the <em>shape</em> of the code, converting "the head is a special case sometimes" into "everything is always relative to a stable point that never itself needs to change." Any time a linked list problem involves possibly removing, inserting before, or otherwise touching the head, reaching for a dummy node upfront — even before you've hit the specific bug it would have prevented — is a genuinely good habit, not just a fix to apply after getting bitten once.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.7</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Losing the reference to the rest of the list mid-operation</span>
+            <p>Section 8.5's core lesson, worth restating as a standalone warning because it shows up in more than just reversal: any time you're about to overwrite a node's "next" pointer, and you haven't already saved wherever it used to point, you risk permanently orphaning the rest of the chain — with no array-style backup copy to recover from, unlike some array mistakes which just cost you a wasted pass. Before writing <code>node.next = something_new</code>, always pause and ask: do I still need the old value of node.next later in this same operation? If yes, save it in a temporary variable first, every single time, no exceptions.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Forgetting the fast pointer's bounds check</span>
+            <p>In fast/slow pointer code, the loop condition needs to check <em>both</em> <code>fast</code> and <code>fast.next</code> before advancing — a plain <code>while fast:</code> isn't enough, because the line <code>fast = fast.next.next</code> would crash on a null-pointer error if <code>fast.next</code> happened to be the last node (with no further ".next" to jump through). This asymmetry (checking two things ahead, not just one) is easy to forget precisely because the slow pointer's own advancement, <code>slow = slow.next</code>, only ever needs a single-step check.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Assuming a linked list problem needs a data structure when pointer manipulation alone would do</span>
+            <p>It's tempting, especially after Chapter 3 and 4's heavy use of hash maps and running state, to reach for a hash set to "remember visited nodes" by default. But as Section 8.3 showed, several classic linked-list problems (cycle detection, finding the middle, detecting an intersection between two lists) have genuinely elegant O(1)-space pointer-only solutions. Before reaching for extra memory, it's worth asking whether a fast/slow pointer trick might apply — the payoff, when it does, is real.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Forgetting that "the middle" is ambiguous for even-length lists</span>
+            <p>The classic fast/slow "find the middle" trick (Chapter 8.3's fast pointer reaching the end exactly when slow reaches the middle) lands on a specific one of the two middle nodes for even-length lists, depending on the exact loop condition used — and different problems sometimes want the <em>other</em> one. This is a genuine, easy-to-miss edge case worth explicitly checking against a small even-length example by hand, rather than assuming the "obvious" middle-finding code automatically gives whichever middle a specific problem actually wants.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">8.8</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the treasure hunt picture, explain why a linked list can't offer O(1) access by position the way an array can.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>An array's O(1) access comes from contiguous, evenly-spaced memory, letting you compute any position's address directly through arithmetic. A linked list's nodes are scattered wherever they happen to be, with no relationship between a node's memory location and its position in the sequence — the only way to find "the 6th node" is to follow the chain of pointers starting from the head, one hop at a time, since there's no address formula that could ever compute where the 6th clue is sitting without first reading the notes leading up to it.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why is inserting into the middle of a linked list O(1), given a direct reference to the insertion point, when the same operation was O(n) for arrays?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Arrays needed to shuffle every downstream element to preserve their contiguous, gapless layout — a direct consequence of the property that made array lookups fast in the first place. Linked lists were never contiguous to begin with, so there's no gaplessness to preserve — inserting just means rewriting two pointers (the new node's "next," and the previous node's "next"), with every other node completely undisturbed regardless of how many nodes come after the insertion point.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Using the two-joggers picture, explain why a faster and slower pointer moving around a cycle are guaranteed to eventually meet.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Once both pointers are inside the loop, the gap between them shrinks by exactly one step every single iteration, because the fast pointer gains one net step on the slow pointer each time. A gap that starts at some finite number and shrinks by exactly one each step can't skip over zero — it must eventually land exactly on zero, at which point both pointers are on the same node. This is a guaranteed mathematical consequence of the constant closing rate, not a lucky coincidence.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In reversal, why must you save "next_node" before overwriting curr.next, and not after?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Overwriting curr.next replaces the only existing reference to the rest of the still-unreversed list with a reference pointing backward instead. If you haven't already saved the old value somewhere before that overwrite happens, that information is permanently gone — there's no way to recover "what came next" once it's been overwritten, unlike some array mistakes that just cost extra time to fix. The order isn't a style preference; reversing the two lines would break the algorithm's ability to continue walking the rest of the list at all.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — What specific bug does the dummy node trick eliminate, and why does it work?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>It eliminates the need for special-case code handling "what if the node I need to modify is the head itself" — a common, easy-to-forget source of bugs whenever an operation might need to remove or insert before the current first node. By inserting one throwaway placeholder node just before the real head, every operation can be written uniformly as "modify relative to some previous node," which now always exists (even for what used to be the head's special case), without ever needing a separate code path.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why does resetting one pointer to the head and advancing both pointers at the same (not double) pace correctly find the cycle's start?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The distance from the head to the cycle's entrance (call it L) turns out to equal the remaining distance from the meeting point forward around the loop back to that same entrance — a direct consequence of the fast pointer's total extra distance always being a whole multiple of the loop's length. Because both quantities equal exactly L, walking L steps from the head and walking L steps from the meeting point (both at the same, normal pace) land on the exact same node — the cycle's entrance — which is why advancing both pointers one step at a time from these two different starting points causes them to meet exactly there.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Nearly everything in this chapter comes from the same root fact: linked lists gave up contiguity on purpose, trading array's instant access for genuinely free insertion and deletion — and the clever pointer tricks (fast/slow, careful reversal, the dummy node) are all just honest engineering responses to living inside that trade-off well.
+      </div>
+
+      <div class="endnote">
+        Chapter 8 of 10 — Linked Lists, intuition-first. Ready for Chapter 9 (Stacks &amp; Queues) whenever you are — it revisits the monotonic stack idea from Chapter 1 and 4 and finally gives it the full treatment.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

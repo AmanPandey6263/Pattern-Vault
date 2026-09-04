@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 2 — Arrays | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+/* memory cells visual */
+.cells{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.cell{width:52px; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.cell .idx{font-size:9px; color:var(--ink-faint); font-family:var(--sans);}
+.cell.hi{background:var(--accent-soft); border-color:var(--accent);}
+.cell.warn{background:var(--warn-soft); border-color:var(--warn);}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Two</div>
+    <div class="toc-title">Arrays</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">2.1 &nbsp;The parking lot picture</a></li>
+      <li><a href="#s2" data-target="s2">2.2 &nbsp;The one law arrays live by</a></li>
+      <li><a href="#s3" data-target="s3">2.3 &nbsp;Why inserting is sometimes free, sometimes not</a></li>
+      <li><a href="#s4" data-target="s4">2.4 &nbsp;Prefix sums — pre-paying the work</a></li>
+      <li><a href="#s5" data-target="s5">2.5 &nbsp;Kadane's — cutting your losses</a></li>
+      <li><a href="#s6" data-target="s6">2.6 &nbsp;Dutch National Flag — sort in one pass</a></li>
+      <li><a href="#s7" data-target="s7">2.7 &nbsp;Cyclic sort — when values are addresses</a></li>
+      <li><a href="#s8" data-target="s8">2.8 &nbsp;Moore's Voting — the election analogy</a></li>
+      <li><a href="#s9" data-target="s9">2.9 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s10" data-target="s10">2.10 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 1: Complexity Analysis</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER TWO OF TEN · INTUITION FIRST</div>
+      <h1>Arrays</h1>
+      <p>Arrays feel almost too simple to deserve a chapter — until you notice how much of everything else in DSA is really just "clever things people figured out to do with arrays." Understanding <em>why</em> arrays behave the way they do unlocks a surprising number of famous one-pass tricks that otherwise feel like magic.</p>
+      <div class="meta">Builds directly on Chapter 1's loop and complexity intuition</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.1</span>The parking lot picture</h2>
+          <p class="section-sub">What an array actually is, physically, in memory</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Picture a parking lot with numbered spots, painted in a dead straight line: spot 0, spot 1, spot 2, all the way down. If someone tells you "your car is in spot 47," you don't have to walk past spots 0 through 46 to get there — you already know exactly how far spot 47 is from the entrance, because the spots are evenly spaced and numbered in order. You just walk straight to it.</p>
+
+          <p>That is, almost exactly, what an array is. It's a block of memory cells sitting <strong>right next to each other</strong>, each the same size, numbered starting from 0. When you ask for <code>arr[47]</code>, the computer doesn't search — it does simple arithmetic: "start of the parking lot" + "47 × (size of one spot)" = the exact address to walk to. One calculation, done instantly, regardless of whether the lot has 10 spots or 10 million.</p>
+
+          <div class="cells">
+            <div class="cell"><div class="idx">0</div>12</div>
+            <div class="cell"><div class="idx">1</div>7</div>
+            <div class="cell"><div class="idx">2</div>19</div>
+            <div class="cell"><div class="idx">3</div>3</div>
+            <div class="cell hi"><div class="idx">4</div>25</div>
+            <div class="cell"><div class="idx">5</div>8</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">arr[4] is reached instantly — no walking past 0 through 3 required, because its address is computed directly.</p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 WHY THIS "PARKING LOT" PROPERTY MATTERS SO MUCH</span>
+            <p>Almost every strength and weakness of arrays traces back to this single physical fact: the spots are <strong>contiguous</strong> (right next to each other, no gaps) and <strong>evenly sized</strong>. Contiguous + evenly sized is exactly what makes "jump straight to spot 47" possible through simple math, instead of needing to walk there step by step. Every other data structure in this book is, in some sense, a story about what you gain and lose when you give up this contiguous-parking-lot property in exchange for something else.</p>
+          </div>
+
+          <p>This is worth genuinely sitting with, because it explains something that otherwise feels like an arbitrary rule you're told to memorize: "array access is O(1)." It's not O(1) because someone decided it should be — it's O(1) because of this specific physical arrangement, and understanding <em>that</em> is what lets you predict, later, why other structures (like linked lists, where cells are scattered wherever there's free space, connected by pointers instead of sitting next to each other) can't offer this same instant-jump trick.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.2</span>The one law arrays live by</h2>
+          <p class="section-sub">Every trade-off in this chapter traces back to one physical fact</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Because of the parking-lot property, here's what's fast and what's slow with an array — and crucially, <em>why</em>, not just <em>that</em>:</p>
+
+          <table>
+            <tr><th>Operation</th><th>Speed</th><th>Why, in plain terms</th></tr>
+            <tr><td>Read <code>arr[i]</code></td><td>O(1)</td><td>direct address math — no walking needed</td></tr>
+            <tr><td>Search for a value, unsorted</td><td>O(n)</td><td>the value itself carries no address information — you must check spots one by one</td></tr>
+            <tr><td>Search for a value, sorted</td><td>O(log n)</td><td>sortedness lets you throw away half the remaining spots each check (this is exactly the "library shelf" story from Chapter 1)</td></tr>
+            <tr><td>Add/remove at the very end</td><td>O(1) usually</td><td>nothing else needs to move — you're just filling (or vacating) the next free spot</td></tr>
+            <tr><td>Add/remove at the start or middle</td><td>O(n)</td><td>every single spot after the gap must physically shift to keep the parking lot contiguous</td></tr>
+          </table>
+
+          <p>That last row is worth slowing down on, because it's the one people memorize without really <em>seeing</em> why.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚗 WHY MIDDLE INSERTION IS EXPENSIVE — THE PARKING LOT VERSION</span>
+            <p>Suppose the parking lot is completely full, bumper to bumper, and a new car needs to squeeze into spot 2. There's no gap — so every single car currently in spot 2 onward has to shuffle forward by exactly one spot to free up room, all the way to the end of the lot. If there are 1000 cars parked after spot 2, that's 1000 cars that all need to move, just to fit one new car near the front. That physical shuffling <em>is</em> the O(n) cost of inserting into the middle of an array — it's not an abstract penalty, it's literally that many elements having to shift over in memory to preserve the contiguous, gapless layout that made fast lookups possible in the first place.</p>
+          </div>
+
+          <p>This is the trade-off that defines arrays, and it's worth stating as its own idea, separate from the table above: <strong>the same contiguous layout that makes reading arr[i] instant is exactly what makes inserting in the middle expensive.</strong> You don't get the O(1) lookup for free — you're paying for it, elsewhere, with expensive middle insertions. Nothing in computer science is free; it's trade-offs all the way down, and arrays are one of the cleanest illustrations of that principle you'll ever meet.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.3</span>Why inserting is sometimes free, sometimes not</h2>
+          <p class="section-sub">The full picture of insert/delete costs, worked through slowly</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Let's walk through all four cases side by side, because the difference between them is really just "how many cars have to shuffle," made concrete.</p>
+
+          <h4>Inserting at the end</h4>
+          <p>Picture the parking lot with a bit of free space at the far end (this is basically always true in practice — real dynamic arrays deliberately keep a little breathing room, which connects directly back to the doubling trick from Chapter 1.7). Adding a car to the very next free spot doesn't disturb anyone else. <strong>O(1).</strong></p>
+
+          <h4>Deleting from the end</h4>
+          <p>Same idea in reverse — the last car just leaves, and nobody else needs to move to keep things contiguous, since there was nothing after it. <strong>O(1).</strong></p>
+
+          <h4>Inserting at the start</h4>
+          <p>Every single existing car has to shuffle forward by one spot to make room at spot 0. If there are n cars, that's n shuffles. <strong>O(n)</strong> — and specifically, this is the <em>worst possible case</em> of insertion, because everyone downstream of the insertion point has to move.</p>
+
+          <h4>Inserting in the middle</h4>
+          <p>Only the cars <em>after</em> the insertion point need to shuffle — cars before it are untouched. If you insert exactly in the middle, roughly n/2 cars shuffle. Still <strong>O(n)</strong> in the worst case (inserting near the front), even though on average across all possible insertion points, it's cheaper than always inserting at the very start.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 THE PATTERN WORTH REMEMBERING</span>
+            <p>The rule of thumb that falls out of all four cases: <strong>the cost of an insertion or deletion is proportional to how many elements sit "downstream" of it</strong> (i.e., after it, that need to shift to preserve contiguity). Insert/delete at the end → nothing downstream → free. Insert/delete at the start → everything is downstream → maximally expensive. This single mental picture replaces needing to separately memorize four different cases.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.4</span>Prefix sums — pre-paying the work</h2>
+          <p class="section-sub">The single most useful "cheat" for range-sum questions</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a question that shows up constantly: "what's the sum of elements from index 3 to index 7?" — and worse, you're asked this <em>repeatedly</em>, for many different ranges, on the same unchanging array. The naive approach re-walks the relevant slice every single time, which is wasteful if you're asked this a hundred times.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧾 THE RUNNING RECEIPT TOTAL ANALOGY</span>
+            <p>Imagine a cashier who, instead of just ringing up each item, also writes down a running total after every single item: "after item 1: ₹40. After item 2: ₹95. After item 3: ₹110..." Now, if a customer later asks "how much did items 2 through 3 alone cost?", the cashier doesn't need to re-add anything — they just look up the running total <em>after</em> item 3 (₹110), subtract the running total <em>after</em> item 1 (₹40), and immediately knows: items 2 and 3 cost ₹70 together. One subtraction, no re-adding, regardless of how many items are in that range.</p>
+          </div>
+
+          <p>That "running total" idea is exactly the prefix sum array. Build it once: <code>pre[i]</code> = sum of everything from the start up through index i-1. Building this running total costs one honest pass through the array — O(n) — done a single time, up front.</p>
+
+          <pre><code>arr = [4, 2, 7, 1, 5, 3]
+pre = [0, 4, 6, 13, 14, 19, 22]
+<span class="comment"># pre[i] = sum of arr[0..i-1]. pre[0] = 0 by convention (sum of nothing).</span></code></pre>
+
+          <p>Now, any range sum from index <code>l</code> to <code>r</code> (inclusive) is answered instantly:</p>
+          <div class="derivation">sum(l, r) = pre[r+1] − pre[l]</div>
+          <p>Why does this subtraction work? Because <code>pre[r+1]</code> already contains "everything up to and including r," and <code>pre[l]</code> contains "everything before l" — subtracting removes exactly the part you didn't want, leaving only the range in between. It's the exact same logic as the cashier's receipt: take the "total so far" at the far end of your range, and subtract the "total so far" at the point just before your range starts.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE TRADE-OFF, NAMED HONESTLY</span>
+            <p>You pay O(n) once, up front, to build the prefix array, plus O(n) extra memory to store it. In exchange, every future range-sum question — no matter how many you're asked — costs O(1) instead of O(range length). This only pays off when you'll be asked <em>many</em> range queries on the same unchanging data — if you're only ever asked one single range sum, just walking that range directly is simpler and just as fast. Recognizing "will this data be queried repeatedly without changing?" is the actual signal that should make you reach for prefix sums.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.5</span>Kadane's Algorithm — cutting your losses</h2>
+          <p class="section-sub">Finding the biggest possible "hot streak" in one pass</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The problem: given an array of numbers (some positive, some negative), find the contiguous stretch that adds up to the biggest possible total. Think of the array as a sequence of daily profits and losses for a small shop, and you're trying to find the best possible unbroken stretch of days to report to an investor.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📈 THE "CUT YOUR LOSSES" GAMBLING ANALOGY</span>
+            <p>Imagine you're tracking your running total as you walk day by day through the profit/loss numbers, carrying forward a "current streak total." Here's the one crucial decision at every single day: is it worth <em>continuing</em> your current streak into today, or would you genuinely be better off <em>abandoning</em> your current streak and starting fresh from today alone? The honest answer: if your streak-so-far has gone <em>negative</em>, it's actively dragging today's number down — you'd do strictly better starting fresh from today than carrying that negative baggage forward. If your streak-so-far is still positive (or zero), it can only help today's number, so keep it.</p>
+          </div>
+
+          <p>That single decision, repeated once per day, is the entire algorithm:</p>
+
+          <pre><code>current_streak = 0
+best_streak = -infinity
+<span class="kw">for</span> profit <span class="kw">in</span> daily_profits:
+    current_streak = max(profit, current_streak + profit)
+    best_streak = max(best_streak, current_streak)</code></pre>
+
+          <p>Walk through the logic of that first line slowly: <code>current_streak + profit</code> is "keep the streak going." Just <code>profit</code> alone is "abandon the streak, start fresh today." Taking the max of those two options is exactly the "cut your losses" decision from the analogy, made mechanical. The second line just remembers the best streak total we've seen at any point along the way, since the best streak might have ended a few days ago, not necessarily today.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY "GREEDILY CUTTING LOSSES" ACTUALLY GIVES THE RIGHT GLOBAL ANSWER</span>
+            <p>It might feel like a leap of faith that a simple day-by-day local decision ("should I keep or restart my streak") reliably finds the single best stretch across the <em>entire</em> array, without ever looking ahead. Here's the honest reasoning: a negative streak-so-far can never help any future stretch — carrying it forward can only ever drag a future total down compared to not carrying it. So dropping it the instant it turns negative never costs you anything, and it might save you from dragging down a genuinely great streak that's about to start. This is why this greedy, no-lookahead approach happens to be provably correct here — not every greedy idea works this cleanly (Chapter 16 goes deep on when greedy approaches are trustworthy and when they aren't), but this specific one holds up.</p>
+          </div>
+
+          <p>The entire array gets walked exactly once — <strong>O(n)</strong> time, and only two running numbers are being tracked, no extra array needed — <strong>O(1)</strong> space. Compare that to the brute-force alternative of checking every possible start/end pair (which is exactly the "triangle loop" shape from Chapter 1.4 — O(n²)) — Kadane's is a genuine, satisfying upgrade once you see why the greedy step is safe.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.6</span>Dutch National Flag — sort in one pass</h2>
+          <p class="section-sub">Sorting an array of only three distinct values, without a full sort</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The problem: given an array containing only 0s, 1s, and 2s, in any mixed-up order, rearrange it so all the 0s come first, then all the 1s, then all the 2s — using only a single walk through the array, no separate full sort.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚦 THE THREE-BUCKET LINE ANALOGY</span>
+            <p>Picture a single-file line of people, each wearing a red, white, or blue badge (matching the actual Dutch flag, which is where the algorithm's name comes from). You want everyone sorted red-white-blue from left to right, but you're only allowed to walk the line once, swapping people as you go. The trick: keep three markers — a "boundary of confirmed reds" growing from the left, a "boundary of confirmed blues" growing from the right, and a "current person you're examining" walking from the left inward. Whenever you find a red, swap them up to the red boundary and move both the red boundary and your current-position marker forward. Whenever you find a blue, swap them down to the blue boundary and move only the blue boundary inward — <em>you have to re-examine whoever just got swapped into your current spot</em>, since you don't yet know their badge color. Whenever you find a white, it's already exactly where it belongs relative to what you've confirmed — just move your current-position marker forward.</p>
+          </div>
+
+          <pre><code>low, mid, high = 0, 0, len(arr) - 1
+<span class="kw">while</span> mid <= high:
+    <span class="kw">if</span> arr[mid] == 0:
+        arr[low], arr[mid] = arr[mid], arr[low]
+        low += 1; mid += 1
+    <span class="kw">elif</span> arr[mid] == 1:
+        mid += 1
+    <span class="kw">else</span>:  <span class="comment"># arr[mid] == 2</span>
+        arr[mid], arr[high] = arr[high], arr[mid]
+        high -= 1  <span class="comment"># do NOT advance mid — re-check the newly swapped-in value</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY WE DON'T ADVANCE <code>mid</code> AFTER A "2" SWAP</span>
+            <p>This is the one detail that trips people up, and it's worth understanding exactly why it's not a bug. When you swap a 2 out to the high boundary, whatever value comes back <em>into</em> the current spot from the high end is completely unknown — it could be a 0, a 1, or even another 2 that also needs to be swapped away. If you blindly advanced <code>mid</code> past it without checking, you might walk right past a 0 or another 2 that still needs handling. Compare this to the "0" case: when you swap a 0 to the low boundary, you already know for certain the value swapped <em>back</em> in is either a 1 or something already confirmed-safe from earlier in the walk — never an unprocessed value — so it's genuinely safe to move forward there. The asymmetry between the two swap cases isn't arbitrary; it comes directly from which direction of the array has already been "seen and confirmed" and which hasn't.</p>
+          </div>
+
+          <p>Because <code>mid</code> and <code>high</code> together sweep across the array and the region they haven't yet examined only shrinks, the whole process finishes in a single honest pass — <strong>O(n) time, O(1) extra space</strong> — genuinely faster than calling a general-purpose sort (which would cost O(n log n) for information this simple: only three distinct values ever appear).</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.7</span>Cyclic sort — when values are addresses</h2>
+          <p class="section-sub">A trick that only works because of a very specific, exploitable property</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Some problems hand you an array containing the numbers 1 through n (or 0 through n-1), possibly with some missing or duplicated, in scrambled order — and ask you to find what's missing, or what's duplicated, ideally without extra memory.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎫 THE ASSIGNED-SEAT ANALOGY</span>
+            <p>Imagine a small theater with exactly n seats, each seat pre-printed with a ticket number 1 through n. Everyone rushed in and sat wherever they liked, completely ignoring their assigned seat numbers. Here's the clever bit: because you already know each ticket-holder's <em>correct</em> seat number just by reading their ticket, you don't need any extra list or notebook to figure out where they belong — the number itself <em>is</em> the address. So you can walk down the row, and for each person, check: "does your ticket number match this seat number? If not, swap you into your correct seat, and let whoever was already sitting there deal with the same question." Repeat until everyone's back in their assigned seat.</p>
+          </div>
+
+          <p>This is exactly what makes cyclic sort different from a general sorting problem: normally, sorting a value tells you nothing about <em>where</em> it belongs until you compare it against everything else. Here, the value <em>is</em> the address — <code>value v</code> belongs at <code>index v-1</code> (or index v, depending on the problem's numbering), full stop, no comparison against other elements needed at all.</p>
+
+          <pre><code>i = 0
+<span class="kw">while</span> i < len(arr):
+    correct_index = arr[i] - 1
+    <span class="kw">if</span> arr[i] != arr[correct_index]:
+        arr[i], arr[correct_index] = arr[correct_index], arr[i]
+    <span class="kw">else</span>:
+        i += 1  <span class="comment"># already in the right seat (or a duplicate) — move on</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS IS STILL O(n) DESPITE THE NESTED-LOOKING SWAP LOGIC</span>
+            <p>It might look suspicious — an inner "keep swapping" behavior nested inside a walk — like it could secretly be O(n²). But apply the same amortized thinking from Chapter 1.7: every swap places at least one number into its genuinely correct seat, permanently, and a number that's already correctly seated is never swapped again. Since there are only n numbers and each can be "correctly seated" once, there can be at most n total swaps across the <em>entire</em> run, not per iteration. Total work — walking plus swapping — stays proportional to n. <strong>O(n) time, O(1) extra space</strong> — once you see this, you'll also recognize it as basically the same reasoning that made the monotonic stack from Chapter 1 amortized O(n) despite its own nested-looking while loop.</p>
+          </div>
+
+          <p>Once every value that <em>can</em> be correctly seated is seated, a second, simple pass reveals the answer to most cyclic-sort problems almost for free: whichever index <code>i</code> doesn't hold the value <code>i+1</code> is exactly where the missing number should have been — you're literally just reading off the one seat that stayed empty (or has the wrong occupant, for duplicate-finding problems), no separate searching required.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.8</span>Moore's Voting Algorithm — the election analogy</h2>
+          <p class="section-sub">Finding the majority element without counting anything</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The problem: given an array where one value appears <em>more than half the time</em> (a guaranteed majority — not just "the most common," but strictly more than 50% of all elements), find that value, ideally in one pass, using no extra memory for counting.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🗳️ THE CANCELING-VOTES ANALOGY</span>
+            <p>Picture a rowdy, informal election where instead of a proper tally sheet, people just pair off: whenever two people supporting <em>different</em> candidates bump into each other, they both storm off in protest and leave the room entirely — canceling each other out, as if neither had voted at all. Keep this pairing-off-and-leaving process going as long as possible. Here's the key realization: because the majority candidate's supporters outnumber <em>everyone else combined</em>, no matter how the canceling pairs happen to form, the room can never be fully emptied of majority supporters before every single opposing voter has already been paired off and sent home. Someone from the majority side is always guaranteed to still be standing at the very end.</p>
+          </div>
+
+          <p>The algorithm just simulates this canceling process using two running variables instead of an actual room full of people — a current "candidate," and a "count" representing how many un-canceled votes that candidate currently has:</p>
+
+          <pre><code>candidate = None
+count = 0
+<span class="kw">for</span> value <span class="kw">in</span> arr:
+    <span class="kw">if</span> count == 0:
+        candidate = value      <span class="comment"># nobody currently standing — this value becomes the new candidate</span>
+    <span class="kw">if</span> value == candidate:
+        count += 1             <span class="comment"># a matching vote, count grows</span>
+    <span class="kw">else</span>:
+        count -= 1             <span class="comment"># an opposing vote — they cancel each other out</span></code></pre>
+
+          <p>Every time <code>count</code> hits zero, it's exactly the moment "the room has emptied out" in the analogy — everyone who's shown up so far has been fully paired off and canceled, so the next value effectively gets to start a fresh round as the new candidate, with no memory of who came before.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THE SURVIVOR IS GUARANTEED TO BE THE REAL MAJORITY</span>
+            <p>The honest reasoning, not just "trust the algorithm": every single cancellation removes exactly one majority-vote and one non-majority-vote together, as a pair — never two majority votes against each other being needlessly wasted in a way that would hurt the majority's case (a majority vote only ever gets canceled by a genuinely different, opposing value). Since majority votes strictly outnumber all opposing votes combined, even in the absolute worst case — where the algorithm is "unlucky" enough to pair off a majority vote against every single opposing vote it possibly can — there are still leftover majority votes with no opposing partner left to cancel them out. That leftover is exactly what survives as the final candidate.</p>
+          </div>
+
+          <p>One honest catch worth naming explicitly: this algorithm <em>assumes</em> a true majority element exists in the array. If you're not certain one does, you need a second pass afterward to actually count the surviving candidate's real occurrences and confirm it's genuinely above 50% — otherwise you might confidently return a wrong answer for an array that has no true majority at all. Single pass to <em>find a candidate</em>, second pass (if needed) to <em>verify</em> it — both still O(n), just worth being honest about the assumption baked in.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.9</span>Where smart people trip up</h2>
+          <p class="section-sub">Array-specific mistakes, explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Forgetting that "delete" in many languages doesn't actually shrink memory instantly</span>
+            <p>In several language implementations, removing an element from an array-backed list still involves the same "everyone after it shifts left by one" cost as any middle deletion — it just happens invisibly behind a clean-looking method call. It's tempting to assume a one-line delete call is automatically cheap because it's one line of your own code, but remember Chapter 1's Mistake 1: built-in-looking operations still do real, visible-if-you-look-closely work underneath.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Using prefix sums on data that changes frequently</span>
+            <p>Prefix sums are a fantastic trade when the underlying array is fixed and you're asked many range queries against it. But if the array is being <em>updated</em> frequently (elements changing values), a plain prefix sum array falls apart — a single update near the front means every prefix sum after it is now wrong, and you'd have to rebuild the whole thing, an O(n) cost per update. In genuinely dynamic-update situations, a different structure (a Fenwick tree / Binary Indexed Tree, or a segment tree — tools for a later chapter) is the right upgrade. Recognizing "is this data static or does it change often?" is the actual decision point, not just "range sum questions always mean prefix sums."</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Assuming Kadane's handles "all-negative" arrays correctly by accident</span>
+            <p>If every single number in the array is negative, the "best contiguous stretch" is actually just the single largest (least negative) number alone — not an empty stretch summing to zero. This is why Kadane's is written starting <code>best_streak = -infinity</code> rather than 0 — starting at 0 would incorrectly let "pick nothing" beat every genuinely negative option, giving a wrong answer of 0 for an array that's entirely negative. A small initialization detail, but it's exactly the kind of edge case that silently breaks an otherwise-correct-looking implementation.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Trusting cyclic sort's index math without double-checking the numbering</span>
+            <p>Cyclic sort problems sometimes use values 1 through n (belonging at index value-1) and sometimes 0 through n-1 (belonging at index value directly) — a genuinely easy detail to mix up under pressure, and it silently produces an off-by-one bug rather than a crash, which makes it harder to notice. Always explicitly work out, on a tiny 3-4 element example by hand, exactly which index each value is supposed to land at, before trusting the general pattern.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s10">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">2.10</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Why is reading arr[i] O(1) but inserting at arr[0] O(n)? Use the parking lot picture.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Reading is just address arithmetic — "start of the lot + i × spot size" — a single calculation regardless of lot size, no walking needed. Inserting at the very front means every single car currently parked has to physically shuffle forward by one spot to preserve the gapless, evenly-spaced layout that made the address arithmetic possible in the first place — and with n cars, that's n shuffles. The same contiguous property that makes reads instant is exactly what makes front-insertion expensive.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — When is a prefix sum array actually worth building, and when is it a waste of effort?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Worth it when the underlying array stays fixed (or changes rarely) and you'll be asked <em>many</em> range-sum questions against it — the O(n) one-time build cost gets paid off many times over by O(1) answers afterward. A waste if you're only asked one or two range sums total, since directly walking that one range is just as fast and needs no extra setup or memory — or if the array is being updated constantly, since each update would force an expensive rebuild.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — In Kadane's algorithm, what does it mean, intuitively, when current_streak gets reset to just the current value alone?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>It means the streak-so-far had gone negative — actively dragging today's number down rather than helping it — so you're better off abandoning it and starting completely fresh from today. It's the "cut your losses" moment: carrying negative baggage forward can never help a future total, so there's genuinely nothing lost by dropping it the instant it turns negative.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In Dutch National Flag, why do we re-examine the current position after a "2" swap, but not after a "0" swap?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>After swapping a 2 out to the high boundary, the value that comes back into the current spot is completely unknown — it's from the unexamined far end of the array, so it could be anything and needs checking. After swapping a 0 out to the low boundary, the value that comes back in is guaranteed to be something already-processed and safe (never an unexamined value from beyond where we've walked), so it's safe to move forward without re-checking. The asymmetry comes from which side of the swap is "already seen" and which isn't.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why is cyclic sort O(n) overall, even though it has a "keep swapping" loop nested inside the main walk?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because every swap places at least one number into its permanently correct seat, and a correctly-seated number is never touched again. With only n numbers total, and each one "correctly seated" at most once across the entire run, there can be at most n swaps total — not per outer-loop iteration. This is the same amortized reasoning as Chapter 1's monotonic stack: don't count nested-looking loops syntactically, track the total number of times the expensive action (swapping / pushing-popping) can happen across the whole run.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Moore's Voting Algorithm can return a wrong answer in what specific situation, and what's the fix?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>It can confidently return a "candidate" even when no true majority element (strictly more than 50%) actually exists in the array — because the canceling logic always leaves <em>someone</em> standing at the end, whether or not that someone genuinely represents over half the array. The fix: after finding a candidate in the first pass, run a second pass that actually counts how many times that specific candidate appears, and confirm it's truly more than half the array before trusting it — otherwise report "no majority exists."</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Every trick in this chapter — prefix sums, Kadane's, Dutch flag, cyclic sort, Moore's voting — is really the same move wearing different outfits: notice one exploitable property of the specific problem (fixed data, "cut your losses," only three values, values-as-addresses, guaranteed majority), and turn an O(n²) brute force into a single honest O(n) pass.
+      </div>
+
+      <div class="endnote">
+        Chapter 2 of 10 — Arrays, intuition-first. Ready for Chapter 3 (Strings) in this same style whenever you are — it builds directly on this chapter, since strings are just arrays with a few extra rules layered on top.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

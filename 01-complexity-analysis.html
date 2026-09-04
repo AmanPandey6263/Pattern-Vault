@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 1 — Complexity Analysis | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0;
+  --paper-raised:#ffffff;
+  --ink:#1c1b19;
+  --ink-soft:#4a4740;
+  --ink-faint:#8a8578;
+  --rule:#ddd8cc;
+  --accent:#2b5f6b;
+  --accent-soft:#e4ede9;
+  --accent-deep:#173b43;
+  --warn:#8a4a2b;
+  --warn-soft:#f3e6dc;
+  --good:#3d6b3d;
+  --good-soft:#e7efe3;
+  --code-bg:#232220;
+  --code-text:#e8e4d8;
+  --code-accent:#7fc4a8;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  --mono: 'SF Mono', 'Cascadia Code', Consolas, 'Courier New', monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{
+  width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto;
+  padding:40px 28px 40px 32px; border-right:1px solid var(--rule);
+}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:0.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-family:var(--serif); font-size:22px; font-weight:600; color:var(--ink); margin:0 0 28px 0; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s, color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s, background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px; color:var(--ink);}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600; color:var(--ink);}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;}
+.callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);}
+.callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);}
+.callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);}
+.callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:0.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;}
+.kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule); color:var(--ink);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.growth-viz{margin:24px 0; font-family:var(--sans);}
+.growth-row{display:flex; align-items:center; gap:14px; margin-bottom:10px;}
+.growth-label{width:110px; font-size:12.5px; color:var(--ink-soft); flex-shrink:0; text-align:right;}
+.growth-bar-track{flex:1; background:var(--rule); border-radius:4px; height:20px; overflow:hidden;}
+.growth-bar{height:100%; border-radius:4px; background:var(--accent);}
+.growth-val{width:90px; font-size:12px; color:var(--ink-faint); flex-shrink:0;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book One</div>
+    <div class="toc-title">Complexity Analysis</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">1.1 &nbsp;The library shelf problem</a></li>
+      <li><a href="#s2" data-target="s2">1.2 &nbsp;Naming the growth patterns</a></li>
+      <li><a href="#s3" data-target="s3">1.3 &nbsp;Reading Big-O off real code</a></li>
+      <li><a href="#s4" data-target="s4">1.4 &nbsp;Loops, unpacked slowly</a></li>
+      <li><a href="#s5" data-target="s5">1.5 &nbsp;Recursion, unpacked slowly</a></li>
+      <li><a href="#s6" data-target="s6">1.6 &nbsp;The Master Theorem, gently</a></li>
+      <li><a href="#s7" data-target="s7">1.7 &nbsp;Amortized cost, the phone bill way</a></li>
+      <li><a href="#s8" data-target="s8">1.8 &nbsp;Space: the forgotten half</a></li>
+      <li><a href="#s9" data-target="s9">1.9 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s10" data-target="s10">1.10 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER ONE OF TEN · REWRITTEN FOR UNDERSTANDING, NOT RECITATION</div>
+      <h1>Complexity Analysis</h1>
+      <p>No exam is waiting at the end of this. The only goal is that by the last section, you genuinely <em>get</em> why algorithms behave the way they do — well enough to explain it to someone else using a picture in your head, not a memorized formula.</p>
+      <div class="meta">Written to be read slowly, once, and actually understood — not skimmed twice</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.1</span>The library shelf problem</h2>
+          <p class="section-sub">Building the intuition before touching any notation</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Forget code for a second. Imagine two different ways someone could hand you a book from a library.</p>
+
+          <p><strong>Method A:</strong> Every book has a number on its spine, and the shelves are arranged so that if you know the number, you can walk straight to the exact shelf and pull it out. Doesn't matter if the library has 100 books or 10 million — you walk to the same spot, every time, in roughly the same amount of time.</p>
+
+          <p><strong>Method B:</strong> The books are just piled in random order. To find one, you start at the first pile and check every single book until you find the one you want. If you're lucky, it's near the top. If you're unlucky, it's the very last book you check.</p>
+
+          <p>Here's the thing worth sitting with: <strong>both methods "work."</strong> Both eventually get you the book. If the library only has 20 books, you probably won't even notice a difference — checking 20 books one by one takes a few seconds either way. The difference only becomes impossible to ignore once the library gets big. At 10 million books, Method A still takes a few seconds. Method B could take you the rest of your afternoon.</p>
+
+          <p>That's the entire idea behind complexity analysis. It's not really about counting exact operations or being precise about seconds — it's about answering one question honestly: <strong>as the pile of stuff grows, does this method's effort grow slowly, or does it grow fast?</strong> Everything in this chapter exists purely to make that one question precise enough to reason about instead of just eyeballing it.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🗂️ THE MENTAL MODEL TO KEEP</span>
+            <p>Every time you see "O(something)" from now on, translate it in your head to: <strong>"as the input grows, the work grows like ___."</strong> O(n) means "work grows in a straight line with input." O(n²) means "work grows like a square — double the input, and the work roughly quadruples." That's genuinely most of what you need to carry forward — the rest of this chapter just sharpens that idea.</p>
+          </div>
+
+          <p>Why do engineers care so much about this, practically? Because in real software, the amount of data almost never stays small. A method that feels totally fine with 100 users falls over completely with 100 million users, and the code doesn't even look different — it's the same lines, just running on more data. Complexity analysis is how you spot that failure coming <em>before</em> you ship it and find out the hard way.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.2</span>Naming the growth patterns</h2>
+          <p class="section-sub">A visual feel for what each Big-O class actually looks like</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Once you accept that we're just describing "how fast does the work grow," the different Big-O classes are really just different <em>shapes</em> of growth, each with a very intuitive real-world story attached. Let's go through them slowly, using one consistent example: imagine you're handed a stack of <strong>n</strong> exam papers to process somehow.</p>
+
+          <h3>O(1) — constant time</h3>
+          <p><em>The story:</em> "How many papers are in this stack?" — someone already wrote the count on a sticky note on top, so you just read the note. Doesn't matter if there are 10 papers or 10 million, reading a sticky note takes the same instant. The work doesn't depend on n at all.</p>
+
+          <h3>O(log n) — logarithmic time</h3>
+          <p><em>The story:</em> The papers are sorted alphabetically by student name, and you're looking for "Kavya." You open to the middle. Too far ahead alphabetically? Throw away the entire back half and repeat on the front half. Too far behind? Throw away the front half. Every check <strong>eliminates half the remaining papers</strong> — so even with a million papers, you'd find "Kavya" in about 20 checks (because 2²⁰ ≈ 1 million). That's the magic of log n: it grows agonizingly slowly, because you're throwing away more papers per look as n grows, not looking at more of them.</p>
+
+          <h3>O(n) — linear time</h3>
+          <p><em>The story:</em> The papers are in totally random order and you need to find "Kavya's" paper. No shortcut exists — you flip through one at a time until you find it (or reach the end). Double the papers, and in the worst case, you double the flipping. Effort tracks input size exactly, one-to-one.</p>
+
+          <h3>O(n log n) — "linearithmic" time</h3>
+          <p><em>The story:</em> You want to <em>sort</em> the random pile alphabetically. A genuinely efficient way (properly covered in the Sorting chapter) is to split the pile in half repeatedly — that's the log n part, halving — and every time you merge two already-sorted smaller piles back together, that merge itself costs a full pass through all papers involved — that's the n part. You do "a linear amount of work," but roughly log n times over. Mildly worse than pure O(n), but dramatically better than what's next.</p>
+
+          <h3>O(n²) — quadratic time</h3>
+          <p><em>The story:</em> You want to find any two papers belonging to siblings (same last name). Brute force: pick paper 1, compare it against every other paper. Pick paper 2, compare it against every other paper. And so on. Every paper gets compared against every other paper — n papers, each checked against roughly n others, so roughly n × n = n² total comparisons. Double the pile, and comparisons roughly <strong>quadruple</strong>, not double. This shape quietly destroys performance at scale — fine with 50 papers, catastrophic with 50,000.</p>
+
+          <h3>O(2ⁿ) — exponential time</h3>
+          <p><em>The story:</em> You want to try every possible way of splitting the papers into two piles. Each paper independently could go in Pile A or Pile B — 2 choices per paper, n papers, so 2×2×2...(n times) = 2ⁿ total ways. Adding just <em>one more paper</em> doubles the possibilities to check. This grows so fast that even 40-50 papers can already be computationally hopeless to brute-force fully.</p>
+
+          <div class="growth-viz">
+            <div class="growth-row"><div class="growth-label">O(1)</div><div class="growth-bar-track"><div class="growth-bar" style="width:1%"></div></div><div class="growth-val">flat, always</div></div>
+            <div class="growth-row"><div class="growth-label">O(log n)</div><div class="growth-bar-track"><div class="growth-bar" style="width:7%"></div></div><div class="growth-val">~20 for n=1M</div></div>
+            <div class="growth-row"><div class="growth-label">O(n)</div><div class="growth-bar-track"><div class="growth-bar" style="width:20%"></div></div><div class="growth-val">1M for n=1M</div></div>
+            <div class="growth-row"><div class="growth-label">O(n log n)</div><div class="growth-bar-track"><div class="growth-bar" style="width:35%"></div></div><div class="growth-val">~20M for n=1M</div></div>
+            <div class="growth-row"><div class="growth-label">O(n²)</div><div class="growth-bar-track"><div class="growth-bar" style="width:75%"></div></div><div class="growth-val">10¹² for n=1M</div></div>
+            <div class="growth-row"><div class="growth-label">O(2ⁿ)</div><div class="growth-bar-track"><div class="growth-bar" style="width:100%"></div></div><div class="growth-val">unusable past n≈50</div></div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">Rough visual "danger level" at real scale — not exact proportion, just gut feel.</p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 THE ONE THING WORTH REALLY INTERNALIZING HERE</span>
+            <p>O(log n) and O(n²) can both look like "just numbers" if you don't think about scale — but at n = 1,000,000, one finishes in about 20 steps and the other needs a trillion. The gap between complexity classes isn't a mild difference in speed. It's the difference between "instant" and "would outlive you." This is why engineers obsess over which class an algorithm falls into.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.3</span>Reading Big-O off real code</h2>
+          <p class="section-sub">Now that you have the shapes in your head, let's connect them to actual code</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's the practical skill: given a piece of code, how do you figure out which "shape" it belongs to? The trick is to stop reading code as instructions and start reading it as a <strong>story about how many times something happens.</strong></p>
+
+          <pre><code><span class="kw">def</span> find_kavya(papers):
+    <span class="kw">for</span> paper <span class="kw">in</span> papers:
+        <span class="kw">if</span> paper.name == <span style="color:#e2b872">"Kavya"</span>:
+            <span class="kw">return</span> paper</code></pre>
+          <p>Read this as a story: "for every paper, check the name." A single pass through n papers — matches our O(n) story exactly (flipping through the random pile). No shortcuts — every paper potentially gets looked at once.</p>
+
+          <pre><code><span class="kw">def</span> has_sibling_pair(papers):
+    <span class="kw">for</span> p1 <span class="kw">in</span> papers:
+        <span class="kw">for</span> p2 <span class="kw">in</span> papers:
+            <span class="kw">if</span> p1 != p2 <span class="kw">and</span> p1.lastname == p2.lastname:
+                <span class="kw">return</span> <span class="kw">True</span></code></pre>
+          <p>Read this one as a story too: "for every paper, look at every <em>other</em> paper." That's the "compare everyone against everyone" story — our O(n²) example, made literal in code. You can spot O(n²) by this exact visual pattern: a loop sitting fully inside another loop, both walking over roughly the same collection.</p>
+
+          <p>This really is the whole skill: <strong>don't trace the code line-by-line and count. Ask "what real-world story does this loop structure match?"</strong> Once you've built the intuition from 1.2, most code will visually "look like" one of those shapes before you do any formal counting — the formal counting (coming up in 1.4) just double-checks your instinct when code gets tricky.</p>
+
+          <h3>Why we round off the messy details</h3>
+          <p>Real code is never as clean as "exactly n operations." A function might do 3n + 100 operations — 3 per paper, plus 100 fixed setup regardless of n. Here's why we still just call this "O(n)":</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚗 THE ROAD TRIP ANALOGY</span>
+            <p>Imagine driving from Delhi to Mumbai (roughly 1400 km) versus driving to your local market (2 km). It doesn't matter whether it took 10 minutes or 25 minutes to pack your bags before either trip (the "+100" fixed cost) — that packing time is irrelevant to comparing "a 1400 km trip" against "a 2 km trip." It gets drowned out by the sheer difference in distance. Once n gets large, small fixed costs and small multipliers ("+100" and "3×") become irrelevant compared to the shape of growth itself — which is exactly why we drop them and just say O(n).</p>
+          </div>
+
+          <p>This isn't laziness — it's precision about the thing that actually matters: does effort track n in a straight line, or does it explode faster than that? The constant multiplier changes <em>how steep</em> the line is, but not whether it's a line, a curve, or an explosion — and it's the shape, not the steepness, that decides whether your code survives a huge dataset.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.4</span>Loops, unpacked slowly</h2>
+          <p class="section-sub">Four loop shapes you'll see again and again, explained one at a time</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <h4>SHAPE 1 — Two loops, side by side (not nested)</h4>
+          <pre><code><span class="kw">for</span> paper <span class="kw">in</span> papers:      <span class="comment"># pass 1: n steps</span>
+    check_something(paper)
+<span class="kw">for</span> paper <span class="kw">in</span> papers:      <span class="comment"># pass 2: n steps</span>
+    check_something_else(paper)</code></pre>
+          <p>Think of this as two separate errands, one after the other: walk through the whole pile once for reason A, then walk through it again for reason B. Total effort: n + n = 2n. But remember the road-trip logic — the "2" is a steepness multiplier, not a change in shape. We still just call this <strong>O(n)</strong>, because doubling n still roughly doubles the work — still a straight line, just steeper.</p>
+
+          <h4>SHAPE 2 — One loop fully inside another (nested, same size)</h4>
+          <pre><code><span class="kw">for</span> i <span class="kw">in</span> range(n):
+    <span class="kw">for</span> j <span class="kw">in</span> range(n):
+        do_something()</code></pre>
+          <p>The "compare everyone to everyone" story again. For <em>every</em> value of i (n of them), you redo the <em>entire</em> inner loop (n more steps). n groups of n steps each — n × n = n². <strong>O(n²)</strong>, exactly as felt intuitively before.</p>
+
+          <h4>SHAPE 3 — Nested loops, but the inner one shrinks each time</h4>
+          <pre><code><span class="kw">for</span> i <span class="kw">in</span> range(n):
+    <span class="kw">for</span> j <span class="kw">in</span> range(i, n):
+        do_something()</code></pre>
+          <p>This one deserves a slower look, because "it's smaller than O(n²) since the inner loop shrinks" is <em>half right</em>, and it's worth understanding exactly why.</p>
+          <p>Picture a triangle instead of a square. When i=0, the inner loop runs n times. When i=1, it runs n-1 times. When i=2, n-2 times. Down to i=n-1, running once. Sketch this as a picture — a row of n bars, then n-1, then n-2... — and you're literally drawing a <strong>triangle</strong>, exactly half of the n×n square from Shape 2.</p>
+          <div class="derivation">Total = n + (n-1) + (n-2) + ... + 1 = n(n+1)/2 ≈ n²/2</div>
+          <p>So yes, it does about <em>half</em> the work of the full square. But "half of n²" is still, shape-wise, n². If you double n, this triangle's area still roughly <strong>quadruples</strong> — it just quadruples from a smaller number each time (half of a quadrupling thing still quadruples). Honest answer: <strong>faster than Shape 2 by a constant factor of 2, but still O(n²) in growth shape.</strong> This "triangle loop" shows up constantly — comparing every pair without double-counting, certain sorting algorithms — so picture the triangle, don't just memorize "still n²."</p>
+
+          <h4>SHAPE 4 — A loop that halves the problem each time</h4>
+          <pre><code>i = n
+<span class="kw">while</span> i > 1:
+    i = i // 2
+    do_something()</code></pre>
+          <p>Our library-search story, made literal: every iteration, the problem size gets <strong>cut in half</strong>, not reduced by a fixed amount. Starting from n, how many times can you halve something before reaching 1? For n = 1,000,000, only about 20 times (2²⁰ ≈ a million). That's the essence of <strong>O(log n)</strong> — you're not doing less work each step, you need far fewer steps overall, because halving shrinks things ferociously fast.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE PATTERN-MATCHING SHORTCUT TO BUILD</span>
+            <p>Loop counter <strong>added or subtracted</strong> by a fixed amount each step (i = i + 1) → think "straight line" → probably O(n). Loop counter <strong>multiplied or divided</strong> each step (i = i * 2) → think "halving/doubling" → probably O(log n). This one distinction — add/subtract vs. multiply/divide on the loop variable — silently explains most "linear or logarithmic" questions.</p>
+          </div>
+
+          <p>One more quick note: if a function loops through one array of size <em>a</em> and, separately, another of size <em>b</em> — and a and b aren't necessarily related — resist lumping them into one "n." Call it O(a + b) honestly. This matters a lot with graphs later (you'll see "O(V + E)" — vertices and edges genuinely don't always grow together), so build the habit now of keeping unrelated quantities separate.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.5</span>Recursion, unpacked slowly</h2>
+          <p class="section-sub">Why recursive functions need a different way of thinking entirely</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Loops are a single path — you can literally count "how many times does this line run." Recursion is different: one call can spawn <em>multiple</em> more calls, which each spawn more, branching outward like a tree. We need a new mental picture.</p>
+
+          <h3>The family tree picture</h3>
+          <p>Take the classic, deliberately <em>inefficient</em> way of computing Fibonacci numbers:</p>
+          <pre><code><span class="kw">def</span> fib(n):
+    <span class="kw">if</span> n <= 1: <span class="kw">return</span> n
+    <span class="kw">return</span> fib(n-1) + fib(n-2)</code></pre>
+          <p>Picture this as an actual family tree, where <code>fib(5)</code> is the ancestor at the top, with two "children" — <code>fib(4)</code> and <code>fib(3)</code> — because computing fib(5) needs both first. Each of those has two children of its own. Draw this out for fib(5) if you want to really feel it — the tree gets wide fast, and you'll notice something uncomfortable:</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">👀 SPOT THE WASTE</span>
+            <p>fib(3) appears as a child of fib(5) [via fib(4)'s subtree] <em>and again</em> as a direct child of fib(5) itself — computed completely independently, from scratch, in two separate branches. As if you asked two different people to redo the exact same homework without telling them someone already did it. This redundant recomputation, repeated at every level, is <em>the entire reason</em> this version of Fibonacci is slow.</p>
+          </div>
+
+          <p>How wide does this tree get? 1 call at the top. That makes 2 children. Each of those makes 2 more — 4 grandchildren. Each makes 2 more — 8 great-grandchildren. The tree <strong>doubles in width at every level</strong>, and it's roughly n levels deep. Doubling, n times, is exactly the "2×2×2...(n times)" story from 1.2 — our <strong>O(2ⁿ)</strong> shape, showing up not from an explicit "try every combination" loop, but purely from redundant recursive branching.</p>
+
+          <h3>Fixing it: what if nobody redoes anyone else's homework?</h3>
+          <p>Here's the single most important idea in this chapter for your future understanding of Dynamic Programming — a whole later chapter is basically an extension of this one idea. What if, the very first time you compute fib(3), you write the answer on a sticky note? Then the next time anyone needs fib(3), instead of recomputing the whole subtree, they just read the sticky note.</p>
+
+          <pre><code>memo = {}
+<span class="kw">def</span> fib(n):
+    <span class="kw">if</span> n <= 1: <span class="kw">return</span> n
+    <span class="kw">if</span> n <span class="kw">in</span> memo: <span class="kw">return</span> memo[n]   <span class="comment"># read the sticky note</span>
+    memo[n] = fib(n-1) + fib(n-2)      <span class="comment"># write the sticky note</span>
+    <span class="kw">return</span> memo[n]</code></pre>
+          <p>Now there are only ever n <em>distinct</em> sticky notes possible (fib(0) through fib(n)), each written exactly once, doing a small constant amount of work beyond reading two other notes. The endlessly-rebranching tree collapses down to just n pieces of real work. Same recursive <em>shape</em> of code, wildly different complexity — <strong>O(2ⁿ) collapses to O(n)</strong> purely by refusing to redo work already done. Sit with this one — it's genuinely the seed the whole idea of Dynamic Programming grows out of.</p>
+
+          <h3>A gentler recursion: adding up a list</h3>
+          <p>Not all recursion branches — some is just a loop wearing a different outfit:</p>
+          <pre><code><span class="kw">def</span> total(arr, i=0):
+    <span class="kw">if</span> i == len(arr): <span class="kw">return</span> 0
+    <span class="kw">return</span> arr[i] + total(arr, i+1)</code></pre>
+          <p>Only <em>one</em> child per call, not two — a straight chain, not a branching tree. Picture a single line of dominoes, n of them, each triggering the next. That's just n steps total, dressed up as recursion — <strong>O(n)</strong>, no different in spirit from a plain loop. Lesson: recursion itself doesn't automatically mean exponential — it's specifically <em>branching</em> recursion, especially with overlapping sub-calls, that creates explosive growth. Always ask: "does each call spawn one next step, or multiple? If multiple, do the subtrees repeat work?"</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.6</span>The Master Theorem, gently</h2>
+          <p class="section-sub">A shortcut for a very specific, very common shape of recursion</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The Fibonacci tree was <em>uneven</em> and messy to analyze by hand. But a huge number of important algorithms follow a much tidier, predictable branching pattern: split the problem into a few equal-sized pieces, solve each, then do a bit of extra work to combine results. The Master Theorem is a pre-worked-out answer key for exactly this tidy pattern, so you don't redraw a tree every time.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🍰 THE CAKE-CUTTING ANALOGY</span>
+            <p>Imagine icing a huge sheet cake. Your strategy: cut it into <strong>a</strong> equal pieces, hand each to a helper who ices their piece (each piece is <strong>1/b</strong> the size of what you started with), then you spend extra time <strong>f(n)</strong> making sure the icing lines up where pieces reconnect. The Master Theorem answers: what dominates the total time — the sheer <em>number of pieces</em> being iced, or the <em>reassembly work</em> at the end?</p>
+          </div>
+
+          <p>Formally this is written <code>T(n) = a·T(n/b) + f(n)</code> — don't worry about memorizing the symbols. From the cake story: <strong>a</strong> = how many pieces, <strong>b</strong> = how much smaller each piece is, <strong>f(n)</strong> = extra combine/reassembly work.</p>
+
+          <h3>The three outcomes, as a tug-of-war</h3>
+          <p>There's a quantity <code>n^(log_b a)</code> representing "how much work comes purely from having so many small pieces" — think of it as "the pieces' side" in a tug of war. We compare it against f(n), "the combine step's side." Whichever side is stronger wins:</p>
+
+          <table>
+            <tr><th>Who wins</th><th>What it means</th><th>Result</th></tr>
+            <tr><td><strong>The pieces win</strong></td><td>So many tiny pieces that icing them all individually is what takes the time — reassembly barely matters</td><td>T(n) = Θ(n^(log_b a))</td></tr>
+            <tr><td><strong>It's a tie</strong></td><td>Combine work matters equally at every layer, and there are log n layers, so multiply by log n</td><td>T(n) = Θ(n^(log_b a) · log n)</td></tr>
+            <tr><td><strong>The combine step wins</strong></td><td>Reassembly is itself so expensive it doesn't matter how the pieces were split</td><td>T(n) = Θ(f(n))</td></tr>
+          </table>
+
+          <h3>Working through Merge Sort slowly</h3>
+          <p>Merge sort: split into 2 equal halves (a=2, b=2), sort each recursively, merge the two sorted halves back — costing one full pass through n elements, f(n) = n.</p>
+          <p>Tie or win? The "pieces" side works out to n¹ (trust the formula here). The combine side is also n¹ (f(n) = n). <strong>Exactly equal — a tie.</strong> Multiply by log n.</p>
+          <div class="derivation">Result: T(n) = Θ(n log n)</div>
+          <p>Now picture it, don't just recite it: merge sort has log n "layers" of splitting (same halving story as binary search), and at <em>every layer</em>, merging all pieces back together costs a full pass of n total elements (spread across smaller merges, adding up to n). n work per layer, times log n layers, equals n log n total.</p>
+
+          <h3>Working through Binary Search slowly</h3>
+          <p>Strategy: look at the middle, throw away half, recurse on the rest. a=1 (only one recursive call happens — you only ever explore <em>one</em> half), b=2 (that half is half the size), f(n) = O(1) (one comparison, nothing to reassemble).</p>
+          <p>Pieces side and combine side again come out equal (both flat, n⁰ = 1) — another tie: <strong>Θ(1 · log n) = Θ(log n)</strong>. Matches perfectly with the "halving the library" story from 1.2 — good confirmation that the formula and the intuition describe the same reality in two languages.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY BOTHER WITH THE FORMULA IF THE PICTURE ALREADY WORKS?</span>
+            <p>For merge sort and binary search, yes, the picture alone gets you there. But some splits are genuinely non-obvious to picture — like an algorithm splitting into 7 pieces instead of 8 (a real example: Strassen's algorithm for multiplying large matrices faster than the "obvious" way, needing only 7 sub-multiplications instead of 8). It's not obvious, just by picturing it, how much difference "7 instead of 8" makes — but the Master Theorem instantly tells you: it drops complexity from n³ to roughly n^2.8, a real, provable improvement. The formula earns its keep exactly where the picture gets fuzzy.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.7</span>Amortized cost, the phone bill way</h2>
+          <p class="section-sub">What to do when most operations are cheap but a few are expensive</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a situation that doesn't fit anything covered so far: an operation that's <em>usually</em> instant, but <em>occasionally</em>, unpredictably, expensive. Judge it only by its worst single moment, and you'll wildly overestimate how bad it really is <em>on average, over time</em>. Amortized analysis rigorously averages out the occasional expensive moments across all the cheap ones around them.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📱 THE PHONE BILL ANALOGY</span>
+            <p>Imagine a phone plan that's ₹0 most months, but once a year you get hit with a ₹1200 annual fee. Looking only at "the worst month," you'd panic and think this plan costs ₹1200/month. But spread that ₹1200 over the year's 12 months, and it's really ₹100/month <em>on average</em>, even though no single month actually charges exactly ₹100. Amortized analysis is exactly this: not claiming every operation costs the same, but proving that <em>averaged over a long run</em>, the cost per operation settles into something small and predictable.</p>
+          </div>
+
+          <h3>The real example: a growing list</h3>
+          <p>Python's <code>list</code> is backed by a fixed-size block of memory. Most of the time, <code>append</code> just drops the element into the next free slot — instant, O(1). But every so often the block fills up completely — no room left. At that moment, Python allocates a <em>new</em>, bigger block, and copies <em>every existing element</em> over to it. That single append just became expensive.</p>
+
+          <p>Across a long sequence of n appends, how much total work happens, and what's the <em>average</em> per append? The key design decision — genuinely worth understanding, not just accepting — is <em>how much bigger</em> does the new block get each time? Python <strong>doubles</strong> the size. Let's see why, by comparing to the "obviously reasonable-sounding" alternative of adding a fixed amount each time.</p>
+
+          <h4>Option A: Grow by doubling (what's actually done)</h4>
+          <p>Resizes happen at size 1, 2, 4, 8, 16, 32... Each resize copies that many elements. Total copying across all resizes, up to size n:</p>
+          <div class="derivation">1 + 2 + 4 + 8 + ... + n &nbsp;≈&nbsp; 2n
+<div class="step">// a classic doubling sum — never gets much bigger than the last term itself</div></div>
+          <p>Here's the intuitive reason this sum stays small: each resize is roughly <strong>twice as expensive</strong> as the last, but also roughly <strong>twice as rare</strong> (you need to fill twice as much space to trigger it again). Those two effects — twice as expensive, half as frequent — cancel out almost perfectly. So even though individual resizes get bigger, the <em>total</em> copying work across all of them stays proportional to n, not n².</p>
+          <p>Spread that total (≈2n) over n appends: roughly 2 units of "resize work" per append, on average — a constant, not something that grows with n. <strong>O(1) amortized per append.</strong></p>
+
+          <h4>Option B: Grow by a fixed amount (the tempting-but-wrong alternative)</h4>
+          <p>Suppose instead, every time the list fills, you add 10 more fixed slots, forever. Resizes now happen every 10 appends, no matter how big the list already is — at size 1,000, still resizing every 10 appends, each copying up to 1,000 elements.</p>
+          <p>Unlike doubling, this growth rate doesn't slow down as the list gets bigger. Roughly n/10 resizes happen by size n, each copying on average n/2 elements:</p>
+          <div class="derivation">Total copying ≈ (n/10 resizes) × (avg n/2 elements) ≈ n²/20</div>
+          <p>Spread over n appends: roughly n/20 work per append <em>on average</em> — which <strong>grows with n</strong>. So fixed-amount growth gives O(n) amortized per append — meaningfully worse at scale than doubling's O(1).</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE ONE-SENTENCE TAKEAWAY</span>
+            <p>Doubling makes big resizes rare enough, fast enough, that they never catch up with you — fixed growth makes resizes frequent enough that they eventually dominate everything. This one design decision (multiply, don't add) is the entire reason dynamic arrays are practical at all.</p>
+          </div>
+
+          <h3>A second example: a step-counter</h3>
+          <p>Picture a mechanical odometer with digit wheels — a car's old-style mileage counter, 9s rolling over to 0s. Most increments only change the last digit (cheap). Occasionally — like 1999 → 2000 — <em>every digit</em> flips (expensive for that one increment).</p>
+          <p>But the last digit flips on <em>every</em> increment. The second-to-last flips only every 10th. The third-to-last only every 100th. The digits expensive to flip are exactly the ones that flip <em>rarely</em> — the same "expensive but rare" cancellation as array doubling. Add it up over n increments: total digit-flips come out proportional to n, giving O(1) amortized per increment, even though any single increment can occasionally be expensive.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.8</span>Space: the forgotten half</h2>
+          <p class="section-sub">Memory matters exactly as much as time — it's just easier to forget about</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Everything so far has been about <em>time</em>. But there's an equally important question: how much <em>extra memory</em> does something need beyond the input itself? This is space complexity, and it's genuinely easy to forget, because it doesn't show up as visible "slowness" — a program using too much memory doesn't feel slow, it just crashes.</p>
+
+          <h3>The sneaky one: recursion secretly costs memory</h3>
+          <p>Compare two ways of summing a list:</p>
+          <pre><code><span class="comment"># Version A — recursive</span>
+<span class="kw">def</span> total_recursive(arr, i=0):
+    <span class="kw">if</span> i == len(arr): <span class="kw">return</span> 0
+    <span class="kw">return</span> arr[i] + total_recursive(arr, i+1)
+
+<span class="comment"># Version B — iterative</span>
+<span class="kw">def</span> total_iterative(arr):
+    s = 0
+    <span class="kw">for</span> x <span class="kw">in</span> arr:
+        s += x
+    <span class="kw">return</span> s</code></pre>
+          <p>Both do the same n additions — same time complexity. But Version A secretly uses <strong>much more memory</strong>. Every time a function calls itself, the computer needs to remember where to come back to once that inner call finishes — like a stack of sticky notes, one per unfinished call, each saying "pause here, I'm waiting on someone else first."</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📋 THE STACK OF STICKY NOTES</span>
+            <p>Picture a manager delegating a task to an assistant, who delegates part of it to their own assistant, who delegates further — a whole chain, each person waiting mid-task for the person below to finish. At the deepest point of this chain, <em>everyone above</em> is still "open," still waiting, still holding their own partial context. That's exactly what recursion does to memory — every unfinished call sits there, taking up space, until the chain bottoms out and resolves back upward.</p>
+          </div>
+
+          <p>In Version A, that chain of "waiting" calls goes n deep — at the deepest point, n unfinished calls sit in memory simultaneously. O(n) memory, even though there's no array or list anywhere. Version B never delegates — one person doing all n additions themselves, one after another, never opening a "waiting" chain — genuinely O(1) memory.</p>
+
+          <p>This is exactly why interviewers love asking "can you do this without recursion?" right after you solve something recursively — they're checking whether you understand this invisible memory cost, not just whether you can write a second version of the same logic.</p>
+
+          <h3>Trading one for the other</h3>
+          <p>Time and space are very often a dial you slide back and forth, not two independent things. A few concrete examples worth sitting with:</p>
+          <ul>
+            <li><strong>Finding a duplicate in a list:</strong> sort it first (some time cost, but duplicates end up next to each other, barely any extra memory) — or remember every element seen so far in a running "seen" set (barely any extra time, but now you're paying for that memory).</li>
+            <li><strong>Checking if a word reads the same backwards:</strong> walk from both ends toward the middle simultaneously (essentially no extra memory) — or build a fully reversed copy and compare it (extra memory, slightly simpler-looking code).</li>
+          </ul>
+          <p>Neither choice is universally "correct" — it depends which resource is scarcer for your situation. But knowing this dial <em>exists</em>, and being able to name what you're trading, is the real skill.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.9</span>Where smart people trip up</h2>
+          <p class="section-sub">Five honest, common misunderstandings — explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Trusting a "built-in" function is automatically fast</span>
+            <p>Tempting to think anything that's a single line of code, like <code>sorted(list)</code> or <code>x in some_list</code>, must be "free" since it's not <em>your</em> loop. But the computer still does the work underneath — <code>sorted()</code> is still roughly n log n comparisons, and <code>x in some_list</code> is still secretly checking every element one by one (unless it's a set, a genuinely different structure built for fast checks). Call one of these "free-feeling" operations <em>inside</em> a loop of n, and you've quietly built something much slower than it looks — the ugliness just hid behind a clean function call instead of a visible nested loop.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Assuming "worse Big-O" always means "actually slower in real life"</span>
+            <p>Feels contradictory, but true: an algorithm with worse worst-case complexity can still be faster in practice, most of the time. Quicksort is technically O(n²) worst case, yet often chosen over merge sort (guaranteed O(n log n)) because that worst case is rare in practice, and quicksort has real, measurable memory-efficiency advantages. Big-O tells you how something scales — it says nothing about typical real-world speed, and conflating the two leads to picking the "textbook safe" option when the "usually faster" one would serve better.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Building up a string piece by piece in a loop</span>
+            <p>In many languages, a string can't actually be modified once created — "add one character" secretly throws away the old string and builds an entirely new, slightly longer one, copying everything over again. Do that in a loop of n iterations, and you're re-copying a growing string over and over — the same "triangle" shape from 1.4's Shape 3, silently turning an apparent O(n) loop into O(n²). The fix is simple once you see it (collect pieces in a list, join once at the end) — but the bug is invisible unless you specifically know strings work this way.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Believing a "fast lookup" structure is always instantly fast</span>
+            <p>Hash maps are usually O(1) for lookups — genuinely one of the most useful facts in programming. But "usually" is doing real work in that sentence: it's an <em>average case</em> guarantee. If, by bad luck (or a deliberately adversarial input), many keys land in the same internal "bucket," lookups there degrade back toward a slow, one-by-one search. Rare in ordinary use, but worth knowing it's an assumption, not a law of nature.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 5 — Forgetting recursion's hidden memory cost</span>
+            <p>Covered in depth already, but worth repeating standalone because it's such a common blind spot: elegant recursive code can feel "free" since there's no visible array being built — but the call stack itself <em>is</em> a hidden structure, growing with every unfinished call. Always ask "how deep does this recursion go?" and treat that depth as real memory usage, even when nothing else looks like it's storing anything.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s10">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">1.10</span>Check your understanding</h2>
+          <p class="section-sub">Not a test — a way to see if the pictures actually stuck. Try explaining out loud before revealing.</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Why does complexity analysis "drop the small stuff" like +100 or ×3?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Once input gets genuinely large, small fixed costs and multipliers get drowned out by the <em>shape</em> of growth — like how bag-packing time barely matters comparing a 2km trip to a 1400km trip. The multiplier changes steepness, not whether it's a line, a curve, or an explosion — and shape, not steepness, decides whether your code survives a huge dataset. If your own explanation touched "gets swallowed by scale" or "shape matters more than steepness," you've got it.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — A friend says "recursion is always slower than a loop." True or false, and why?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Not automatically true. The "sum a list recursively" example did exactly the same amount of <em>time</em>-work as a loop — just a straight chain, no branching. What recursion tends to cost extra is <strong>memory</strong> — every unfinished call sits waiting, like the chain of delegating assistants. The more precise version of your friend's claim: "recursion often costs more <em>memory</em> than an equivalent loop, because of the call stack" — not that it's automatically slower in time.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Picture the "triangle loop" (inner loop shrinking). Without math, closer to O(n) or O(n²)? Why?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Closer to O(n²) — it's still a triangle-shaped <em>area</em>, same family as a square, just smaller by a constant factor (roughly half). Double n, and the triangle's area still roughly quadruples — just from a smaller starting number. "It shrinks each time" tells you about the <em>constant factor</em>, not the fundamental growth shape.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Why does doubling an array's size (instead of adding a fixed amount) keep appends cheap on average?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Doubling makes each resize roughly twice as expensive as the last, but also roughly twice as rare — those effects cancel almost perfectly, so total copying work stays proportional to n, not n². Fixed-amount growth lacks that self-balancing property — resizes stay just as frequent even as the list gets huge, so total copying work grows like n². Core idea: doubling makes expensive moments rare enough, fast enough, that they never catch up with the cheap moments around them.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In the Master Theorem's "tug of war," what does it mean when the combine step (f(n)) wins?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The work of stitching pieces back together at the top is itself so expensive it doesn't matter how cleverly you split things underneath — reassembly cost alone dominates. In the cake analogy: if icing-matching is so painstaking and slow that it doesn't matter whether you cut into 2 or 20 pieces, reassembly time swamps everything else regardless. That's "combine step wins," and the answer becomes Θ(f(n)) — the recursive splitting barely factors in.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Someone says "O(n) means it always takes proportionally longer as input grows, every single time." What's slightly wrong?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>O(n) is only an <em>upper bound</em> — a promise it won't do <em>more</em> than roughly n work, not a promise it always <em>does</em> exactly that much. A search that sometimes gets lucky and finds what it needs on the first check is still correctly O(n) (that's its worst case) — but it doesn't always take proportionally longer; sometimes it finishes instantly regardless of n. Big-O describes the ceiling, not a guarantee about every individual run.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        If you could explain any of the six questions above to a friend using a picture — the library, the cake, the sticky-note chain, the phone bill — rather than a formula, you understand this chapter. That was always the actual goal.
+      </div>
+
+      <div class="endnote">
+        Chapter 1 of 10 — Complexity Analysis, rewritten for genuine understanding. Ready for Chapter 2 (Arrays) in this same intuition-first style whenever you are.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){
+  const section = headEl.closest('.section');
+  section.classList.toggle('open');
+}
+function togglePractice(el){
+  el.classList.toggle('open');
+}
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{
+    a.classList.toggle('active', a.dataset.target === currentId);
+  });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

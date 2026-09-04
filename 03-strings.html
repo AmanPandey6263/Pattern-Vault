@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 3 — Strings | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{width:38px; height:38px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:15px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Three</div>
+    <div class="toc-title">Strings</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">3.1 &nbsp;A costume over an array</a></li>
+      <li><a href="#s2" data-target="s2">3.2 &nbsp;The immutability trap</a></li>
+      <li><a href="#s3" data-target="s3">3.3 &nbsp;Hashing — the fingerprint trick</a></li>
+      <li><a href="#s4" data-target="s4">3.4 &nbsp;Rabin-Karp — sliding the fingerprint</a></li>
+      <li><a href="#s5" data-target="s5">3.5 &nbsp;KMP — never forget what you already know</a></li>
+      <li><a href="#s6" data-target="s6">3.6 &nbsp;The Z-function, briefly</a></li>
+      <li><a href="#s7" data-target="s7">3.7 &nbsp;Palindromes and Manacher's mirror trick</a></li>
+      <li><a href="#s8" data-target="s8">3.8 &nbsp;Anagrams — the fingerprint, reused</a></li>
+      <li><a href="#s9" data-target="s9">3.9 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s10" data-target="s10">3.10 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 2: Arrays</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER THREE OF TEN · INTUITION FIRST</div>
+      <h1>Strings</h1>
+      <p>Almost everything you already know about arrays carries straight over — strings are just arrays of characters. This chapter is really about the handful of places where that "just an array" story gets a plot twist, and the genuinely clever tricks (hashing, KMP, Manacher's) people invented to deal with those twists.</p>
+      <div class="meta">Builds directly on Chapter 2's array intuition</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.1</span>A costume over an array</h2>
+          <p class="section-sub">What's actually new here, and what genuinely isn't</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Before anything clever, the honest starting point: a string is a sequence of characters sitting in memory, contiguous, indexed from 0 — which means everything from Chapter 2 about the "parking lot" applies without modification. <code>s[3]</code> is O(1) for the exact same reason <code>arr[3]</code> was. Looping through a string character by character is O(n), same as looping through an array. Reversing, searching, comparing two strings for equality — all of it is array logic wearing a costume made of letters instead of numbers.</p>
+
+          <div class="strchars">
+            <div class="ch">P</div><div class="ch">Y</div><div class="ch">T</div><div class="ch hi">H</div><div class="ch">O</div><div class="ch">N</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">s[3] = 'H' — same instant address arithmetic as any array, just holding a character instead of a number.</p>
+
+          <p>So why does this topic deserve its own chapter at all, instead of just being a footnote on arrays? Because two specific properties of strings — being <strong>immutable</strong> in many languages, and being read and compared <strong>as whole meaningful chunks</strong> (words, patterns, palindromes) rather than just individual numbers — open up a set of problems and tricks that don't really have an array equivalent. That's what the rest of this chapter is actually about.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.2</span>The immutability trap</h2>
+          <p class="section-sub">Revisiting Chapter 1's warning, but seeing exactly why it happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 1 mentioned this as a pitfall in passing — here's the full picture. In many languages, once a string is created, it can never be changed in place. Every time you write something that looks like "add a character to this string," what's actually happening under the hood is: throw the entire old string away, allocate a brand new block of memory slightly bigger, and copy every old character into it plus the new one.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📜 THE STONE TABLET ANALOGY</span>
+            <p>Imagine a message carved into a stone tablet. You can't add a single letter to the end of it — stone doesn't work that way. If you want a message with one more letter, you have to carve an <em>entirely new tablet</em>, re-carving every existing letter from scratch, plus the new one at the end. That's exactly what "immutable string" means: every single change, no matter how small, means re-copying the whole thing onto a fresh tablet.</p>
+          </div>
+
+          <p>Now picture doing this <em>in a loop</em>, building up a string one character at a time:</p>
+
+          <pre><code>result = <span style="color:#e2b872">""</span>
+<span class="kw">for</span> ch <span class="kw">in</span> some_very_long_text:
+    result = result + ch   <span class="comment"># looks innocent — is secretly re-carving the whole tablet</span></code></pre>
+
+          <p>On iteration 1, you re-carve a tablet of length 1. On iteration 2, a tablet of length 2. By iteration k, you're re-carving a tablet of length k. This is <em>exactly</em> the triangle-loop shape from Chapter 1.4 — total re-carving work is <code>1 + 2 + 3 + ... + n ≈ n²/2</code>. A loop that visually looks like a single, innocent O(n) pass has secretly become <strong>O(n²)</strong>, purely because of this hidden re-copying cost baked into every "+".</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE FIX, AND WHY IT ACTUALLY WORKS</span>
+            <p>Instead of carving a new tablet on every single letter, collect the letters in a mutable container (a list, an array of characters) — appending to a list at the end is O(1) amortized, exactly like Chapter 1.7's dynamic array doubling — and only carve the final stone tablet <em>once</em>, at the very end, by joining everything together in a single pass. One re-carve of the final length n, instead of n re-carves of growing length — collapsing O(n²) back down to the honest O(n) the loop looked like it deserved in the first place.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.3</span>Hashing — the fingerprint trick</h2>
+          <p class="section-sub">How to compare huge chunks of text without reading all of it, every time</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a problem that shows up constantly: you have a huge amount of text, and you keep needing to ask "is this particular stretch of characters equal to that other stretch?" Character-by-character comparison works, but it's slow if you're asking this question over and over, especially on long stretches.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">👆 THE FINGERPRINT ANALOGY</span>
+            <p>Imagine you're a detective trying to figure out if two people at a crime scene are actually the same person. You <em>could</em> stand them side by side and compare every visible feature, one by one — but a much faster shortcut, if you already have a fingerprint database, is to just compare their fingerprints: two short numbers. If the fingerprints match, you're very confident (though not mathematically 100% certain — fingerprints could theoretically collide) that they're the same person, without ever comparing their actual faces feature-by-feature. A hash is exactly this: a short, quickly-computed "fingerprint" for a much longer piece of text, letting you compare fingerprints instead of doing a full character-by-character comparison every time.</p>
+          </div>
+
+          <p>A simple way to build this string fingerprint: treat the string as a number in some base <code>b</code> (bigger than the size of your alphabet), where each character contributes a digit:</p>
+
+          <div class="derivation">hash(s) = s[0]·b^(k-1) + s[1]·b^(k-2) + ... + s[k-1]·b^0
+<div class="step">// exactly like how the number "present at a specific" present value comes from each digit times a power of 10 — just swap base 10 for base b, and digits for characters</div></div>
+
+          <p>Two different strings can, in rare unlucky cases, produce the exact same fingerprint — this is called a <strong>hash collision</strong>, and it's the honest asterisk on this whole technique: a fingerprint match is <em>strong evidence</em> of equality, not an absolute guarantee, unless you follow it up with a real character-by-character check to confirm (which, importantly, you only need to do on the rare occasions the fingerprints actually match — not on every comparison).</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.4</span>Rabin-Karp — sliding the fingerprint</h2>
+          <p class="section-sub">Finding a pattern inside a big text, using the fingerprint trick as you slide along</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The problem: find every place a short pattern (say, a 5-letter word) appears inside a much longer text. The naive way — try matching the pattern starting at every single position in the text, comparing letter by letter each time — costs roughly O(n·m), where n is the text length and m is the pattern length, because in the worst case you re-compare almost the whole pattern at almost every starting position.</p>
+
+          <p>Rabin-Karp's insight: instead of re-comparing letters from scratch at every position, compute the fingerprint of the pattern <em>once</em>, then slide a same-sized window across the text, and instead of recomputing that window's fingerprint from scratch each time, <strong>update it incrementally</strong> — a genuine O(1) update per slide, not a full recompute.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎞️ THE FILM-STRIP WINDOW ANALOGY</span>
+            <p>Picture holding a small cardboard window over a long strip of text, showing only 5 letters at a time, and sliding that window one letter to the right at each step. Instead of re-reading and re-summing all 5 visible letters every single time you slide (wasteful — 4 of the 5 letters didn't even change!), you can be clever: subtract out the contribution of the letter that just <em>left</em> the window on the left, shift everything else's "place value" over by one (multiply by the base), and add in the contribution of the new letter that just <em>entered</em> on the right. Three quick arithmetic operations, regardless of how wide the window is — genuinely O(1) per slide, instead of re-summing the whole window.</p>
+          </div>
+
+          <div class="derivation">new_hash = (old_hash − leaving_char × b^(m-1)) × b + entering_char
+<div class="step">// remove the leaving character's contribution, "shift" everyone else up one place value, add the entering character</div></div>
+
+          <p>At every window position, compare the window's fingerprint against the pattern's fingerprint — an O(1) check — and only bother doing an actual full character-by-character confirmation on the rare occasions the fingerprints happen to match (guarding against the collision risk from the last section). Sliding across the whole text costs O(n) total slides, each O(1) — genuinely <strong>O(n+m) on average</strong>, a real improvement over the naive O(n·m), achieved purely by refusing to redundantly re-read overlapping parts of the window on every slide, in the same spirit as Chapter 2's prefix sums refusing to re-sum overlapping ranges.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.5</span>KMP — never forget what you already know</h2>
+          <p class="section-sub">Pattern matching that never backtracks through the text itself</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>KMP solves the same problem as Rabin-Karp — find a pattern inside a text — but with a completely different, and genuinely elegant, idea: what if, on a mismatch, we could figure out exactly how far to jump the pattern forward, using information the pattern <em>already told us about itself</em>, instead of naively sliding forward by just one position and starting the comparison completely over?</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧩 THE "DON'T FORGET WHAT YOU ALREADY KNEW" ANALOGY</span>
+            <p>Imagine you're matching the pattern <code>"ABABC"</code> against some text, and you've successfully matched <code>"ABAB"</code> before hitting a mismatch on the 5th character. Naive matching would throw away all of that hard-won progress and restart the entire comparison from the very next position in the text, character by character, as if you'd learned nothing. But think about what you actually <em>do</em> know at this point: the last 4 matched characters were "ABAB" — and you can look at the pattern itself and notice that "AB" (the first 2 characters) is also a <em>suffix</em> of what you just matched. That means you don't need to re-check those 2 characters at all when you shift the pattern forward — you already know, for free, purely from the pattern's own internal structure, that they'll match. You only need to resume checking from where your <em>actual</em> new information runs out.</p>
+          </div>
+
+          <p>This "how much of what I just matched can I keep, for free, based on the pattern's own structure" is precomputed once per pattern into something called the <strong>LPS array</strong> (Longest Prefix which is also a Suffix). <code>LPS[i]</code> tells you: for the pattern's first <code>i+1</code> characters, what's the length of the longest proper prefix that's also a suffix of that same chunk? This is purely a property of the <em>pattern itself</em> — it has nothing to do with the text you're searching, which is exactly why it can be computed once, upfront, and reused throughout the entire search.</p>
+
+          <pre><code>pattern = <span style="color:#e2b872">"ABABC"</span>
+LPS     =  [0, 0, 1, 2, 0]
+<span class="comment"># LPS[3] = 2 means: the first 4 characters "ABAB" have a matching
+# 2-character prefix-and-suffix, namely "AB" — so on a mismatch right
+# after matching "ABAB", we can safely skip re-checking those 2 letters</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS MAKES THE WHOLE SEARCH GENUINELY O(n+m), NOT JUST "USUALLY FASTER"</span>
+            <p>The crucial, provable guarantee: the pointer walking through the <em>text</em> never, ever moves backward — it only ever advances forward, one character at a time, for the entire search. Only the pointer walking through the <em>pattern</em> ever jumps backward, and it does so using the precomputed LPS table rather than blindly restarting. Because the text pointer makes at most n forward moves total, and the pattern-building step (computing the LPS array itself) is a separate, one-time O(m) cost, the whole search is a clean <strong>O(n + m)</strong> — genuinely guaranteed, not just a lucky average case the way Rabin-Karp's hashing approach technically is (Rabin-Karp has a rare worst case where many collisions force it back toward O(n·m); KMP has no such asterisk).</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.6</span>The Z-function, briefly</h2>
+          <p class="section-sub">A close cousin of KMP's idea, framed slightly differently</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The Z-function asks a subtly different question than LPS did: for every starting position <code>i</code> in a string, how long is the stretch starting at <code>i</code> that matches the very beginning of the string? Call this <code>Z[i]</code>.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🪞 THE "HOW FAR DOES THIS ECHO THE OPENING" ANALOGY</span>
+            <p>Imagine reading a long string and, starting from every single position, asking "if I compare what follows from here against the string's very own opening, how far do they stay identical before diverging?" That "how far before diverging" number, recorded at every starting position, is the entire Z-function.</p>
+          </div>
+
+          <p>The clever trick that makes this computable in O(n) total, rather than restarting the comparison from scratch at every position (which would be O(n²)): once you've discovered a matching stretch, you remember its boundaries (call them <code>[l, r]</code>, the rightmost match-window found so far), and for any new position that falls <em>inside</em> that already-explored window, you can often reuse previously-computed Z-values instead of blindly re-comparing character by character — the exact same "don't forget what you already know" spirit as KMP's LPS array, just applied to a slightly different question.</p>
+
+          <p>Practically, this shows up most often for pattern matching by gluing the pattern and text together with a separator character not found in either (<code>pattern + "#" + text</code>), then computing the Z-function of that combined string — any position where <code>Z[i]</code> equals the pattern's length marks a genuine match. Worth knowing this exists and roughly why it works, more than memorizing its exact implementation cold — KMP is the more commonly reached-for tool for straightforward pattern matching, and the Z-function tends to show up when a problem needs this "match against the opening" framing specifically.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.7</span>Palindromes and Manacher's mirror trick</h2>
+          <p class="section-sub">Finding the longest palindrome without checking every possible substring</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A palindrome reads the same forwards and backwards — "racecar," "level," "noon." The brute-force way to find the longest palindromic <em>substring</em> inside a bigger string is to check every possible substring (an O(n²) count of them, the familiar triangle shape) and, for each, verify it's a palindrome (another O(n) check) — a costly O(n³) altogether, or O(n²) with a smarter "expand outward from each center" approach. Manacher's algorithm gets this all the way down to O(n), using a genuinely beautiful trick worth actually seeing.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🪟 THE HALL-OF-MIRRORS ANALOGY</span>
+            <p>Imagine you're standing inside a large palindrome — think of it as a hallway with a mirror at its exact center, where the left half is a perfect reflection of the right half. Now suppose you've already carefully measured how far a smaller palindrome extends, somewhere on the <em>left</em> side of this hallway. Here's the beautiful realization: because the whole hallway is mirror-symmetric around its center, there must be a <em>matching</em> palindrome on the right side too, at the mirrored position, extending out to at least the same distance — you don't have to re-measure it from scratch by expanding outward character by character. You can just glance at its mirror-image twin's measurement and start from there, only doing fresh, careful expansion-checking once you run past the boundary of the big hallway-palindrome where the mirror guarantee stops applying.</p>
+          </div>
+
+          <p>Concretely: Manacher's algorithm keeps track of the rightmost-reaching palindrome discovered so far and its center. For each new position, if it falls inside that current rightmost palindrome's reach, it initializes its own palindrome-radius using its already-computed mirror-twin's radius (capped appropriately at the boundary) <em>before</em> doing any fresh character comparisons — meaning a huge amount of potential re-checking gets skipped entirely, purely by exploiting symmetry that's already been discovered. Only once you're forced past the known boundary do you fall back to genuinely fresh, character-by-character expansion.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS COLLAPSES ALL THE WAY TO O(n)</span>
+            <p>The honest amortized argument, in the same spirit as Chapter 1's monotonic stack and Chapter 2's cyclic sort: the "rightmost boundary discovered so far" only ever moves forward, never backward, across the entire run of the algorithm — and every unit of genuinely fresh character-comparison work directly extends that boundary further to the right. Since the boundary can only move forward at most n times total, the total amount of fresh comparison work across the <em>whole</em> algorithm is bounded by O(n), even though any single position might occasionally trigger a burst of comparisons. The mirror trick isn't cutting corners on correctness — it's precisely avoiding redoing comparisons whose answers were already fully determined by symmetry.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.8</span>Anagrams — the fingerprint, reused</h2>
+          <p class="section-sub">A much simpler idea than it sounds, once you see the connection</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Two words are anagrams if one is just a rearrangement of the other's letters — "listen" and "silent," for instance. How do you check this without trying every possible rearrangement (which would be a genuinely awful O(n!) approach)?</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧺 THE INGREDIENT-BASKET ANALOGY</span>
+            <p>Imagine each word is a basket of scrabble tiles. Two baskets contain "the same word, rearranged" precisely when they contain the exact same tiles in the exact same quantities — it genuinely doesn't matter what order the tiles sit in inside the basket. So instead of comparing the words letter-position by letter-position (which cares about order, and is the wrong question entirely), just count how many of each letter is in each basket, and compare those two counts. If the counts match exactly, letter for letter, the baskets are anagrams — full stop, order never even enters into it.</p>
+          </div>
+
+          <p>Practically: build a frequency count (an array of size 26 for lowercase English letters is enough — no hash map even needed, since the "address" for each letter's count is just its position in the alphabet, a nice callback to Chapter 2's cyclic sort idea of "the value tells you its own address"), incrementing for one word and decrementing for the other as you walk through both. If you land back at all-zeros, the counts matched perfectly, and they're anagrams.</p>
+
+          <pre><code>counts = [0] * 26
+<span class="kw">for</span> ch <span class="kw">in</span> word1: counts[ord(ch) - ord(<span style="color:#e2b872">'a'</span>)] += 1
+<span class="kw">for</span> ch <span class="kw">in</span> word2: counts[ord(ch) - ord(<span style="color:#e2b872">'a'</span>)] -= 1
+<span class="kw">return</span> all(c == 0 <span class="kw">for</span> c <span class="kw">in</span> counts)</code></pre>
+
+          <p>This is genuinely the <em>same underlying idea</em> as Section 3.3's fingerprint trick, just wearing yet another costume: instead of comparing two long words character by character in order (an ordered comparison), you're compressing each word down into a short, order-independent "fingerprint" — its letter-frequency signature — and comparing those instead. Two words with matching frequency signatures are guaranteed anagrams, with none of the "rare collision" asterisk that plain numeric hashing carried, since a full 26-length frequency count carries exactly as much information as the original word's letter multiset, no compression loss at all.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.9</span>Where smart people trip up</h2>
+          <p class="section-sub">String-specific mistakes, explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Trusting a hash match without ever confirming it</span>
+            <p>It's tempting, once you've built a fast fingerprint check, to treat a fingerprint match as absolute proof of equality and skip verification entirely. But remember: hash collisions, while rare, are mathematically possible — two genuinely different strings landing on the same fingerprint by unlucky coincidence. For correctness-critical code (not just "probably fine" code), always follow up a hash match with a real character-by-character confirmation, especially in an adversarial setting where someone might deliberately try to engineer a collision.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Forgetting the multiplier when removing the leaving character in a rolling hash</span>
+            <p>In Rabin-Karp's sliding update, it's easy to forget that the leaving character's contribution needs to be multiplied by <code>b^(m-1)</code> before subtracting — because that character was sitting at the <em>most significant</em> place-value position in the window, not the least significant one. Forgetting this power term is a common, subtle bug that silently produces wrong fingerprints rather than an obvious crash, since the arithmetic still "runs," it just computes the wrong number.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Confusing "prefix that's also a suffix" with "any matching substring"</span>
+            <p>KMP's LPS array specifically wants the longest <em>proper</em> prefix (not the whole string itself) that's also a suffix of the same chunk — it's easy to accidentally include the full string as its own "prefix-suffix match," which breaks the whole algorithm's logic, since that would mean "skip past everything," which makes no sense for finding a genuine mismatch-recovery jump. Always double check the LPS table by hand on a short 4-5 character example before trusting a general implementation.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Assuming Unicode/multi-byte characters behave like single array cells</span>
+            <p>In some languages and encodings, a single visible character (especially emoji, or characters outside basic ASCII) can actually be represented internally by more than one underlying storage unit. This quietly breaks the "parking lot" assumption from Chapter 2 that every cell is the same fixed size — s[i] might land you in the <em>middle</em> of a multi-unit character rather than cleanly on a character boundary. Worth being aware this asterisk exists, even if most interview-style problems conveniently stick to plain ASCII to sidestep it.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s10">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">3.10</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Why does <code>result = result + ch</code> inside a loop secretly cost O(n²), using the stone tablet picture?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because strings are immutable — every "+" doesn't add a letter to the existing tablet, it re-carves an entirely new, slightly longer tablet from scratch. On iteration k, you're re-carving a tablet of length k, so total re-carving work across n iterations is 1+2+...+n ≈ n²/2 — the same triangle-loop shape from Chapter 1. It's an invisible cost hidden behind an innocent-looking "+" operator.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — In your own words, what does a hash collision mean, and why doesn't it make hashing useless?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>A collision is when two genuinely different strings happen to produce the exact same fingerprint by unlucky coincidence — like two different people accidentally sharing a fingerprint pattern in a flawed database. It doesn't make hashing useless because collisions are rare with a well-chosen hash, and you can always follow up a fingerprint match with a real full comparison to confirm — you're using the fast fingerprint check to quickly rule out the overwhelming majority of non-matches, then paying the full comparison cost only on the rare occasions it's actually needed.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — What's the core idea KMP and the Z-function actually share, even though they compute slightly different things?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Both refuse to "forget" information the string has already revealed about its own structure, and both reuse that information to skip redundant future comparisons instead of naively restarting from scratch after every mismatch or at every new position. KMP asks "how much of what I just matched can I keep on a mismatch" using the pattern's own prefix-suffix structure; the Z-function asks "how far does this position echo the opening" using previously-discovered match windows. Different questions, same underlying "don't redo work whose answer you already know" spirit.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Using the hall-of-mirrors picture, explain why Manacher's algorithm doesn't need to re-verify every mirrored palindrome from scratch.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because the region inside the currently-known rightmost palindrome is genuinely, provably mirror-symmetric — whatever palindrome radius was measured on the left side is guaranteed to exist at the mirrored position on the right side too, as a direct consequence of the bigger palindrome's own symmetry, not a guess or heuristic. So that measurement can be reused as a starting point instead of re-measured from zero — fresh character comparison is only needed once you go past where the mirror guarantee runs out, at the boundary of the currently-known palindrome.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why is checking anagrams via letter-frequency counting fundamentally different from checking two strings for exact equality character-by-character?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Exact equality cares about both <em>which</em> characters appear and the precise <em>order</em> they appear in. Anagram-checking only cares about which characters appear and <em>how many</em> of each — order is completely irrelevant, like comparing scrabble-tile baskets rather than comparing two written-out words position by position. Frequency counting throws away order entirely and compares only the "ingredient list," which is exactly the right compression for a question that was never about order in the first place.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Rabin-Karp and KMP both solve "find pattern in text" in roughly linear time. Why might you still prefer one over the other?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>KMP has a genuinely guaranteed O(n+m) worst case, no asterisks — its correctness doesn't depend on luck. Rabin-Karp's O(n+m) is an <em>average</em>-case story; in a rare, unlucky (or adversarially engineered) situation with many hash collisions, it can degrade back toward O(n·m) from all the fallback full comparisons. On the other hand, Rabin-Karp's rolling-hash idea generalizes more naturally to problems like "find any of many patterns at once" or 2D pattern matching, where KMP's specific prefix-suffix machinery doesn't extend as cleanly. Pick based on which property — guaranteed worst case, or easy generalization — matters more for the specific problem in front of you.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Nearly every trick in this chapter is the same move as Chapter 2's, just aimed at text instead of numbers: find some structure already sitting inside the data (a mirror symmetry, a repeated prefix, a frequency signature) and reuse it instead of redoing work whose answer you already, secretly, know.
+      </div>
+
+      <div class="endnote">
+        Chapter 3 of 10 — Strings, intuition-first. Ready for Chapter 4 (Two Pointers & Sliding Window) whenever you are — it picks up directly on the "don't redo overlapping work" thread running through this entire chapter.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

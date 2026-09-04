@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 13 — Tries | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.tree-ascii{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.5; margin:18px 0; white-space:pre;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Thirteen</div>
+    <div class="toc-title">Tries</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">13.1 &nbsp;The question a hash set can't answer</a></li>
+      <li><a href="#s2" data-target="s2">13.2 &nbsp;A hallway that forks at every letter</a></li>
+      <li><a href="#s3" data-target="s3">13.3 &nbsp;Insert and search, walked through slowly</a></li>
+      <li><a href="#s4" data-target="s4">13.4 &nbsp;Tries as a pruning device for backtracking</a></li>
+      <li><a href="#s5" data-target="s5">13.5 &nbsp;The honest cost — memory</a></li>
+      <li><a href="#s6" data-target="s6">13.6 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s7" data-target="s7">13.7 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 12: Heaps / Priority Queues</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER THIRTEEN · INTUITION FIRST</div>
+      <h1>Tries</h1>
+      <p>A trie answers a question hash sets are structurally incapable of answering well: not "does this exact word exist," but "does <em>anything</em> start with these letters." That's a genuinely different question, and it needs a genuinely different shape of structure.</p>
+      <div class="meta">Builds directly on Chapter 2's "the value tells you its own address" idea</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.1</span>The question a hash set can't answer</h2>
+          <p class="section-sub">Why "starts with" is a fundamentally different kind of question than "equals"</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A hash set is genuinely excellent at one specific question: "is this exact word in my collection?" O(1) average, done. But ask it a subtly different question — "does <em>any</em> word in my collection start with 'pre'?" — and it has no good answer at all. It would have to check every single stored word, one at a time, seeing if each one happens to start with "pre" — a full O(n) scan, with the hashing that made exact lookups fast offering no help whatsoever here.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🗄️ WHY HASHING ACTIVELY WORKS AGAINST PREFIX QUESTIONS</span>
+            <p>A hash function is deliberately designed to scatter similar-looking inputs into wildly different, unrelated storage locations — that scattering is exactly what prevents collisions and keeps lookups fast. But that same scattering is precisely what destroys any useful relationship between "predict" and "prefix" and "president" — even though they all start with "pre," a hash function will happily send them to three completely unrelated corners of memory, with nothing connecting them. The property that makes hashing good at one job (exact lookup) is the very same property that makes it bad at the other (prefix lookup) — it's not a missing feature, it's a direct structural consequence of what hashing is built to do.</p>
+          </div>
+
+          <p>A trie is built specifically to make "starts with" cheap, by doing the opposite of hashing: instead of scattering similar inputs apart, it deliberately <em>merges</em> them together wherever they share a common beginning.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.2</span>A hallway that forks at every letter</h2>
+          <p class="section-sub">The actual shape of the structure, built up from the problem it solves</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-analogy">
+            <span class="label">🚪 THE FORKING-HALLWAY ANALOGY</span>
+            <p>Imagine a building where you enter through a single front door, and every hallway forks at every single letter of every word stored inside. Walking down the hallway spelling out "c-a-t" means you pass through a fork for 'c', then a fork for 'a', then a fork for 't' — and if the building also contains the word "car," the "c" and "a" hallway segments are <em>the exact same physical hallway</em> as the beginning of "cat"'s path — they only diverge at the third letter, where one path continues to 'r' and the other to 't'. Words that share a prefix genuinely share hallway segments, right up until the point where their spellings actually differ.</p>
+          </div>
+
+          <div class="tree-ascii">insert("cat"), insert("car"), insert("dog")
+
+            (root)
+            /    \
+           c      d
+           |      |
+           a      o
+          / \     |
+         t   r    g
+         *   *    *      ← * marks "a complete word ends here"</div>
+
+          <p>Each node in this structure represents one character position along some path from the root, typically implemented as a dictionary or fixed-size array mapping "next character → next node," plus a flag marking whether a complete, valid word actually ends at this exact node (necessary because "car" being a word doesn't mean "ca" is also one — the flag distinguishes "a word ends here" from "this is merely a letter passed through on the way to a longer word").</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY SHARED PREFIXES BEING PHYSICALLY MERGED IS THE ENTIRE POINT</span>
+            <p>This structural merging is precisely what makes "does anything start with X" cheap: walking the hallway for "ca" and checking whether that fork exists at all instantly tells you whether <em>any</em> stored word begins with "ca" — you never need to check "cat" and "car" and "cabbage" individually, because their shared beginning was only ever stored <em>once</em>, as one shared hallway segment. This is genuinely the same underlying idea as Chapter 2's cyclic sort and Chapter 9's monotonic stack — "don't redo or duplicate what's already implied by structure" — just expressed here as physically shared paths instead of avoided recomputation.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.3</span>Insert and search, walked through slowly</h2>
+          <p class="section-sub">Both operations are the same hallway walk, differing only in what happens on a dead end</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <pre><code><span class="kw">class</span> TrieNode:
+    <span class="kw">def</span> __init__(self):
+        self.children = {}       <span class="comment"># letter -> TrieNode</span>
+        self.is_end_of_word = <span class="kw">False</span>
+
+<span class="kw">def</span> insert(root, word):
+    node = root
+    <span class="kw">for</span> ch <span class="kw">in</span> word:
+        <span class="kw">if</span> ch <span class="kw">not</span> <span class="kw">in</span> node.children:
+            node.children[ch] = TrieNode()   <span class="comment"># build a new hallway fork</span>
+        node = node.children[ch]              <span class="comment"># walk through it</span>
+    node.is_end_of_word = <span class="kw">True</span>            <span class="comment"># plant a flag: a word ends exactly here</span>
+
+<span class="kw">def</span> search(root, word):
+    node = root
+    <span class="kw">for</span> ch <span class="kw">in</span> word:
+        <span class="kw">if</span> ch <span class="kw">not</span> <span class="kw">in</span> node.children:
+            <span class="kw">return</span> <span class="kw">False</span>              <span class="comment"># hallway doesn't exist — dead end</span>
+        node = node.children[ch]
+    <span class="kw">return</span> node.is_end_of_word         <span class="comment"># hallway exists — but does a WORD end here?</span>
+
+<span class="kw">def</span> starts_with(root, prefix):
+    node = root
+    <span class="kw">for</span> ch <span class="kw">in</span> prefix:
+        <span class="kw">if</span> ch <span class="kw">not</span> <span class="kw">in</span> node.children:
+            <span class="kw">return</span> <span class="kw">False</span>
+        node = node.children[ch]
+    <span class="kw">return</span> <span class="kw">True</span>                     <span class="comment"># hallway exists — that's ALL prefix-check needs</span>
+</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THE ONE-LINE DIFFERENCE THAT SEPARATES "SEARCH" FROM "STARTS_WITH" — WORTH GETTING EXACTLY RIGHT</span>
+            <p>Notice <code>search</code> and <code>starts_with</code> are almost character-for-character identical code, walking the exact same hallway — the entire distinguishing difference is the final return line. <code>search</code> needs the walked path to end exactly at a node flagged <code>is_end_of_word</code>, because "the hallway to 'ca' exists" does not mean "'ca' is itself a valid, complete word" (it might only exist because "cat" or "car" passes through it). <code>starts_with</code> only cares that the hallway <em>exists at all</em> — it never checks the flag, because a valid prefix doesn't need to itself be a complete word. This single-line distinction is the entire structural payoff of storing the end-of-word flag separately from "this node exists" in the first place.</p>
+          </div>
+
+          <p>All three operations cost <strong>O(L)</strong>, where L is the length of the word or prefix being processed — genuinely independent of how many total words are stored in the trie, since you only ever walk one path down from the root, never touching any of the other branches. Compare this to Section 13.1's hash-set scan, which was O(n) — proportional to the <em>number of stored words</em>, regardless of how short the prefix being searched for was.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.4</span>Tries as a pruning device for backtracking</h2>
+          <p class="section-sub">Combining this chapter with Chapter 7, for a genuinely powerful payoff</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A classic, genuinely instructive problem: given a grid of letters and a dictionary of valid words, find every word from the dictionary that can be traced out by a path of adjacent letters in the grid. The natural approach is Chapter 7's backtracking — explore every possible path letter by letter — but without help, this explores an enormous number of paths that are doomed from the very first few letters.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚧 CHAPTER 7's "DON'T WALK THE DEAD-END HALLWAY," NOW WITH A MAP IN HAND</span>
+            <p>Recall Chapter 7.4's pruning idea: don't fully explore a path once you can already tell it's doomed. The problem there was <em>knowing</em> a path was doomed without a fast way to check. A trie built from the dictionary is exactly that fast way to check: at every single step of the grid exploration, walk the corresponding hallway in the trie alongside it. The instant the trie hallway you'd need doesn't exist — meaning no dictionary word could possibly continue with the letters traced out so far — you know with total certainty that continuing to explore this specific grid path is hopeless, and you can abandon it immediately, without wasting any further exploration on it.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> backtrack(row, col, trie_node, path):
+    ch = grid[row][col]
+    <span class="kw">if</span> ch <span class="kw">not</span> <span class="kw">in</span> trie_node.children:
+        <span class="kw">return</span>                          <span class="comment"># no dictionary word can possibly continue this way — prune</span>
+    next_node = trie_node.children[ch]
+    path.append(ch)
+    <span class="kw">if</span> next_node.is_end_of_word:
+        record(<span style="color:#e2b872">''</span>.join(path))
+    <span class="kw">for</span> neighbor <span class="kw">in</span> adjacent_cells(row, col):
+        backtrack(neighbor.row, neighbor.col, next_node, path)
+    path.pop()                             <span class="comment"># Chapter 7's undo step, unchanged</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THE TRIE SPECIFICALLY, AND NOT JUST A PLAIN SET OF WORDS, IS WHAT MAKES THIS PRUNING POSSIBLE</span>
+            <p>This is worth being precise about, because it's the entire reason this chapter and Chapter 7 combine so well: a plain hash set of dictionary words could only ever tell you "is the path traced <em>so far</em> a complete, valid word" — it has no way to answer the genuinely different, and far more useful, mid-search question "could this <em>partial</em> path still possibly become some valid word if I kept going?" A trie answers exactly that second question, for free, as a direct structural side effect of Section 13.1's prefix-merging — the very thing that made "starts with" cheap for a static dictionary is precisely what makes "is this partial path still alive" cheap to check at every single step of a live, in-progress search.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.5</span>The honest cost — memory</h2>
+          <p class="section-sub">Every trade-off in this book has an asterisk, and this one is worth naming plainly</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Following Chapter 2.2's honest framing — nothing is free — it's worth being direct about what a trie costs in exchange for its fast prefix operations: <strong>memory</strong>, and often more of it than people expect at first.</p>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ THE HONEST TRADE, NAMED PLAINLY</span>
+            <p>Every single character of every stored word potentially needs its own node, and every node potentially needs room for many possible next-character branches (up to 26 for lowercase English, far more for full Unicode) — and crucially, most of those possible branches sit unused (null or absent) at any given node, since most letters don't actually have every other letter following them in real words. This can add up to genuinely more total memory than simply storing the raw words themselves in a plain list or hash set would need, especially when the stored words don't share many common prefixes with each other — the structural benefit (shared hallways) only pays off in proportion to how much genuine overlap actually exists in the data.</p>
+          </div>
+
+          <p>This is exactly why a trie is a specialist tool, reached for specifically when prefix-based operations (autocomplete, "starts with" queries, the trie-plus-backtracking pruning from Section 13.4) are genuinely part of what's being asked — not a default, drop-in replacement for a hash set whenever strings are involved. If the actual questions being asked are all exact-match ("is this exact word present"), a hash set remains the leaner, more appropriate choice, and reaching for a trie there would be paying a real memory cost for a prefix capability that's never actually used.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.6</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Confusing "the path exists" with "a word ends here"</span>
+            <p>Section 13.3's core distinction, worth restating directly as the warning it is: forgetting to check <code>is_end_of_word</code> in <code>search</code> (or accidentally checking it in <code>starts_with</code>, where it's not needed) is one of the most common trie bugs — it silently reports "cat" as a valid stored word just because the hallway to it exists, even if only "catastrophe" was ever actually inserted and "cat" itself never was.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Reaching for a trie by default whenever a problem involves strings</span>
+            <p>Section 13.5's honest memory cost is exactly why this default instinct is worth resisting. If the actual operations needed are all exact-match lookups, a plain hash set is leaner and simpler — a trie earns its keep specifically when prefix-based questions ("does anything start with X," "what are all words starting with X," or Section 13.4's live-search pruning) are genuinely part of the problem, not just because the data happens to be strings.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Forgetting to prune the trie-plus-backtracking search when a branch is exhausted</span>
+            <p>In Section 13.4's word-search combination, once a particular trie branch has yielded all the words it's going to (or was never going to yield any), continuing to explore grid paths that lead into that same dead branch repeatedly wastes work. A further, genuinely valuable optimization (worth knowing exists, even if not implementing it every time) is removing a trie node once it's been fully "used up" — no children left, and no longer marking any live word — so future searches passing through that same grid region prune even faster on subsequent encounters.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Assuming trie operations are O(1) rather than O(L)</span>
+            <p>It's tempting, after hearing "independent of the number of stored words," to round that up to "constant time" — but the cost genuinely does depend on L, the length of the word or prefix being processed, which is not itself a constant across different queries. For most everyday words this difference is negligible in practice, but it's worth stating the complexity precisely as O(L) rather than O(1), especially if a problem involves unusually long strings where L could meaningfully dominate the cost.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">13.7</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Why does the exact property that makes hashing fast for exact-match lookups (scattering similar inputs apart) make it useless for prefix questions?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Hashing deliberately scatters inputs to avoid collisions and keep lookups fast, which means words sharing a prefix (like "predict" and "prefix") end up in completely unrelated storage locations with no structural connection between them. A prefix question needs exactly the opposite property — the ability to find everything sharing a beginning — which requires related inputs to be grouped or connected somehow, the direct opposite of what a hash function is designed to do.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Using the forking-hallway picture, explain why storing "cat" and "car" in the same trie uses less total space than storing them completely separately.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Both words share the same first two letters, "c" and "a" — in a trie, this shared beginning is walked through the exact same two nodes for both words, only forking into separate paths at the third letter where they actually differ ('t' versus 'r'). The shared prefix is physically stored once, not duplicated for every word that happens to share it, which is exactly why words with a lot of common prefixes benefit the most from this structural merging.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — What's the exact difference in what search() and starts_with() need to check, given they walk the identical hallway?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Both need the hallway (the sequence of character-nodes) to exist all the way through — if any letter's fork is missing, both immediately fail. But search() additionally needs the final node reached to be flagged is_end_of_word, since a hallway existing only means some longer word passes through that point, not that the exact queried word was itself ever inserted. starts_with() doesn't check that flag at all — a valid prefix is allowed to not be a complete word on its own.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In the word-search-with-backtracking combination, what specific question does the trie answer that a plain hash set of dictionary words couldn't answer?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>A plain hash set can only answer "is the path traced so far a complete valid word" — it has no way to answer "could this partial, in-progress path still possibly extend into some valid word." The trie answers that second, genuinely more useful question for free, because checking whether the next letter's hallway fork exists directly tells you whether any dictionary word could still possibly continue this way — exactly what's needed to prune a doomed grid-exploration path immediately, rather than only discovering it's doomed after fully tracing it out.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why isn't a trie automatically the better choice whenever a problem involves storing and looking up strings?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>A trie's fast prefix operations come at a genuine memory cost — potentially one node per character with room for many possible branches, most of them unused at any given node — which can add up to more total memory than simply storing the raw words in a hash set, especially when the stored words don't share much overlap with each other. If the actual operations needed are only exact-match lookups, that memory cost buys a prefix capability that's never used, making a plain hash set the leaner, more appropriate choice instead.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why is it more precise to describe trie operations as O(L) rather than O(1), even though they don't depend on how many words are stored?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The cost genuinely scales with L, the length of the specific word or prefix being processed — walking a 3-letter hallway takes fewer steps than walking a 30-letter one, even though neither depends on the total number of other words stored in the trie. "Independent of the number of stored words" and "constant time regardless of everything" are two different claims — the operation is independent of one specific variable (word count), but it's not independent of L, which is why O(L) is the honest, precise complexity rather than O(1).</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        A trie is what you get when you take Chapter 2's "the value tells you its own address" idea and stretch it across an entire sequence of characters instead of a single number — every shared prefix becomes a shared, physically merged path, and that merging is simultaneously the whole benefit and the whole cost.
+      </div>
+
+      <div class="endnote">
+        Chapter 13 — Tries, intuition-first. Ready for Chapter 14 (Graphs) whenever you are — it's where Chapter 9's stack-versus-queue distinction (DFS versus BFS) and Chapter 8's pointer-chasing finally combine into the biggest chapter in this book.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

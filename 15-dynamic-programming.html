@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 15 — Dynamic Programming | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:25px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.gridtable{display:grid; margin:20px 0; font-family:var(--mono); font-size:13px; gap:2px;}
+.gridcell{background:var(--paper-raised); border:1px solid var(--rule); padding:6px; text-align:center; border-radius:3px;}
+.gridcell.hd{background:var(--accent-soft); font-weight:700; border-color:var(--accent);}
+.gridcell.hi{background:var(--good-soft); border-color:var(--good); font-weight:700;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Fifteen</div>
+    <div class="toc-title">Dynamic Programming</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">15.1 &nbsp;The two requirements, revisited properly</a></li>
+      <li><a href="#s2" data-target="s2">15.2 &nbsp;Top-down vs bottom-up — filling the same table two ways</a></li>
+      <li><a href="#s3" data-target="s3">15.3 &nbsp;The actual process for deriving a DP solution</a></li>
+      <li><a href="#s4" data-target="s4">15.4 &nbsp;0/1 Knapsack — the backpack that won't reuse an item</a></li>
+      <li><a href="#s5" data-target="s5">15.5 &nbsp;Longest Common Subsequence</a></li>
+      <li><a href="#s6" data-target="s6">15.6 &nbsp;Edit distance — three honest moves</a></li>
+      <li><a href="#s7" data-target="s7">15.7 &nbsp;LIS — from O(n²) down to O(n log n)</a></li>
+      <li><a href="#s8" data-target="s8">15.8 &nbsp;Interval DP and bitmask DP, briefly</a></li>
+      <li><a href="#s9" data-target="s9">15.9 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s10" data-target="s10">15.10 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 14: Graphs</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER FIFTEEN · INTUITION FIRST</div>
+      <h1>Dynamic Programming</h1>
+      <p>You already met the entire idea of DP back in Chapter 1.5 — the memoized Fibonacci sticky notes — and saw a second preview in Chapter 14.8's Floyd-Warshall. This chapter isn't introducing something new. It's finally giving that one small idea the room to become a genuine, repeatable process.</p>
+      <div class="meta">Builds directly on Chapter 1.5's memoization and Chapter 7's recursive leap of faith</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.1</span>The two requirements, revisited properly</h2>
+          <p class="section-sub">Not every slow recursive function is fixable this way — here's how to tell</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 1.5 showed naive Fibonacci recomputing the same sticky-note answers over and over, and fixed it by writing each answer down once. But that fix only worked because Fibonacci happened to have two specific properties — and it's worth being precise about both, because DP genuinely doesn't apply to every slow recursive function you'll meet.</p>
+
+          <p><strong>Overlapping subproblems:</strong> the same smaller question gets asked multiple times across different branches of the recursion — fib(3) was needed by both fib(5)'s direct path and fib(4)'s subtree. If a recursive function never actually asks the same question twice, there's nothing to cache, and memoization buys you nothing at all.</p>
+
+          <p><strong>Optimal substructure:</strong> the best answer to the big problem can genuinely be built out of the best answers to its smaller subproblems, with no need to reconsider decisions once made. This is the subtler of the two — it's not just "the problem breaks into smaller pieces," but specifically that solving those pieces optimally, independently, and then combining them, is guaranteed to give the overall optimal answer.</p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 A CASE WHERE OPTIMAL SUBSTRUCTURE GENUINELY FAILS, WORTH SEEING ONCE</span>
+            <p>Consider "find the longest simple path between two nodes in a graph" (a path visiting no node twice). It's tempting to think: find the longest path from A to some midpoint M, find the longest path from M to B, glue them together. But this can break — the two "optimal" sub-paths might both pass through some shared node, and gluing them together would revisit that node, violating the "simple path, no repeats" rule entirely. The locally optimal pieces don't combine into a globally valid answer here, which is exactly why this specific problem resists a clean DP formulation the way shortest-path problems don't — optimal substructure is a genuine, checkable property, not something to assume by default just because a problem has smaller sub-versions of itself.</p>
+          </div>
+
+          <p>Both properties need to hold before reaching for DP. If subproblems overlap but there's no meaningful "optimal" choice being made (just one deterministic answer, like Fibonacci itself), memoization still helps — you're just caching, not truly optimizing over choices. If there's a choice to optimize over but nothing overlaps, plain recursion or a greedy approach (Chapter 16) might already be enough, and adding a memo table would be pure overhead with no payoff.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.2</span>Top-down vs bottom-up — filling the same table two ways</h2>
+          <p class="section-sub">Two genuinely different ways to arrive at the identical answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-analogy">
+            <span class="label">📖 THE "READ THE STORY BACKWARD, OR TELL IT FORWARD" ANALOGY</span>
+            <p><strong>Top-down (memoization):</strong> write the recursive function exactly the way you'd naturally think about the problem — "to solve the big case, I need these smaller cases" — and just add a cache. This is like starting at the end of a story and asking "how did we get here?", tracing backward through cause and effect, writing down each answer the first time you work it out so you never have to re-derive it. <strong>Bottom-up (tabulation):</strong> start from the smallest, simplest base cases and build forward, filling in a table in an order that guarantees every value you need has already been computed by the time you need it — telling the story forward from the very beginning, chronologically, instead of working backward from the ending.</p>
+          </div>
+
+          <pre><code><span class="comment"># Top-down — looks exactly like Chapter 1.5's memoized fib</span>
+memo = {}
+<span class="kw">def</span> fib(n):
+    <span class="kw">if</span> n <= 1: <span class="kw">return</span> n
+    <span class="kw">if</span> n <span class="kw">in</span> memo: <span class="kw">return</span> memo[n]
+    memo[n] = fib(n-1) + fib(n-2)
+    <span class="kw">return</span> memo[n]
+
+<span class="comment"># Bottom-up — same answers, built forward instead of backward</span>
+<span class="kw">def</span> fib(n):
+    <span class="kw">if</span> n <= 1: <span class="kw">return</span> n
+    dp = [0, 1]
+    <span class="kw">for</span> i <span class="kw">in</span> range(2, n+1):
+        dp.append(dp[i-1] + dp[i-2])
+    <span class="kw">return</span> dp[n]</code></pre>
+
+          <p>Both cost O(n) time and produce identical results — the difference is genuinely just direction of construction, not correctness or, usually, complexity class. Top-down tends to be easier to <em>derive</em>, since it mirrors the natural recursive thought process directly — write the recursion first, worry about caching second. Bottom-up tends to be easier to <em>optimize for space</em>, because building forward through a table often reveals that you only ever need the last one or two rows, letting you collapse the whole table down to a couple of rolling variables (exactly what the Fibonacci example above could still be shrunk further to, using only two variables instead of a full array).</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY BOTTOM-UP CAN ALSO AVOID CHAPTER 8's RECURSION-STACK COST</span>
+            <p>Recall Chapter 8's warning: recursion secretly costs O(depth) stack space, even when no explicit data structure is being built. Top-down DP is still recursion underneath the caching, so it still pays this hidden cost — a deep enough recursion (say, n in the hundreds of thousands) can genuinely hit a stack-depth limit that bottom-up's plain iterative loop never risks at all. This is a real, practical reason to prefer bottom-up specifically when n could be large, beyond just "personal style."</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.3</span>The actual process for deriving a DP solution</h2>
+          <p class="section-sub">A repeatable checklist, not a trick you either see or don't</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>DP has an unfair reputation as something you either magically "see" or don't. In practice, it's a genuinely repeatable process — the same four questions, asked in order, every time.</p>
+
+          <div class="callout callout-good">
+            <span class="label">✅ THE FOUR QUESTIONS, IN ORDER</span>
+            <p><strong>1. Define the state, in plain words.</strong> Not "dp[i]" as a symbol — actually write out, in a sentence, exactly what dp[i] (or dp[i][j]) represents. "dp[i] = the maximum value achievable using only the first i items" is a real definition; "dp[i] = the answer" is not.<br><br>
+            <strong>2. Find the recurrence, by asking "what's the last decision?"</strong> This is the single most transferable trick in this whole chapter: instead of trying to see the whole solution at once, ask what choice was made <em>last</em> — was the last item taken or skipped? Was the last character matched or not? Answering that one question honestly usually reveals exactly how dp[i] relates to smaller states.<br><br>
+            <strong>3. Identify the base case(s).</strong> The smallest state(s) that can be answered directly, no delegation — exactly Chapter 7.2's base-case discipline, applied here.<br><br>
+            <strong>4. Decide the fill order (if bottom-up), or trust the cache (if top-down).</strong> Make sure every state a given cell depends on has already been computed by the time you need it.</p>
+          </div>
+
+          <p>The rest of this chapter is really this same four-question process, applied to five classic problems — worth reading each one specifically watching for how the four questions get answered, not just memorizing the final recurrence.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.4</span>0/1 Knapsack — the backpack that won't reuse an item</h2>
+          <p class="section-sub">The "last decision" question, applied for the first time</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-analogy">
+            <span class="label">🎒 THE PACKING-FOR-A-TRIP ANALOGY</span>
+            <p>You're packing a bag with a strict weight limit, choosing from a set of items each with its own weight and value, wanting to maximize total value without exceeding the limit — and crucially, each item exists in only one copy, so once packed, it can't be packed again. Standing at the very last item on your list, deciding whether to include it, you have exactly two options: leave it out entirely (your total value is whatever the best you could do with everything else and the full weight limit still available), or take it (your total value is this item's value, plus the best you could do with everything else and the weight limit reduced by this item's weight).</p>
+          </div>
+
+          <p><strong>State:</strong> dp[i][w] = the maximum value achievable using only the first i items, with total weight capacity w. <strong>Recurrence (the "last decision" question, applied):</strong></p>
+
+          <div class="derivation">dp[i][w] = max(
+&nbsp;&nbsp;dp[i-1][w],                                    <span class="step">// leave item i out</span>
+&nbsp;&nbsp;dp[i-1][w - weight[i]] + value[i]              <span class="step">// take item i (only valid if weight[i] ≤ w)</span>
+)</div>
+
+          <p><strong>Base case:</strong> dp[0][w] = 0 for all w — zero items considered means zero value, regardless of available capacity.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY ITERATING WEIGHT IN REVERSE MATTERS WHEN COLLAPSING TO 1D</span>
+            <p>The 2D table can be collapsed to a single 1D array (since dp[i][...] only ever depends on dp[i-1][...], the immediately previous row) — but this collapse has a genuine trap worth understanding, not just memorizing as a rule. If you update the 1D array by iterating weight from low to high, then by the time you compute dp[w] for a middling weight, dp[w - weight[i]] might have <em>already been updated</em> during this same pass for item i — meaning you'd accidentally be allowed to use item i twice within a single "row," turning 0/1 knapsack into unbounded knapsack (Chapter 6's counting-sort-style "reuse allowed" story) by mistake. Iterating weight from <em>high to low</em> instead guarantees every value you read during item i's update still reflects the state from <em>before</em> item i was considered at all — preserving the "each item used at most once" rule the problem actually requires.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.5</span>Longest Common Subsequence</h2>
+          <p class="section-sub">Proving the recurrence, not just stating it</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Given two strings, find the length of the longest subsequence (not necessarily contiguous, but order-preserving) common to both — "ABCBDAB" and "BDCABA" share the subsequence "BCBA," for instance.</p>
+
+          <p><strong>State:</strong> dp[i][j] = the length of the longest common subsequence between the first i characters of string 1 and the first j characters of string 2. <strong>The last-decision question:</strong> look at the very last characters, s1[i-1] and s2[j-1] — do they match?</p>
+
+          <div class="derivation">
+<span class="step">if s1[i-1] == s2[j-1]:</span>
+dp[i][j] = dp[i-1][j-1] + 1
+
+<span class="step">else:</span>
+dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY MATCHING CHARACTERS ARE ALWAYS SAFE TO INCLUDE — A GENUINE PROOF, NOT JUST A RULE</span>
+            <p>This deserves an actual justification, in the spirit Chapter 9 and 14 kept insisting on: if s1[i-1] equals s2[j-1], is it always correct to greedily include this matching pair in the LCS, rather than possibly skipping it in favor of some other arrangement? Here's the exchange argument: suppose some optimal LCS exists that does <em>not</em> use this specific matching pair. That LCS's own last characters (whatever they happen to be) still had to come from somewhere at or before position i-1 in s1 and j-1 in s2 — but since s1[i-1] and s2[j-1] match each other, you could always swap in <em>this</em> matching pair as the LCS's final character instead, without shortening the LCS at all (you're just substituting one final matching character for another). This means an LCS using this pair is always at least as good as any LCS that doesn't — so greedily taking a matching pair when you find one never costs you anything, which is exactly what licenses the clean <code>dp[i-1][j-1] + 1</code> recurrence.</p>
+          </div>
+
+          <p>When they don't match, neither character can jointly contribute to this position of the LCS, so the best you can do is fall back to the better of "ignore this character of s1" or "ignore this character of s2" — trying both and taking the max, since there's no way to know in advance which one will turn out to matter less without just checking.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.6</span>Edit distance — three honest moves</h2>
+          <p class="section-sub">A direct extension of LCS's thinking, with one more option on the table</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The minimum number of single-character insertions, deletions, or substitutions needed to turn one string into another. This is genuinely LCS's sibling — same "look at the last characters" question, with one extra option available when they don't match.</p>
+
+          <div class="derivation">
+<span class="step">if s1[i-1] == s2[j-1]:</span>
+dp[i][j] = dp[i-1][j-1]              <span class="step">// characters already match, no edit needed here</span>
+
+<span class="step">else:</span>
+dp[i][j] = 1 + min(
+&nbsp;&nbsp;dp[i-1][j],      <span class="step">// delete s1[i-1]</span>
+&nbsp;&nbsp;dp[i][j-1],      <span class="step">// insert s2[j-1]</span>
+&nbsp;&nbsp;dp[i-1][j-1]     <span class="step">// substitute s1[i-1] for s2[j-1]</span>
+)
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY EACH OF THE THREE OPTIONS MAPS TO A SPECIFIC MOVE ON THE STATE GRID</span>
+            <p>This is worth genuinely visualizing as movement through the dp table, not just an arithmetic rule. Moving from dp[i-1][j] to dp[i][j] means "I consumed one more character of s1 without consuming a new character of s2" — exactly what a deletion does. Moving from dp[i][j-1] to dp[i][j] means the opposite — consuming a new s2 character without consuming a new s1 character, exactly an insertion. Moving from dp[i-1][j-1] to dp[i][j] means consuming one character from <em>both</em> strings at once — exactly a substitution (or, in the matching-character case above, a free non-edit). Every arrow into a table cell corresponds to a specific, real edit operation, and the recurrence is just "try all the moves that could have led here, keep whichever was cheapest."</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.7</span>LIS — from O(n²) down to O(n log n)</h2>
+          <p class="section-sub">A genuinely clever optimization worth seeing built up, not dropped in whole</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Longest Increasing Subsequence: given an array, find the length of the longest subsequence where each element is strictly bigger than the one before. The naive DP: dp[i] = length of the longest increasing subsequence <em>ending exactly at</em> index i, computed by checking every earlier index j and extending whichever valid one gives the longest result — an honest O(n²), the familiar triangle-loop shape from Chapter 1.4.</p>
+
+          <p>There's a genuinely different, faster approach worth building intuition for, not just accepting.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🃏 THE PATIENCE-SORTING CARD PILES ANALOGY</span>
+            <p>Imagine dealing cards one at a time, building a row of piles under one strict rule: a card can only be placed on top of a pile whose current top card is bigger than it; if no such pile exists, start a brand new pile to the right of all existing ones. Here's the insight worth sitting with: the <em>number of piles</em> you end up with is exactly the length of the longest increasing subsequence — because every time you're forced to start a new pile, that's genuine proof you've found a value that couldn't extend any existing increasing run, meaning the LIS truly did grow by one. And crucially, placing a card on the leftmost valid pile (the one with the smallest top card that's still bigger than your current card) is always the safest, most flexible choice — it keeps every pile's top card as small as possible, maximizing the chance that future cards will find somewhere to go rather than being forced to start yet another new pile unnecessarily.</p>
+          </div>
+
+          <p>Translated into code: maintain an array <code>tails</code>, where <code>tails[k]</code> is the smallest possible "top card" (ending value) among all increasing subsequences of length k+1 discovered so far. For each new number, use Chapter 5's binary search to find the leftmost pile it can legally sit on (the first tail that's ≥ the current number), and either replace that pile's top card or, if none qualifies, append a brand new pile.</p>
+
+          <pre><code>tails = []
+<span class="kw">for</span> num <span class="kw">in</span> nums:
+    pos = bisect_left(tails, num)   <span class="comment"># Chapter 5's binary search — find leftmost valid pile</span>
+    <span class="kw">if</span> pos == len(tails):
+        tails.append(num)            <span class="comment"># no valid pile — start a new one</span>
+    <span class="kw">else</span>:
+        tails[pos] = num              <span class="comment"># replace this pile's top card with a smaller one</span>
+<span class="comment"># len(tails) is the LIS length</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY BINARY SEARCH IS EVEN VALID HERE — THE PROPERTY THAT MAKES IT WORK</span>
+            <p>Binary search (Chapter 5) requires a monotonic, no-flickering structure to search over — and it's worth confirming <code>tails</code> genuinely has that property, rather than just trusting it does. Every update to <code>tails</code> either extends it by exactly one element (always bigger than the current last element, by definition of needing a new pile) or replaces an existing entry with something <em>smaller</em> than it was — and it's provable, by induction on the update rule itself, that <code>tails</code> stays sorted in increasing order after every single update. That sortedness is exactly the precondition Chapter 5 needs — without it, binary-searching for the right pile wouldn't be valid at all, and this whole optimization would collapse.</p>
+          </div>
+
+          <p>Worth being honest about one subtlety: <code>tails</code> itself, at the end, is generally <em>not</em> an actual valid increasing subsequence from the original array — it's a bookkeeping structure tracking the best possible tail values, and its final <em>length</em> is what's meaningful, not its literal contents.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.8</span>Interval DP and bitmask DP, briefly</h2>
+          <p class="section-sub">Two more shapes worth recognizing, even without full derivation</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <h4>Interval DP</h4>
+          <p>For problems asking about the best way to combine or process a contiguous <em>range</em> — matrix chain multiplication (in what order should you multiply a chain of matrices to minimize total operations), or burst-balloons-style problems (what order should you pop balloons to maximize points) — the state is naturally dp[i][j] = the best answer for the range from i to j, and the last-decision question becomes "what's the last split point k inside this range?" — trying every possible k and combining dp[i][k] with dp[k][j]. This is genuinely the same shape as Chapter 14.8's Floyd-Warshall (trying every possible waypoint), just applied to combining ranges rather than routing through nodes — worth noticing the family resemblance rather than treating them as unrelated tricks.</p>
+
+          <h4>Bitmask DP</h4>
+          <p>For problems where "which specific subset of items has been used so far" matters more than "how many have been used" — the classic example is a small-scale Traveling Salesman Problem, where the state needs to capture exactly <em>which</em> cities have already been visited, not just a count. Chapter 17's bit manipulation becomes directly useful here: represent the visited set as an integer bitmask (bit i set means city i has been visited), giving a state like dp[mask][i] = the minimum cost to have visited exactly the set of cities in <code>mask</code>, currently standing at city i. This state space is exponential (O(2ⁿ · n) states) — but for small n (roughly up to 20), it's a dramatic, genuine improvement over brute-force O(n!) permutation checking, echoing Chapter 7.6's honest distinction between wasteful exponential blowup and an honestly-sized problem: here, the exponential state space really is unavoidable given the "which exact subset" nature of the question, but it's still enormously better than the alternative.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.9</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Writing the recurrence before precisely defining the state</span>
+            <p>Section 15.3's process insists on defining the state in a full, plain-language sentence <em>first</em>, and it's worth taking seriously as a warning: jumping straight to "dp[i][j] = ..." without first pinning down exactly what dp[i][j] <em>means</em> is the single most common way DP solutions go subtly wrong — the recurrence ends up combining values that don't actually represent compatible things, because the underlying definition was never made precise enough to check against.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Forgetting the reverse-iteration trap when space-optimizing 0/1 knapsack</span>
+            <p>Section 15.4's specific warning, worth repeating directly: collapsing the 2D knapsack table to 1D without iterating weight in reverse silently allows items to be reused within the same pass, turning 0/1 knapsack into unbounded knapsack by accident — a bug that produces a plausible-looking, merely-too-high answer rather than a crash, making it genuinely easy to miss without a targeted test case.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Assuming optimal substructure without checking it, following Section 15.1's warning</span>
+            <p>DP's reputation as broadly applicable can tempt people into assuming any problem with "smaller sub-versions of itself" is automatically DP-friendly. Section 15.1's longest-simple-path counterexample is exactly the kind of trap worth remembering — always sanity-check that locally optimal sub-answers genuinely combine into a valid, globally optimal answer, rather than assuming it by default.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Filling a bottom-up table in the wrong order</span>
+            <p>Bottom-up DP requires that every state a given cell depends on has already been computed before that cell is reached — for a 2D table, this often means a specific nested-loop order (rows before columns, or vice versa, depending on the recurrence's actual dependencies) isn't just a style choice, it's a correctness requirement. Filling in the wrong order means reading a cell that hasn't been properly computed yet, silently using a stale default value (often zero) instead of the real answer.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s10">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">15.10</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Why does the longest-simple-path example fail to have optimal substructure, even though it clearly breaks into smaller sub-versions of itself?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Breaking into smaller sub-versions isn't sufficient on its own — optimal substructure specifically requires that combining the optimal answers to those sub-versions produces a valid optimal answer to the whole. Here, the two independently-optimal sub-paths might both pass through the same shared node, and gluing them together would revisit that node, violating the "simple path" rule the original problem actually requires. The pieces are individually optimal but don't combine into a valid overall solution, which is exactly what optimal substructure demands and what's missing here.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — What's the genuine practical reason to prefer bottom-up over top-down beyond personal taste, for large n?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Top-down is still recursion underneath the caching, so it still pays Chapter 8's hidden O(depth) call-stack cost — for large enough n, this can genuinely hit a stack-depth limit and crash. Bottom-up's plain iterative loop never opens that recursive "waiting chain" at all, so it avoids this risk entirely regardless of how large n gets, which is a real, checkable reason to prefer it beyond just stylistic preference.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Using the exchange argument, explain why LCS can safely, greedily include a matching character pair without ever needing to consider skipping it.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Suppose some optimal LCS didn't use this specific matching pair — its own final characters had to come from somewhere at or before this position in both strings, but since these two specific characters match each other, you could always swap them in as the LCS's new final character without shortening the sequence at all. This means an LCS using the matching pair is always at least as good as one that doesn't, so greedily taking the match whenever found never costs anything — it's always a safe, correct choice.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In edit distance, why does moving from dp[i-1][j] to dp[i][j] specifically correspond to a deletion, not an insertion?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Moving from dp[i-1][j] to dp[i][j] means one more character of s1 has been accounted for (i increased) while no new character of s2 has been consumed (j stayed the same) — consuming an extra character of s1 without matching it to anything new in s2 is exactly what happens when you delete that character from s1. The direction of movement on the grid directly encodes which string "used up" a character, which is what ties each grid movement to a specific, real edit operation.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In the LIS patience-sorting trick, why is placing a card on the leftmost valid pile always the safest choice, rather than just any valid pile?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Placing on the leftmost valid pile keeps that pile's top card as small as possible going forward, which maximizes the chance that future cards will find a legal pile to extend rather than being forced to start an unnecessary new one. Choosing a pile with a bigger top card than necessary would "waste" flexibility — a smaller top card can accept strictly more future values than a bigger one can, so always minimizing the top card at every step keeps the structure as accommodating as possible for whatever comes next.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why is it valid to use binary search inside the LIS optimization, given Chapter 5's requirement of a monotonic, no-flickering structure?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The tails array is provably kept sorted in increasing order after every single update — each update either appends a strictly bigger value than everything before it, or replaces an existing entry with something strictly smaller, and it can be shown by induction on this exact update rule that sortedness is preserved throughout. Since Chapter 5's binary search only requires this sortedness (or more generally, a monotonic, non-flickering property) to be valid, and tails genuinely has it, searching it with binary search is legitimate, not just a lucky coincidence.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Every DP problem in this chapter reduces to the same four honest questions from Section 15.3 — what does this state mean, what was the last decision, what's the base case, what order do I need to fill things in. The "trick" was never seeing the whole solution at once; it was learning to ask those four questions patiently, every single time.
+      </div>
+
+      <div class="endnote">
+        Chapter 15 — Dynamic Programming, intuition-first. Ready for Chapter 16 (Greedy Algorithms) whenever you are — it's where the exchange-argument proofs used throughout this chapter and Chapter 14 finally get their own formal treatment.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

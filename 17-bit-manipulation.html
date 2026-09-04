@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 17 — Bit Manipulation | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.bitrow{display:flex; gap:2px; margin:16px 0; font-family:var(--mono); font-size:14px;}
+.bit{width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px;}
+.bit.on{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.bit.hi{background:var(--good-soft); border-color:var(--good); font-weight:700;}
+.bitlabel{font-family:var(--sans); font-size:11px; color:var(--ink-faint); margin-top:-10px; margin-bottom:16px;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Seventeen</div>
+    <div class="toc-title">Bit Manipulation</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">17.1 &nbsp;Numbers as light switches</a></li>
+      <li><a href="#s2" data-target="s2">17.2 &nbsp;n &amp; (n-1) — the domino trick</a></li>
+      <li><a href="#s3" data-target="s3">17.3 &nbsp;n &amp; (-n) — isolating one switch</a></li>
+      <li><a href="#s4" data-target="s4">17.4 &nbsp;XOR — the self-cancelling pair</a></li>
+      <li><a href="#s5" data-target="s5">17.5 &nbsp;Shifting as multiplying, made concrete</a></li>
+      <li><a href="#s6" data-target="s6">17.6 &nbsp;A whole set living inside one integer</a></li>
+      <li><a href="#s7" data-target="s7">17.7 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s8" data-target="s8">17.8 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 16: Greedy Algorithms</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER SEVENTEEN · INTUITION FIRST · A SHORTER ONE</div>
+      <h1>Bit Manipulation</h1>
+      <p>A shorter chapter, deliberately, after two dense ones — but a genuinely useful one. Every "clever trick" here is really just a light-switch-panel picture in disguise, and once you see the panel, the tricks stop feeling like magic incantations to memorize.</p>
+      <div class="meta">Picks up Chapter 15.8's bitmask DP preview and finally explains the mechanics underneath it</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.1</span>Numbers as light switches</h2>
+          <p class="section-sub">The one picture that explains everything else in this chapter</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Every integer your computer works with is, underneath, a row of light switches — each one either on (1) or off (0), and the specific pattern of on/off switches determines the number's value, exactly the same way a row of digits determines a value in ordinary base-10, just with only two possible states per position instead of ten.</p>
+
+          <div class="bitrow">
+            <div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit">0</div>
+          </div>
+          <div class="bitlabel">This switch pattern (010100 read right to left as usual) represents the number 20 — the "on" switches are worth 16 and 4, and 16+4=20.</div>
+
+          <p>Once you hold this picture firmly — a number <em>is</em> a row of switches, not a mysterious abstract quantity — the operations in this chapter stop being arcane incantations and become genuinely readable statements about turning switches on, off, or checking their state, in bulk, all at once, across the entire row in a single instruction.</p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 WHY THIS CHAPTER'S TRICKS ARE WORTH KNOWING AT ALL</span>
+            <p>Because the computer can flip or check every switch in the row <em>simultaneously</em>, in a single operation, bit tricks are often dramatically faster than the equivalent loop-based logic — and, as Chapter 15.8 previewed, an entire row of switches can represent a whole <em>set</em> of up to 32 or 64 items, letting set operations (add, remove, check membership) become single, instant integer operations instead of anything resembling a loop at all.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.2</span>n &amp; (n-1) — the domino trick</h2>
+          <p class="section-sub">Why subtracting 1 has such a specific, useful ripple effect on the switches</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>One of the most quietly useful bit tricks: <code>n & (n-1)</code> always clears the <em>lowest</em> currently-on switch, leaving everything else untouched. Worth actually seeing why, not just memorizing.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎲 THE ODOMETER-DIGIT DOMINO ANALOGY</span>
+            <p>Recall Chapter 1.7's odometer picture: subtracting 1 from a binary number causes a specific, predictable ripple — the lowest "on" switch flips off, and every switch <em>below</em> it (which must all currently be "off," since the lowest on-switch is by definition the lowest one that's set) flips <em>on</em> instead, exactly like an odometer rolling from ...1000 down to ...0111. Everything <em>above</em> that lowest on-switch stays completely untouched by the subtraction.</p>
+          </div>
+
+          <div class="bitrow">
+            <div class="bit">1</div><div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit">0</div><div class="bit">0</div>
+          </div>
+          <div class="bitlabel">n = 001000 (8) — the lowest "on" switch is at position 3</div>
+          <div class="bitrow">
+            <div class="bit">0</div><div class="bit hi">1</div><div class="bit hi">1</div><div class="bit hi">1</div><div class="bit">0</div><div class="bit">0</div>
+          </div>
+          <div class="bitlabel">n-1 = 000111 (7) — the lowest on-switch flipped off, everything below it flipped on</div>
+
+          <p>Now AND these two rows together — remember, AND only keeps a switch "on" in the result if it was on in <em>both</em> inputs. The lowest on-switch of n was off in (n-1), so it's cleared in the result. Everything below that switch was off in n to begin with, so ANDing changes nothing there either. Everything above that switch was identical in both n and (n-1) (the ripple never reached that far), so it's preserved exactly.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THE TWO CLASSIC USES THIS SINGLE FACT UNLOCKS</span>
+            <p>Repeatedly applying <code>n = n & (n-1)</code> in a loop, counting iterations until n reaches zero, counts exactly how many switches were originally on — each application removes precisely one, and only one, on-switch, giving an O(popcount) way to count set bits, genuinely faster than checking every one of the (potentially many more) total bit positions individually. And checking <code>n & (n-1) == 0</code> (for n > 0) is an instant power-of-2 test — a power of 2 has, by definition, exactly one switch on, so clearing "the lowest on switch" clears the <em>only</em> on switch, leaving all zeros; any number with two or more switches on will still have at least one left after clearing just the lowest.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.3</span>n &amp; (-n) — isolating one switch</h2>
+          <p class="section-sub">A close cousin of the last trick, isolating rather than clearing</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A related trick, <code>n & (-n)</code>, isolates the lowest on-switch instead of clearing it — the result is a number with <em>only</em> that one switch on, everything else off. This relies on how negative numbers are actually represented: <strong>two's complement</strong>, defined as "flip every switch, then add 1."</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY "FLIP EVERYTHING, THEN ADD 1" PRODUCES EXACTLY THE RIGHT SHARED BIT</span>
+            <p>Flipping every switch of n turns every originally-off switch on, and every originally-on switch off — including the lowest on-switch, which flips to off. Then adding 1 triggers Section 17.2's ripple exactly at that newly-off lowest position (since everything below it is now all "on," from the flip, and adding 1 to a run of all-1s ripples through exactly that run) — flipping that specific switch back on, and rippling everything below it back off, landing you right back at n's <em>original</em> lowest on-switch position, but now with everything else forced off by the flip that never got touched by this second ripple. The net result: <code>-n</code> shares exactly one "on" switch position with n — the original lowest one — and ANDing the two together isolates exactly that single shared switch.</p>
+          </div>
+
+          <p>This isolation trick shows up in structures like Fenwick trees (Binary Indexed Trees), where the lowest set bit of an index determines exactly which range of elements that index is responsible for summarizing — a genuinely elegant piece of engineering built directly on this exact bit fact, worth knowing exists even without full derivation here.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.4</span>XOR — the self-cancelling pair</h2>
+          <p class="section-sub">The one operation whose "undo yourself" property does real work</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>XOR ("exclusive or") flips a switch if the corresponding input switch is on, and leaves it alone if it's off — check each position, and the output switch is on exactly when the two input switches disagree. The single most useful consequence of this rule: <code>a ^ a = 0</code> (anything XORed with itself perfectly cancels to all switches off), and <code>a ^ 0 = a</code> (XORing with all-off switches changes nothing).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🔦 THE FLASHLIGHT-TOGGLE ANALOGY</span>
+            <p>Imagine a row of flashlights, and pressing a specific flashlight's button always toggles it — on becomes off, off becomes on. If you press the exact same sequence of buttons <em>twice</em>, every flashlight ends up back in its original state, because every toggle gets perfectly undone by its own repeat. XOR-ing a value with itself is exactly this — every switch that "toggled on" during the first pass gets "toggled off" again during the second, landing back at all-off, regardless of what the original pattern was.</p>
+          </div>
+
+          <p>The classic application: given an array where every number appears exactly twice except one number that appears once, find the lone number — in a single pass, XOR every element together.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY XOR-ING THE WHOLE ARRAY TOGETHER LEAVES ONLY THE LONE SURVIVOR</span>
+            <p>XOR is both commutative and associative — the order you XOR things together doesn't matter, only which values are included. So mentally regroup the whole array as pairs of matching duplicates, plus the one lone survivor sitting off to the side. Every matching pair, XORed together, cancels perfectly to zero (Section 17.4's core fact) — and XOR-ing a bunch of zeros together, plus the lone survivor, plus Section 17.4's "XOR with 0 changes nothing" rule, leaves exactly the lone survivor and nothing else. The entire array collapses to a single answer in one O(n) pass, using <strong>O(1) extra space</strong> — no hash map needed to count occurrences, a genuinely meaningful upgrade over the more obvious hash-map-based approach, purely by exploiting this self-cancellation property.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.5</span>Shifting as multiplying, made concrete</h2>
+          <p class="section-sub">Why sliding the switches left or right is exactly multiplication or division by 2</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p><code>n << k</code> shifts every switch k positions to the left (filling the newly-opened low positions with off), and <code>n >> k</code> shifts every switch k positions right. Worth connecting this directly to ordinary base-10 intuition, rather than treating it as a separate rule: shifting every digit of a base-10 number one place to the left — 47 becoming 470 — is exactly multiplying by 10, because each digit's positional value grows by a factor of 10 when it moves one place over. Binary works identically, just with each position worth a power of 2 instead of a power of 10 — shifting every switch one place left doubles every switch's contribution, which is precisely multiplication by 2.</p>
+
+          <div class="bitrow">
+            <div class="bit">0</div><div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit">1</div>
+          </div>
+          <div class="bitlabel">n = 00101 (5)</div>
+          <div class="bitrow">
+            <div class="bit">0</div><div class="bit on">1</div><div class="bit">0</div><div class="bit">1</div><div class="bit">0</div>
+          </div>
+          <div class="bitlabel">n << 1 = 01010 (10) — every switch moved one place left, same pattern, doubled value</div>
+
+          <p>This connects directly back to Chapter 1's O(log n) loop-shape lesson: a loop that shifts a value by one position each iteration is doing the exact same "halving/doubling" thing as any other log n process — shifting is genuinely just multiplication or division by a power of 2, expressed as a switch-sliding operation instead of arithmetic, and it inherits all the same complexity intuition Chapter 1.4's Shape 4 already built.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.6</span>A whole set living inside one integer</h2>
+          <p class="section-sub">The payoff this entire chapter has been building toward</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's where Section 17.1's light-switch picture pays off completely: if you have up to 32 (or 64) small, distinct items, you can represent an entire <em>subset</em> of them as a single integer — switch <code>i</code> being "on" means item <code>i</code> is currently in the set. This is exactly the mechanism Chapter 15.8 gestured toward for bitmask DP, finally made concrete.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎛️ THE CONTROL-PANEL ANALOGY</span>
+            <p>Picture a control panel with one switch per item — item 3's switch on means "item 3 is currently in my selected set." Checking whether item 3 is in the set is just glancing at switch 3. Adding item 3 to the set is flipping switch 3 on. Removing it is flipping switch 3 off. Every one of these operations touches exactly one switch, instantly, without needing to inspect or rebuild anything else on the panel — a dramatic contrast to, say, checking membership in a plain list, which might need to scan every entry.</p>
+          </div>
+
+          <table>
+            <tr><th>Operation</th><th>Bit expression</th><th>Reading it via the switch picture</th></tr>
+            <tr><td>Add item i</td><td><code>mask | (1 << i)</code></td><td>force switch i on, leave everything else as-is</td></tr>
+            <tr><td>Remove item i</td><td><code>mask & ~(1 << i)</code></td><td>force switch i off, leave everything else as-is</td></tr>
+            <tr><td>Check item i</td><td><code>mask & (1 << i)</code></td><td>read whether switch i is currently on</td></tr>
+            <tr><td>Toggle item i</td><td><code>mask ^ (1 << i)</code></td><td>flip switch i, using Section 17.4's XOR toggle behavior</td></tr>
+          </table>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS IS EXACTLY WHAT MADE BITMASK DP PRACTICAL</span>
+            <p>Recall Chapter 15.8's bitmask DP state — <code>dp[mask][i]</code>, representing "having visited exactly this set of cities." Without this chapter's tools, "exactly this set" would need to be represented some other way — perhaps a Python tuple or frozenset used as a dictionary key — genuinely workable, but slower, since comparing and hashing a general set-like structure costs more than comparing two plain integers. Representing the visited-set as a single integer bitmask means every state comparison, every "have I visited this exact combination before" check, is as fast as comparing two ordinary numbers — which is precisely why bitmask DP's O(2ⁿ · n²)-shaped state space, while still exponential, remains genuinely practical for the range of n it's typically used for (roughly up to 20), rather than being needlessly slowed down further by clunky set representations on top of an already-large state space.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.7</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Forgetting the n > 0 guard on the power-of-2 check</span>
+            <p>Section 17.2's <code>n & (n-1) == 0</code> test relies on n having exactly one on-switch — but n = 0 has <em>zero</em> on-switches, and the domino trick applied to 0 still produces 0, satisfying the same check despite 0 not being a power of 2 at all. Always explicitly guard with <code>n > 0</code> alongside this check, or the test will silently misclassify zero.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Assuming right-shift on negative numbers behaves like plain division</span>
+            <p>Section 17.5's "shift is division by 2" intuition is clean for non-negative numbers, but right-shifting a negative number in many languages performs an "arithmetic" shift that preserves the sign, which doesn't always match what plain integer division (which typically rounds toward zero) would give — the two can disagree on negative inputs. Worth explicitly testing shift behavior on negative numbers in whatever language you're using, rather than assuming the positive-number intuition transfers unchanged.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Using XOR to find a lone survivor when the "everyone else appears twice" assumption doesn't actually hold</span>
+            <p>Section 17.4's trick specifically depends on every other value appearing an <em>even</em> number of times (any even count cancels via repeated pairing, not just exactly twice) — if the problem's actual guarantee is different (say, "everyone else appears three times," an odd count), naive XOR-ing the whole array won't isolate the right answer at all, since odd-count values don't fully cancel out. Always confirm the exact repetition guarantee a problem is making before reaching for this specific trick.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Running out of bits for the bitmask when n is too large</span>
+            <p>Section 17.6's bitmask-as-set trick is bounded by how many bits a single integer comfortably holds (32 or 64, depending on context) — attempting to represent a set of, say, 40 items this way in a language or context with fixed-width integers risks silent overflow or truncation. This is exactly why bitmask DP is described as practical "up to roughly n=20" — well within any reasonable integer width, with comfortable room to spare, rather than pushing right up against a hard limit.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">17.8</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the odometer-ripple picture, explain exactly why n & (n-1) clears only the lowest on-switch and nothing else.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Subtracting 1 flips the lowest on-switch off and flips every switch below it on (since they were all off, being below the lowest "on" position) — an odometer-style ripple. Everything above the lowest on-switch is untouched by this ripple, staying identical in both n and n-1. ANDing the two together only keeps switches that were on in both: the lowest switch was on in n but off in n-1, so it's cleared; everything below was off in both, staying off; everything above matched in both, staying exactly as it was.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why does the XOR-based lone-survivor trick work with O(1) extra space, when the "obvious" approach (a hash map counting occurrences) needs O(n) space?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The hash-map approach needs to remember every distinct value's count, which genuinely requires space proportional to the number of distinct values. XOR-ing everything together instead exploits a mathematical cancellation property directly — every matching pair XORs to zero, regardless of which specific value it was, so there's no need to remember or count anything at all. The running XOR total is just a single number, updated in place as you go, with no per-value bookkeeping required.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Why is "shifting is multiplication by a power of 2" a genuine mathematical fact rather than just a coincidental shortcut?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Each switch's position represents a specific power of 2, exactly like each digit's position in base-10 represents a specific power of 10. Moving every switch one place to the left is identical, structurally, to moving every base-10 digit one place to the left (which is multiplication by 10) — each switch's contribution to the total value doubles when it moves one position over, because the next position over is worth exactly twice as much. It's the same positional-value logic underlying ordinary place-value arithmetic, just with base 2 instead of base 10.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Using the control-panel picture, explain why checking set membership via a bitmask is faster than checking membership in a plain list.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Checking a specific switch's state on the control panel is a single, direct glance — no need to inspect any other switch. Checking membership in a plain list, by contrast, generally requires scanning entries one by one until a match is found or the list is exhausted, an O(n) cost in the worst case. The bitmask's structure lets you address exactly the bit you care about directly, the same "address math instead of walking" idea from Chapter 2's parking lot, applied here to set membership instead of array access.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why does bitmask DP's use of integers instead of general set structures matter for practical performance, not just theoretical complexity?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The overall state space (2ⁿ possible subsets) is already exponential regardless of representation — that part doesn't change. But representing each state as a plain integer, rather than a general set-like structure, makes every individual comparison and hash lookup genuinely cheaper (comparing two integers is faster than comparing two general sets), which matters a great deal when that comparison is happening an enormous number of times across the whole exponential state space — the representation choice doesn't change the complexity class, but it meaningfully changes the real, practical constant factor.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why does n & (-n) isolate the same lowest bit that n & (n-1) clears, rather than some other bit?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Two's complement negation (flip every switch, then add 1) causes the "add 1" ripple to flip the newly-off lowest-original-on-switch back on, while the flip step has already forced every other switch to disagree with n's original pattern everywhere else. This means -n agrees with n at exactly one position — the original lowest on-switch — and disagrees everywhere else, so ANDing n and -n together keeps only that one shared position, the exact same lowest on-switch that n & (n-1) was clearing, just isolated here instead of removed.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Every trick in this chapter collapses to the same picture: a number is a row of light switches, and bulk operations on that entire row happen in a single instruction. Once that picture is genuinely internalized, nothing here needs to be memorized as a separate incantation — it can all be re-derived on the spot.
+      </div>
+
+      <div class="endnote">
+        Chapter 17 — Bit Manipulation, intuition-first. Ready for Chapter 18 (Math &amp; Number Theory) whenever you are — the final chapter in this ten-plus-chapter series, closing the loop back to Chapter 1's very first idea: proving why something is true, not just trusting that it is.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

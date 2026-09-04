@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 12 — Heaps / Priority Queues | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.tree-ascii{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.5; margin:18px 0; white-space:pre;}
+
+.heaprow{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.hc{min-width:34px; height:34px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:13px;}
+.hc.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Twelve</div>
+    <div class="toc-title">Heaps / Priority Queues</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">12.1 &nbsp;Always knowing the current champion</a></li>
+      <li><a href="#s2" data-target="s2">12.2 &nbsp;A tree hiding inside an array</a></li>
+      <li><a href="#s3" data-target="s3">12.3 &nbsp;Sift up, sift down — finding your own level</a></li>
+      <li><a href="#s4" data-target="s4">12.4 &nbsp;Why building a heap is O(n), not O(n log n)</a></li>
+      <li><a href="#s5" data-target="s5">12.5 &nbsp;Kth largest — a heap that stays small on purpose</a></li>
+      <li><a href="#s6" data-target="s6">12.6 &nbsp;Two heaps, one running median</a></li>
+      <li><a href="#s7" data-target="s7">12.7 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s8" data-target="s8">12.8 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 11: Binary Search Trees</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER TWELVE · INTUITION FIRST</div>
+      <h1>Heaps / Priority Queues</h1>
+      <p>Chapter 9's min-stack answered "what's the smallest value I've ever pushed" — a fixed, never-changing question. A heap answers a harder, more useful version: "what's the smallest value <em>right now</em>," even as things are constantly added and removed. That upgrade is worth genuinely earning.</p>
+      <div class="meta">Builds directly on Chapter 9.5's min-stack "precompute instead of recompute" idea</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.1</span>Always knowing the current champion</h2>
+          <p class="section-sub">The specific gap a heap is built to fill</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a genuine gap left by everything covered so far. Chapter 9's min-stack could instantly tell you the smallest value ever pushed — but only because it never had to deal with the smallest value being <em>removed</em> except in strict last-in-first-out order. What if you need to repeatedly ask "what's the current minimum," while values are being added and removed in <em>any</em> order, not just LIFO?</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🏆 THE ONGOING TOURNAMENT ANALOGY</span>
+            <p>Imagine running an ongoing contest where new competitors keep entering, and you constantly need to answer "who's currently winning?" — and occasionally, the current winner leaves entirely (they've been "used up" — imagine they get a prize and exit), and someone else needs to be instantly recognized as the new leader. Fully sorting the entire list of competitors every time someone enters or leaves works, but it's needless overkill — you don't actually care about the exact ranking of everyone, you only ever care about who's <em>currently on top</em>. A heap is a structure built specifically to answer "who's on top right now" cheaply, without paying the cost of fully sorting everyone else.</p>
+          </div>
+
+          <p>This is exactly the gap a heap fills: O(1) to peek at the current min (or max), and O(log n) to add a new value or remove the current champion — genuinely useful whenever a problem needs repeated access to an extreme value from a changing set, without needing the full sorted order of everything else.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.2</span>A tree hiding inside an array</h2>
+          <p class="section-sub">Why a heap needs no pointers at all, unlike Chapter 10's trees</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A heap is conceptually a tree — but a very specific, disciplined kind of tree: a <strong>complete</strong> binary tree, meaning every level is completely filled before the next level starts, and the last, possibly-incomplete level fills strictly left to right, with no gaps anywhere.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎭 THE MOVIE-THEATER SEATING ANALOGY</span>
+            <p>Picture a movie theater where seating is enforced strictly row by row, left to right — nobody's allowed to sit in row 3 until row 2 is completely full, and nobody's allowed to leave a gap partway through a row. Because the seating pattern is this rigid and predictable, an usher standing at the door could tell you exactly which seat the 47th person to arrive is sitting in, using nothing but a formula — no need to actually walk the aisles and look. That's precisely the property that lets a heap be stored as a plain array, with no pointers anywhere, unlike Chapter 10's general trees which genuinely needed explicit left/right pointers because their shape could be arbitrary.</p>
+          </div>
+
+          <p>Concretely: for a node sitting at array index <code>i</code>, its children sit at indices <code>2i+1</code> and <code>2i+2</code>, and its parent sits at index <code>(i-1)//2</code> — pure arithmetic, no pointers stored or followed, directly analogous to Chapter 2's parking-lot address math, just with a slightly more elaborate formula because you're navigating a tree shape rather than a flat line.</p>
+
+          <div class="tree-ascii">Array:  [1, 3, 2, 7, 4, 6, 9]
+Index:    0  1  2  3  4  5  6
+
+As a tree:
+              1
+            /   \
+           3     2
+          / \   / \
+         7   4 6   9</div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY "COMPLETE" IS THE SPECIFIC PROPERTY THAT MAKES THIS WORK</span>
+            <p>If gaps were allowed anywhere in the tree's shape, the index arithmetic above would silently break — a node's "true" children might not actually sit at 2i+1 and 2i+2 if some earlier position was left empty. Completeness — no gaps, always filled left to right — is precisely the guarantee that makes the array-index math always correct, which is why heaps enforce it strictly on every insertion and deletion, rather than treating it as a nice-to-have.</p>
+          </div>
+
+          <p>The min-heap property itself — every parent is smaller than (or equal to) both its children — guarantees the single smallest element in the entire structure always sits at index 0, the root, giving that O(1) peek Section 12.1 promised.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.3</span>Sift up, sift down — finding your own level</h2>
+          <p class="section-sub">How a heap stays valid after every single change</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Adding or removing a value risks breaking the min-heap property — the new arrangement might have a parent bigger than its child somewhere. Both insertion and removal fix this the same general way: place the affected value somewhere temporarily, then let it "bubble" toward wherever it actually belongs.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎈 THE HELIUM-BALLOON ANALOGY (INSERTION — SIFT UP)</span>
+            <p>Picture inserting a new value at the very last seat in the theater (to preserve completeness — Section 12.2's rule). If this new value happens to be smaller than its parent (violating min-heap order), imagine it as a helium balloon that's lighter than the seat above it — it naturally floats upward, swapping places with its parent, repeating this check-and-float at each new level, until it finally reaches a parent that's actually smaller than it (or reaches the root). It stops rising the moment it finds a spot where it's no longer "lighter" than what's above it — that's genuinely where it belongs.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> sift_up(heap, i):
+    <span class="kw">while</span> i > 0:
+        parent = (i - 1) // 2
+        <span class="kw">if</span> heap[parent] <= heap[i]:
+            <span class="kw">break</span>              <span class="comment"># balloon has stopped floating — found its level</span>
+        heap[parent], heap[i] = heap[i], heap[parent]
+        i = parent</code></pre>
+
+          <div class="callout callout-analogy">
+            <span class="label">🪨 THE SINKING-STONE ANALOGY (REMOVAL — SIFT DOWN)</span>
+            <p>Removing the root (the current minimum) leaves a hole at the top. The standard fix: move the very <em>last</em> value in the array into that empty root spot (again, preserving completeness), and now imagine this relocated value as a stone dropped into water — too heavy to stay at the top if it's bigger than its children, it sinks downward, swapping with whichever child is smaller (to maintain the heap property at each step), repeating this check-and-sink until it either reaches a level where it's no longer bigger than both children, or it hits the bottom of the tree entirely.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> sift_down(heap, i):
+    n = len(heap)
+    <span class="kw">while</span> <span class="kw">True</span>:
+        left, right = 2*i + 1, 2*i + 2
+        smallest = i
+        <span class="kw">if</span> left < n <span class="kw">and</span> heap[left] < heap[smallest]: smallest = left
+        <span class="kw">if</span> right < n <span class="kw">and</span> heap[right] < heap[smallest]: smallest = right
+        <span class="kw">if</span> smallest == i:
+            <span class="kw">break</span>              <span class="comment"># stone has stopped sinking — found its level</span>
+        heap[i], heap[smallest] = heap[smallest], heap[i]
+        i = smallest</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY BOTH ARE O(log n), NOT JUST "USUALLY FAST"</span>
+            <p>Because the heap is complete (Section 12.2), its height is always genuinely, guaranteedly log n — unlike Chapter 11's plain BST, which could silently degrade to height n. A balloon can float at most "height" levels before hitting the root; a stone can sink at most "height" levels before hitting the bottom. Since that height is unconditionally log n for a complete tree, both operations are unconditionally O(log n) — no adversarial input can make a heap secretly slow the way sorted input could secretly ruin a plain BST.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.4</span>Why building a heap is O(n), not O(n log n)</h2>
+          <p class="section-sub">A genuinely surprising result, worth deriving rather than memorizing</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>If you have n raw, unordered values and want to build a valid heap from them, the naive approach — insert them one at a time, sifting up after each insertion — costs O(log n) per insertion, O(n log n) total. There's a genuinely faster way, and the reason it works is worth deriving slowly, because the result feels counterintuitive at first.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🪨 THE "MOST STONES DON'T HAVE FAR TO SINK" INSIGHT</span>
+            <p>Instead of inserting one at a time, dump all n values into the array in any order (still shaped as a complete tree, just not yet heap-ordered), and then run <code>sift_down</code> starting from the <em>last non-leaf node</em>, working backward toward the root. Here's the insight worth sitting with: in a complete tree, <em>most</em> nodes live near the bottom — roughly half of all nodes are leaves, a quarter are one level up, an eighth two levels up, and so on. A sift-down's cost is proportional to how far a node might need to sink, which is bounded by its <em>height</em> (distance to the bottom), not its depth (distance from the root). Since the overwhelming majority of nodes are already near the bottom, the overwhelming majority of sift-downs are cheap — the "stones" dropped near the bottom barely have anywhere to sink at all.</p>
+          </div>
+
+          <div class="derivation">
+Nodes at height h (roughly): n / 2^(h+1)
+Cost of a sift-down from height h: O(h)
+
+Total work ≈ Σ (n / 2^(h+1)) × h,  summed over all heights h
+
+This sum is a classic one: Σ h / 2^h converges to a small constant (2),
+so the total collapses to O(n) — not O(n log n)
+          </div>
+
+          <p>Compare this directly against inserting one at a time: that approach does its <em>expensive</em> sift-ups (up to O(log n) each) on <em>every single</em> element, including all the ones near the bottom that, in the batch-build approach, barely have to move at all. The batch approach is faster precisely because it exploits the fact that most nodes are near the bottom and lets exactly those nodes do cheap, short sift-downs, rather than paying a uniform O(log n) cost per element regardless of where it ends up.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS RESULT IS WORTH ACTUALLY REMEMBERING, NOT JUST TRUSTING</span>
+            <p>This is a genuinely common "gotcha" fact worth having ready: building a heap from n existing elements is O(n), not O(n log n) — a fact that surprises people who reflexively multiply "n elements" by "O(log n) per operation" without checking whether that per-operation cost is actually uniform across all n operations. It usually isn't, and this is one of the cleanest examples in the whole book of why "n things, each costing O(log n)" doesn't automatically mean O(n log n) — the same lesson, in spirit, as Chapter 4.7's warning about nested loops that don't actually multiply.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.5</span>Kth largest — a heap that stays small on purpose</h2>
+          <p class="section-sub">A slightly counterintuitive trick worth seeing explained, not just applied</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Finding the kth largest element among a huge stream of values, without ever storing the whole stream, uses a trick that looks backward at first glance: maintain a <strong>min-heap</strong> — not a max-heap — of size exactly k.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎟️ THE "ONLY K SEATS AVAILABLE" ANALOGY</span>
+            <p>Imagine a shortlist with room for exactly k people, and you want the shortlist to always contain the k <em>largest</em> values seen so far. As new values arrive: if the shortlist isn't full yet, just add the newcomer. Once it's full, a new value only deserves a spot if it's bigger than the <em>current weakest member</em> of the shortlist — in which case, the weakest member gets bumped out to make room. This means you constantly need instant access to "who's currently the weakest on the shortlist" — which is exactly a <em>minimum</em>, even though the whole goal is tracking the <em>largest</em> values overall. That's why the heap is a min-heap: it's not tracking the biggest values directly, it's tracking who's most at risk of eviction from the group of biggest values.</p>
+          </div>
+
+          <pre><code><span class="kw">import</span> heapq
+heap = []
+<span class="kw">for</span> val <span class="kw">in</span> stream:
+    heapq.heappush(heap, val)
+    <span class="kw">if</span> len(heap) > k:
+        heapq.heappop(heap)   <span class="comment"># evict the current weakest of the top-k</span>
+<span class="comment"># heap[0] is now the kth largest overall</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS KEEPS THE HEAP GENUINELY SMALL, AND WHY THAT MATTERS</span>
+            <p>By construction, the heap never holds more than k elements at any point — every push that would exceed size k is immediately balanced by a pop. This means every operation costs O(log k), not O(log n), regardless of how enormous the overall stream is — a genuinely meaningful saving when k is small relative to the total stream size, and it means you never need to hold the entire stream in memory at once, only the current top-k candidates. This is the same spirit as Chapter 9.7's sliding-window deque: maintaining a small, self-correcting "candidate pool" rather than tracking everything that's ever been seen.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.6</span>Two heaps, one running median</h2>
+          <p class="section-sub">A genuinely elegant combination, worth building up piece by piece</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Finding the median of a constantly growing stream of numbers, with an efficient update after every new arrival, uses a genuinely clever idea: split the data into a "lower half" and an "upper half," and keep instant access to the boundary between them.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">⚖️ THE SEE-SAW OF TWO HEAPS ANALOGY</span>
+            <p>Picture splitting every number seen so far into two groups sitting on either side of a see-saw: everyone in the <em>lower</em> half of all values seen, and everyone in the <em>upper</em> half. The median, by definition, sits exactly at the boundary between these two groups — specifically, it's either the largest member of the lower group, the smallest member of the upper group, or an average of the two (if the counts are even). So you don't need every value sorted — you only ever need instant access to the two people standing closest to the see-saw's pivot point: the <em>biggest</em> of the lower half, and the <em>smallest</em> of the upper half.</p>
+          </div>
+
+          <p>This maps directly onto two heaps: a <strong>max-heap</strong> for the lower half (so its root — the biggest of the lower half — is instantly accessible), and a <strong>min-heap</strong> for the upper half (so its root — the smallest of the upper half — is instantly accessible). The one piece of ongoing maintenance: keep the two heaps' sizes balanced (never differing by more than one), rebalancing with a single value transfer whenever a new insertion tips them too far apart.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS GENUINELY BEATS RE-SORTING ON EVERY INSERTION</span>
+            <p>Every new value costs one O(log n) heap insertion, plus at most one O(log n) rebalancing transfer between the two heaps — and reading the current median afterward is an O(1) peek at one or both roots. Compare this to the naive alternative of re-sorting the entire growing list after every single new arrival, which would cost O(n log n) per insertion — the two-heap trick is a genuine, meaningful upgrade specifically because it never needs the <em>full</em> sorted order, only the exact boundary point where the median sits, echoing the same "you don't need to fully sort everything, just track what actually matters" theme from Section 12.1's ongoing-tournament picture.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.7</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Reaching for a max-heap when a min-heap (or vice versa) is what the logic actually needs</span>
+            <p>Section 12.5's kth-largest trick is the clearest example: it's genuinely counterintuitive that finding the <em>largest</em> values uses a <em>min</em>-heap. Before implementing, explicitly ask what you need instant access to — not "the value I ultimately care about," but "the value that determines who gets evicted or replaced next," which is often the opposite extreme from what the problem is asking for overall.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Assuming heap operations are O(log n) even on an already-built heap of unknown history</span>
+            <p>Section 12.4's O(n) batch-build result only applies to building a heap from scratch, all at once — it does not mean individual insertions into an already-running heap are somehow cheaper than O(log n) each. Mixing these up (assuming ongoing insertions are free just because the initial build was cheap) is an easy, avoidable confusion between two genuinely different operations that happen to share the same underlying sift mechanism.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Forgetting to rebalance the two-heap median structure, or rebalancing incorrectly</span>
+            <p>Section 12.6's median trick only works if the size difference between the two heaps never exceeds one — skipping the rebalancing step, or rebalancing based on the wrong comparison (transferring the wrong element), quietly breaks the guarantee that the median sits exactly at the accessible boundary between the two heaps, producing a plausible-looking but incorrect median.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Using a heap when the full sorted order is actually needed</span>
+            <p>A heap gives cheap access to the current extreme value, but it does <em>not</em> give cheap access to the full sorted order of everything inside it — peeking at index 1 or 2 of a heap's underlying array does not reliably give you the second- or third-smallest element, only the root (index 0) is guaranteed. If a problem genuinely needs the full ranking, not just repeated access to the current extreme, a heap alone isn't the right tool — reach for an actual sort, or extract repeatedly if you specifically need a partial ranking.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">12.8</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the movie-theater seating picture, explain why a heap can be stored as a plain array with no pointers, unlike Chapter 10's general trees.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because a heap enforces completeness — every level fully filled before the next starts, no gaps, filled strictly left to right — the position of any node's children can be computed directly through simple arithmetic (2i+1, 2i+2) rather than needing to be explicitly stored and followed. A general tree has no such shape guarantee, so its structure genuinely has to be recorded via pointers; a heap's rigid, predictable shape makes the position itself carry all the structural information needed.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Using the balloon and stone analogies, explain why sift-up and sift-down are both guaranteed O(log n) for a heap, but the equivalent operations aren't guaranteed O(log n) for a plain BST.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>A balloon can float, or a stone can sink, at most as many levels as the tree's height — and because a heap is always a complete tree (Section 12.2), its height is unconditionally log n, no matter what order values were inserted in. A plain BST has no such shape guarantee at all — Chapter 10.6 showed its height can degrade all the way to n on adversarial or sorted input — so the equivalent "how far might this value need to travel" bound isn't fixed at log n the way it provably is for a heap.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Why does building a heap from n existing elements cost O(n) rather than O(n log n), even though each sift-down is individually O(log n)?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The O(log n) figure is a worst-case bound per sift-down, but it's not a uniform cost across all n elements — most nodes in a complete tree live near the bottom, where a sift-down has very little distance left to travel, so most of the n sift-downs are actually very cheap. Summing the actual (height-dependent, not uniform log n) cost across all nodes gives a series that converges to O(n), not n times the worst-case O(log n) — the naive multiplication overcounts by assuming every element pays the maximum possible cost, when in reality the vast majority pay far less.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In the kth-largest-in-a-stream trick, why does the heap need to track the weakest member of the top-k, rather than directly tracking the largest values seen?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The shortlist's job is deciding who gets evicted when a new, bigger value arrives and the list is already full — and the one who should be evicted is always the current weakest member of the shortlist, not the strongest. So the operation that actually needs to be cheap and instant is "find the minimum of the current top-k," which is exactly what a min-heap provides — even though the overall goal is tracking the largest values, the specific comparison driving every update is a minimum-finding operation.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In the two-heap median trick, why does the median always sit at the boundary between the max-heap and min-heap's roots?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>By construction, every value in the max-heap (the "lower half") is smaller than or equal to every value in the min-heap (the "upper half"), and the two groups are kept balanced in size. The median of the full combined set, by definition, is exactly at the point separating the smaller half from the larger half of all values — which is precisely the max-heap's biggest value and the min-heap's smallest value, the two elements sitting right at that dividing line, both instantly accessible as heap roots.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why can't you reliably get the second-smallest element of a min-heap by just looking at index 1 of its underlying array?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The heap property only guarantees that a parent is smaller than both its children — it says nothing about the relative order between the two children themselves, or between a node and its sibling subtrees elsewhere in the tree. Index 1 is guaranteed to be at least as big as the root, but there's no guarantee it's smaller than index 2, or smaller than any deeper node — the heap simply doesn't carry enough ordering information to answer "who's second" without actually popping the root and letting the structure resettle.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        A heap is what happens when you take Chapter 9's "precompute the answer instead of recomputing it" idea and give it just enough structure — completeness, and one ordering rule between parent and child — to stay valid through constant change, without ever paying the cost of fully sorting everything else.
+      </div>
+
+      <div class="endnote">
+        Chapter 12 — Heaps / Priority Queues, intuition-first. Ready for Chapter 13 (Tries) whenever you are — it picks up Chapter 2's "the value tells you its own address" idea and applies it to prefixes instead of single values.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

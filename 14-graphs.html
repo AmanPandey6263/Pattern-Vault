@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 14 — Graphs | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:25px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+.tree-ascii{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.5; margin:18px 0; white-space:pre;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Fourteen</div>
+    <div class="toc-title">Graphs</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">14.1 &nbsp;The friendship-map picture</a></li>
+      <li><a href="#s2" data-target="s2">14.2 &nbsp;Go deep first, or go wide first</a></li>
+      <li><a href="#s3" data-target="s3">14.3 &nbsp;Why BFS guarantees the shortest hop-count</a></li>
+      <li><a href="#s4" data-target="s4">14.4 &nbsp;Cycle detection — two genuinely different questions</a></li>
+      <li><a href="#s5" data-target="s5">14.5 &nbsp;Topological sort — the prerequisite chart</a></li>
+      <li><a href="#s6" data-target="s6">14.6 &nbsp;Dijkstra — the spreading ink stain</a></li>
+      <li><a href="#s7" data-target="s7">14.7 &nbsp;Bellman-Ford — patient, honest relaxation</a></li>
+      <li><a href="#s8" data-target="s8">14.8 &nbsp;Floyd-Warshall — trying every waypoint</a></li>
+      <li><a href="#s9" data-target="s9">14.9 &nbsp;Minimum spanning trees — the cheapest bridges</a></li>
+      <li><a href="#s10" data-target="s10">14.10 &nbsp;Union-Find — the conga line</a></li>
+      <li><a href="#s11" data-target="s11">14.11 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s12" data-target="s12">14.12 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 13: Tries</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER FOURTEEN · INTUITION FIRST · THE BIG ONE</div>
+      <h1>Graphs</h1>
+      <p>Almost every idea in this book so far shows up again here, recombined: Chapter 9's stack-versus-queue becomes DFS-versus-BFS, Chapter 6's greedy-safety question resurfaces in Dijkstra, Chapter 15's dynamic programming sneaks into Floyd-Warshall before you've even reached that chapter. Graphs are less a new topic than a place where everything else finally meets.</p>
+      <div class="meta">The longest chapter in this book — worth reading in two sittings if needed</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.1</span>The friendship-map picture</h2>
+          <p class="section-sub">What a graph actually is, and how to store one</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 10's trees had one strict rule: every node has exactly one parent, no cycles. A graph drops that restriction entirely — any node can connect to any other node, in any pattern, with cycles allowed and no single "root" required at all. The simplest mental picture: a social network, where nodes are people and edges are friendships. Nothing says a friendship graph has to be hierarchical — your friend's friend can also be your own direct friend, forming a loop, and there's no natural "top" of the whole structure.</p>
+
+          <p>Edges can be <strong>directed</strong> (a one-way "follows" relationship, like on social media) or <strong>undirected</strong> (a mutual "friends" relationship), and can carry <strong>weights</strong> (a cost, distance, or strength associated with the connection) or not. These distinctions matter enormously for which algorithm applies — much of this chapter is organized around exactly these axes.</p>
+
+          <table>
+            <tr><th>Representation</th><th>Space</th><th>"Are u,v connected?"</th><th>"List u's neighbors"</th><th>Best for</th></tr>
+            <tr><td>Adjacency matrix</td><td>O(V²)</td><td>O(1)</td><td>O(V)</td><td>dense graphs, frequent edge checks</td></tr>
+            <tr><td>Adjacency list</td><td>O(V+E)</td><td>O(degree)</td><td>O(degree)</td><td>sparse graphs — the default choice</td></tr>
+          </table>
+
+          <div class="callout callout-why">
+            <span class="label">💡 WHY ADJACENCY LIST IS THE DEFAULT, NOT THE MATRIX</span>
+            <p>Most real-world graphs are <strong>sparse</strong> — a social network with a million users doesn't have anywhere close to a million-squared friendships; most people know a tiny fraction of everyone else. An adjacency matrix would allocate space for every possible pair regardless, the overwhelming majority of it wasted on "no edge here" entries — genuinely the same wasted-space problem Chapter 12.7 flagged for tries when data doesn't share much structure. An adjacency list only stores edges that actually exist, which is why O(V+E) — not O(V²) — is the realistic cost for the graphs you'll actually encounter, and exactly why Chapter 6.4's honest habit of asking "what does my actual data look like" applies here too.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.2</span>Go deep first, or go wide first</h2>
+          <p class="section-sub">Chapter 9's stack-versus-queue distinction, finally given its biggest stage</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The two fundamental ways to explore a graph are exactly Chapter 9's two structures, applied to exploration order instead of raw storage.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🌀 THE MAZE-EXPLORER, TWO DIFFERENT STYLES</span>
+            <p><strong>DFS</strong> (depth-first search) is Chapter 7's maze-with-a-pencil, precisely: commit to a direction, walk as far as that path allows, and only backtrack once you genuinely hit a dead end — using a stack (explicit, or implicitly via recursion's own call stack) to remember where to backtrack to. <strong>BFS</strong> (breadth-first search) is a completely different exploration style: imagine a search party spreading out from a starting point in expanding rings, fully exploring every location exactly one step away before advancing to anything two steps away — using a queue to guarantee this strict distance-by-distance ordering, since a queue only ever releases things in the order they arrived, which here means strictly in order of discovery distance.</p>
+          </div>
+
+          <pre><code><span class="comment"># DFS — stack (or recursion)</span>
+<span class="kw">def</span> dfs(start):
+    visited = {start}
+    stack = [start]
+    <span class="kw">while</span> stack:
+        node = stack.pop()
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> visited:
+                visited.add(neighbor)
+                stack.append(neighbor)
+
+<span class="comment"># BFS — queue</span>
+<span class="kw">def</span> bfs(start):
+    visited = {start}
+    queue = deque([start])
+    <span class="kw">while</span> queue:
+        node = queue.popleft()
+        <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> visited:
+                visited.add(neighbor)
+                queue.append(neighbor)</code></pre>
+
+          <p>Both are O(V+E) — every vertex is visited once, and every edge is examined once (from whichever side reaches it first) — a direct echo of Chapter 9.1 and 9.2's picture of two structures sharing a common shape, differing only in one flipped ordering rule, with genuinely different consequences flowing from that single flip.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.3</span>Why BFS guarantees the shortest hop-count</h2>
+          <p class="section-sub">Not a coincidence — a direct consequence of the queue's ordering rule</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a fact worth actually proving, not just accepting: in an unweighted graph, the very first time BFS reaches a node, it has necessarily done so via the shortest possible path (fewest edges) to that node. Why is this guaranteed, and not just usually true?</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THE PROOF, BUILT FROM THE RING-EXPANDING PICTURE</span>
+            <p>BFS's queue enforces that every node at distance 1 from the start is fully discovered and processed before <em>any</em> node at distance 2 is even looked at, which is fully discovered before any node at distance 3, and so on — a direct, mechanical consequence of a queue only ever releasing what's been waiting longest. So by the time BFS ever gets around to discovering a node at distance k for the very first time, it has already, by construction, exhausted every possible path of length less than k. There is no way a shorter path could have been "missed" — the ring-by-ring discipline the queue enforces guarantees every shorter possibility was already checked and ruled out before this node was ever reached at all.</p>
+          </div>
+
+          <p>This is exactly why BFS, not DFS, is the standard tool for shortest-path questions on unweighted graphs — DFS's "commit to one direction and go deep" strategy offers no such distance guarantee at all; it might stumble onto a hugely roundabout path to a node long before ever trying the genuinely short, direct path.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.4</span>Cycle detection — two genuinely different questions</h2>
+          <p class="section-sub">Why "directed" and "undirected" need different logic, not just a tweak</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Detecting a cycle sounds like one problem, but directed and undirected graphs need genuinely different reasoning — conflating them is a common, subtle source of bugs.</p>
+
+          <p><strong>Undirected:</strong> during a DFS, if you reach a node that's already visited and it <em>isn't</em> the node you just came from, you've found a cycle — walking back to your immediate parent is normal and expected (that's just the edge you arrived by, seen from the other side), not evidence of looping.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🧭 THE "AM I STILL ON MY OWN CURRENT PATH" QUESTION (DIRECTED)</span>
+            <p>Directed graphs need a subtler check. Picture DFS as one person walking a single trail, occasionally sending scouts down side trails, each scout reporting back before the main walker continues. A directed cycle means the current trail eventually loops back on <em>itself</em> — not that two <em>different</em>, unrelated scouts happened to both visit the same location, which is completely normal and harmless (many paths in a directed graph can converge on the same node without any cycle existing at all). The distinction that matters: is this "already visited" node still <strong>currently open on the path I'm actively walking right now</strong>, or was it visited and fully closed out by some earlier, now-finished scouting trip?</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> has_cycle_directed(node, visiting, visited):
+    visiting.add(node)              <span class="comment"># mark: currently on MY active path</span>
+    <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+        <span class="kw">if</span> neighbor <span class="kw">in</span> visiting:
+            <span class="kw">return</span> <span class="kw">True</span>            <span class="comment"># looped back onto my own current path — real cycle</span>
+        <span class="kw">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> visited <span class="kw">and</span> has_cycle_directed(neighbor, visiting, visited):
+            <span class="kw">return</span> <span class="kw">True</span>
+    visiting.remove(node)           <span class="comment"># done with this node's path — no longer "currently open"</span>
+    visited.add(node)               <span class="comment"># permanently done, safe to revisit from elsewhere</span>
+    <span class="kw">return</span> <span class="kw">False</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY TWO SEPARATE SETS ARE NECESSARY, NOT REDUNDANT</span>
+            <p>This needs two genuinely different bookkeeping sets, not one — <code>visiting</code> (currently open, on the live path) and <code>visited</code> (permanently finished, safe to encounter again from any other direction). A single "have I seen this before" set, as sufficed for the undirected case, cannot distinguish "this node is part of my current active trail" from "this node was visited ages ago via a completely different, already-finished branch" — and that distinction is precisely what separates a genuine cycle from harmless convergence in a directed graph.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.5</span>Topological sort — the prerequisite chart</h2>
+          <p class="section-sub">Ordering tasks so nothing is scheduled before its dependencies</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Given a directed graph with no cycles (a DAG), a topological sort produces a linear ordering where every edge u→v places u before v — the natural picture is a university course catalog, where an edge "Calc I → Calc II" means Calc I must be scheduled before Calc II.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎓 TWO GENUINELY DIFFERENT WAYS TO BUILD THE SCHEDULE</span>
+            <p><strong>Kahn's algorithm (BFS-flavored):</strong> start by scheduling every course that has zero prerequisites — nothing is blocking them, so they're immediately safe to take. Once "taken," remove them from consideration, which might free up other courses whose only remaining prerequisite was exactly the one just completed. Repeat: schedule whatever's newly unblocked, remove it, repeat. <strong>DFS-flavored:</strong> fully explore each course's entire prerequisite chain first — you can't truly finish "Calc II" as a concept until you've fully traced out everything Calc II itself depends on — and only mark a course as "finished" (pushing it onto a result stack) once every one of its own dependencies has already been fully finished first. Reversing that finish-order stack at the end gives the valid schedule.</p>
+          </div>
+
+          <pre><code><span class="comment"># Kahn's algorithm</span>
+in_degree = compute_in_degrees(graph)
+queue = deque([n <span class="kw">for</span> n <span class="kw">in</span> graph <span class="kw">if</span> in_degree[n] == 0])
+order = []
+<span class="kw">while</span> queue:
+    node = queue.popleft()
+    order.append(node)
+    <span class="kw">for</span> neighbor <span class="kw">in</span> graph[node]:
+        in_degree[neighbor] -= 1
+        <span class="kw">if</span> in_degree[neighbor] == 0:
+            queue.append(neighbor)
+<span class="comment"># if len(order) < total nodes, a cycle exists — some courses could never unblock</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY KAHN'S ALGORITHM ALSO DETECTS CYCLES, ESSENTIALLY FOR FREE</span>
+            <p>If a cycle exists somewhere in the graph, every course caught inside that cycle permanently depends, transitively, on another course that's also stuck inside the same cycle — none of them can ever reach an in-degree of zero, because completing any one of them requires completing another one first, in an unbreakable loop. This means the queue will run dry before every node has been scheduled — comparing the final order's length against the total node count is a direct, nearly-free byproduct check for exactly the kind of impossible, circular-dependency situation Section 14.4 was built to detect.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.6</span>Dijkstra — the spreading ink stain</h2>
+          <p class="section-sub">Shortest paths with weights, and exactly where the greedy trust comes from</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>BFS finds shortest paths by hop-count, assuming every edge costs the same. Dijkstra's algorithm generalizes this to weighted edges (non-negative weights only — the reason why is the whole point of this section), always expanding toward whichever unvisited node is currently <em>cheapest</em> to reach, using Chapter 12's heap for O(1) access to that current cheapest candidate.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🖋️ THE SPREADING-INK-STAIN ANALOGY</span>
+            <p>Picture dropping ink onto the starting node and watching it spread outward through the graph's edges, where thicker (more expensive) edges let ink through more slowly than thin (cheap) ones. At any given moment, the very edge of the spreading stain represents the current frontier — and the point on that frontier the ink reaches <em>next</em> is, quite literally, whichever unstained node is currently closest (by total ink-travel cost) to the source. Dijkstra's algorithm just formalizes this: always expand to whichever unvisited node currently has the smallest known total distance from the start.</p>
+          </div>
+
+          <pre><code>dist = {start: 0}
+pq = [(0, start)]         <span class="comment"># min-heap: (distance, node) — Chapter 12.5's pattern</span>
+<span class="kw">while</span> pq:
+    d, node = heapq.heappop(pq)
+    <span class="kw">if</span> d > dist.get(node, float(<span style="color:#e2b872">'inf'</span>)):
+        <span class="kw">continue</span>              <span class="comment"># a cheaper route was already found — this entry is stale</span>
+    <span class="kw">for</span> neighbor, weight <span class="kw">in</span> graph[node]:
+        new_dist = d + weight
+        <span class="kw">if</span> new_dist < dist.get(neighbor, float(<span style="color:#e2b872">'inf'</span>)):
+            dist[neighbor] = new_dist
+            heapq.heappush(pq, (new_dist, neighbor))</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS GREEDY EXPANSION IS PROVABLY SAFE — AND EXACTLY WHERE THAT SAFETY DEPENDS ON NON-NEGATIVE WEIGHTS</span>
+            <p>This is worth genuinely proving, echoing Chapter 16's upcoming theme of never trusting a greedy step without justification. When Dijkstra pops the current minimum-distance node off the heap, is it safe to consider that distance <em>final</em>, never to be improved later? Yes — <em>provided all weights are non-negative</em> — because any alternative path to that node would have to pass through some other, currently-unvisited node, and every unvisited node, by definition, already has a known distance <em>at least</em> as large as the one just popped (that's exactly why it wasn't popped first). Adding a non-negative edge weight on top of an already-at-least-as-large distance can only produce a total that's at least as large again — it can never sneak in below the distance already finalized. This chain of reasoning collapses instantly the moment negative weights are allowed: a currently-unvisited, seemingly-farther node could hide a large negative edge somewhere just past it, capable of producing a genuinely shorter total route that the greedy "finalize the current minimum" rule would have already locked out and never revisited. That single broken assumption is the entire reason Dijkstra requires non-negative weights, precisely and only.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.7</span>Bellman-Ford — patient, honest relaxation</h2>
+          <p class="section-sub">Giving up Dijkstra's speed to genuinely handle negative weights</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Bellman-Ford solves the exact problem Dijkstra can't: shortest paths when negative edge weights are allowed. Its core operation, "relaxation," is simple: for every edge u→v, check whether going through u offers a shorter route to v than whatever's currently known, and update if so.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🐢 THE "NEVER TRUST A DISTANCE UNTIL YOU'VE DOUBLE-CHECKED EVERYONE" ANALOGY</span>
+            <p>Where Dijkstra confidently declares a distance "final" the moment it's popped (a trust that Section 14.6 showed only holds for non-negative weights), Bellman-Ford refuses to trust anything as final until it has patiently rechecked <em>every single edge</em>, repeatedly, for long enough that no possible improvement could still be lurking somewhere unexamined. Specifically: any genuine shortest path in a graph with V vertices can use at most V-1 edges (a path revisiting a vertex would just be wasting steps, since you could always cut the loop out and get a shorter or equal path instead) — so relaxing every edge in the graph, V-1 times over, is provably enough rounds to guarantee every shortest path has been fully "discovered," however many edges it happens to use, up to that maximum.</p>
+          </div>
+
+          <pre><code>dist = {node: float(<span style="color:#e2b872">'inf'</span>) <span class="kw">for</span> node <span class="kw">in</span> graph}
+dist[start] = 0
+<span class="kw">for</span> _ <span class="kw">in</span> range(len(graph) - 1):        <span class="comment"># V-1 rounds — provably sufficient</span>
+    <span class="kw">for</span> u, v, weight <span class="kw">in</span> all_edges:
+        <span class="kw">if</span> dist[u] + weight < dist[v]:
+            dist[v] = dist[u] + weight
+
+<span class="comment"># One MORE round — if anything still improves, a negative cycle exists</span>
+<span class="kw">for</span> u, v, weight <span class="kw">in</span> all_edges:
+    <span class="kw">if</span> dist[u] + weight < dist[v]:
+        <span class="kw">print</span>(<span style="color:#e2b872">"negative cycle detected"</span>)</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY A VALID DISTANCE THAT STILL IMPROVES ON ROUND V MEANS A NEGATIVE CYCLE, SPECIFICALLY</span>
+            <p>If V-1 rounds are provably enough to discover every genuine shortest path (since none can use more than V-1 edges), then any further improvement on an honest, extra Vth round can't be explained by a legitimately longer shortest path — there isn't one. The only remaining explanation is that some cycle in the graph has a net-negative total weight, meaning you could walk around that cycle infinitely, shaving a little more off the total distance every single lap, so no finite "shortest path" genuinely exists at all for nodes reachable through it. This is exactly why Bellman-Ford trades away Dijkstra's speed (O((V+E) log V) versus O(VE)) for something Dijkstra structurally cannot offer: a correctness guarantee even with negative weights, plus this clean, built-in negative-cycle detector.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.8</span>Floyd-Warshall — trying every waypoint</h2>
+          <p class="section-sub">All shortest paths at once, via a genuinely clean recursive idea</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Dijkstra and Bellman-Ford both find shortest paths from a single source. Floyd-Warshall answers a bigger question at once: shortest paths between <em>every</em> pair of nodes, simultaneously, using an idea that's genuinely a preview of Chapter 15's dynamic programming, worth flagging explicitly since you haven't formally met DP yet.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🛣️ THE "IS THERE A USEFUL DETOUR THROUGH HERE" QUESTION</span>
+            <p>The core idea: consider allowing paths to route through intermediate nodes, one at a time, in some fixed order — node 1 first, then node 2, then node 3, and so on. At each step, for every pair of nodes (i, j), ask one simple question: "would detouring through this newly-allowed waypoint k actually shorten the current best-known route from i to j?" If <code>dist[i][k] + dist[k][j]</code> beats the currently recorded <code>dist[i][j]</code>, update it — you've just found a genuinely useful shortcut through k. Do this for every pair, for every waypoint, one waypoint fully processed before moving to the next.</p>
+          </div>
+
+          <pre><code>dist = build_initial_distance_matrix(graph)   <span class="comment"># direct edges only, infinity elsewhere</span>
+<span class="kw">for</span> k <span class="kw">in</span> range(n):              <span class="comment"># the waypoint being newly allowed</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+        <span class="kw">for</span> j <span class="kw">in</span> range(n):
+            <span class="kw">if</span> dist[i][k] + dist[k][j] < dist[i][j]:
+                dist[i][j] = dist[i][k] + dist[k][j]</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY PROCESSING WAYPOINTS ONE AT A TIME, IN ORDER, IS WHAT MAKES THIS CORRECT</span>
+            <p>The subtle but crucial guarantee: by the time waypoint k is being considered, <code>dist[i][k]</code> and <code>dist[k][j]</code> already correctly reflect the shortest routes using <em>only</em> waypoints 1 through k-1 — so allowing k as a new option and checking whether it improves things is genuinely evaluating "is k, specifically, a useful new addition," never accidentally double-counting a route that already uses k internally in some other, not-yet-fully-processed way. This one-waypoint-at-a-time discipline, echoing Chapter 7's leap of faith (trust that everything processed so far is already correct, then extend it by exactly one new consideration), is what makes the whole O(V³) result correct rather than merely plausible-looking. O(V³) sounds worse than running Dijkstra from every single node separately (roughly O(V·(V+E)log V)) — but for dense graphs, or when the full all-pairs matrix is genuinely needed rather than just a handful of single-source queries, Floyd-Warshall's simplicity and clean handling of negative (non-cycle) weights make it the practical, honest choice.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.9</span>Minimum spanning trees — the cheapest bridges</h2>
+          <p class="section-sub">Connecting everything as cheaply as possible, two different ways</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Given a set of towns and the costs of building possible roads between them, a Minimum Spanning Tree connects every town using the cheapest possible total road cost, with no redundant loops (a tree, not a general graph — exactly Chapter 10's "no cycles" rule, applied here to a subset of edges chosen from a larger graph).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🌉 TWO HONEST WAYS TO BUILD THE CHEAPEST ROAD NETWORK</span>
+            <p><strong>Kruskal's:</strong> sort every possible road by cost, cheapest first, and greedily build each one — <em>unless</em> it would connect two towns that are already connected through some other combination of roads already built (which would just be a wasteful, redundant loop). <strong>Prim's:</strong> start from a single town and grow one connected network outward, at every step adding whichever cheapest available road connects the current network to some town not yet reached — always growing the same single blob, rather than Kruskal's approach of considering all roads globally regardless of which specific blob they'd join.</p>
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THE GREEDY "CHEAPEST FIRST" CHOICE IS PROVABLY SAFE HERE</span>
+            <p>This deserves the same scrutiny Chapter 16 will insist on for every greedy claim: why does always taking the globally cheapest available edge never backfire? Sketch of the reasoning: consider any valid spanning tree that supposedly doesn't include the single cheapest edge in the whole graph. Adding that cheapest edge into that tree would create exactly one cycle (since a tree plus any one new edge always creates exactly one cycle) — and removing any <em>other</em> edge from that newly-formed cycle instead gives back a valid spanning tree, but one that's now cheaper (or at worst equal), since every other edge in the graph costs at least as much as the cheapest one you just swapped in. This means any spanning tree that skips the cheapest edge can always be improved or matched by one that includes it — so it's never actually a strictly better choice to leave the cheapest edge out, which is exactly the "exchange argument" proof style Chapter 16 formalizes for greedy algorithms generally.</p>
+          </div>
+
+          <p>Kruskal's needs a fast way to check "are these two towns already connected through roads built so far" — which is precisely the job Section 14.10's Union-Find structure is built for, and the two are almost always taught and implemented together for exactly that reason.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s10">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.10</span>Union-Find — the conga line</h2>
+          <p class="section-sub">Answering "are these connected" fast, without ever fully exploring the graph</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Union-Find (Disjoint Set Union) tracks a collection of groups, supporting two operations: <code>find(x)</code> — which group is x currently in — and <code>union(x, y)</code> — merge x's group and y's group into one. It's the structure powering Kruskal's cycle check, and general undirected cycle detection as a clean alternative to Section 14.4's DFS-based approach.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">👥 THE "EVERYONE POINTS TO THEIR GROUP LEADER" ANALOGY</span>
+            <p>Imagine every person in a group ultimately points, possibly through a chain of intermediaries, to a single agreed-upon group leader — <code>find(x)</code> means "follow x's pointer chain until you reach whoever it is that points to themselves," and that person is the leader, representing the whole group's identity. <code>union(x, y)</code> means finding both x's leader and y's leader, then having one leader publicly point to the other, merging the two groups into one under a single leader.</p>
+          </div>
+
+          <p>Done naively, this pointer-chasing can get slow if chains grow long — but two small, genuinely clever optimizations fix that entirely.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 PATH COMPRESSION — THE "TELL EVERYONE THE SHORTCUT" TRICK</span>
+            <p>Every time <code>find(x)</code> walks a long chain to discover the leader, it can, on the way back, make every single node it just passed through point <em>directly</em> to that leader — flattening the chain permanently for every future lookup, instead of leaving the long chain in place to be re-walked every time. This is the exact same amortized spirit as Chapter 8.4's cycle-detection math: pay a little extra work once, and every future operation on that same chain gets cheaper as a direct, lasting result.</p>
+          </div>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 UNION BY RANK — THE "SMALLER GROUP JOINS THE BIGGER ONE" TRICK</span>
+            <p>When merging two groups, always have the <em>smaller</em> (or shorter) group's leader point to the <em>bigger</em> group's leader, never the reverse. Consistently attaching small trees under big ones, rather than risking the opposite, prevents any single chain from ever growing tall in the first place — a direct, structural echo of Chapter 10.6's balance obsession, just enforced through a merging rule instead of rotations.</p>
+          </div>
+
+          <pre><code>parent = {x: x <span class="kw">for</span> x <span class="kw">in</span> nodes}   <span class="comment"># everyone starts as their own leader</span>
+rank = {x: 0 <span class="kw">for</span> x <span class="kw">in</span> nodes}
+
+<span class="kw">def</span> find(x):
+    <span class="kw">if</span> parent[x] != x:
+        parent[x] = find(parent[x])   <span class="comment"># path compression — flatten on the way back</span>
+    <span class="kw">return</span> parent[x]
+
+<span class="kw">def</span> union(x, y):
+    root_x, root_y = find(x), find(y)
+    <span class="kw">if</span> root_x == root_y:
+        <span class="kw">return</span> <span class="kw">False</span>                   <span class="comment"># already connected — this edge would form a cycle</span>
+    <span class="kw">if</span> rank[root_x] < rank[root_y]:
+        root_x, root_y = root_y, root_x
+    parent[root_y] = root_x            <span class="comment"># smaller/shorter tree joins the bigger one</span>
+    <span class="kw">if</span> rank[root_x] == rank[root_y]:
+        rank[root_x] += 1
+    <span class="kw">return</span> <span class="kw">True</span></code></pre>
+
+          <p>Together, these two optimizations give near-constant O(α(n)) amortized cost per operation — the inverse Ackermann function, a quantity that grows so absurdly slowly it's effectively a small constant (under 5) for any n you'll ever encounter in practice, genuinely one of the most efficient amortized results in all of computer science.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s11">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.11</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Running Dijkstra on a graph that might have negative weights</span>
+            <p>Section 14.6's entire proof of safety depended on non-negative weights — running Dijkstra anyway on a graph where negative weights are possible doesn't crash, it just silently produces a wrong, overly-optimistic-looking distance, since the greedy "finalize the current minimum" step is no longer actually justified. Always confirm weights are non-negative before reaching for Dijkstra; if they might not be, Bellman-Ford is the honest choice, even at the cost of speed.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Using a single "visited" set for directed cycle detection</span>
+            <p>Section 14.4's core warning: undirected cycle detection can get away with one set, but directed cycle detection genuinely needs the two-set distinction (currently on my active path, versus permanently finished elsewhere) — using only one set will report false cycles on completely legitimate convergent paths that never actually loop back on themselves.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Forgetting the "stale heap entry" check in Dijkstra</span>
+            <p>Because a node can be pushed onto the priority queue multiple times (once for every time a shorter route to it is discovered), popping an entry doesn't automatically mean it's still the best known distance for that node — some other, cheaper entry for the same node might already have been processed earlier. Skipping the <code>if d > dist.get(node): continue</code> check can lead to reprocessing a node with outdated, no-longer-optimal distance information, corrupting results built from it.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Forgetting union by rank, and getting only half the Union-Find speedup</span>
+            <p>Path compression alone already helps enormously, but skipping union-by-rank (attaching arbitrarily, rather than consistently attaching the smaller tree to the larger one) can still let chains grow taller than necessary in adversarial insertion orders. Both optimizations together, not either alone, are what deliver the near-constant O(α(n)) guarantee.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s12">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">14.12</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the expanding-rings picture, explain why BFS — not DFS — guarantees the shortest hop-count path.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>BFS's queue enforces that every node at distance k is fully processed before any node at distance k+1 is even examined — so the first time any node is ever reached, every shorter possible path to it has already, by construction, been checked and would have reached it first if it existed. DFS commits to one direction and goes deep, with no such distance-ordering guarantee at all — it can easily stumble onto a long, roundabout route to a node long before trying a genuinely short, direct one.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why does directed cycle detection need two separate sets, while undirected cycle detection only needs one?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>In a directed graph, reaching an already-visited node doesn't automatically mean a cycle — it might just be two separate, unrelated paths converging on the same node, which is completely normal. What actually matters is whether that node is still open on the specific path currently being walked, which requires tracking "currently active on my path" separately from "visited at some point, possibly via a different, already-finished branch." Undirected graphs don't have this convergence ambiguity in the same way — any repeated visit that isn't the immediate parent genuinely does indicate a cycle.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — In Dijkstra, why does the greedy "trust the current minimum as final" step break the instant negative weights are allowed?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>The safety argument relies on every unvisited node already having a distance at least as large as the one just finalized, and adding a non-negative weight on top of that can only make things at least as large again — never smaller. A negative edge breaks this completely: a currently-unvisited, seemingly-farther node could hide a large negative edge just beyond it, capable of producing a genuinely shorter total route that the algorithm would have already locked out and never gone back to reconsider.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Why does an improvement on Bellman-Ford's extra, Vth round specifically indicate a negative cycle, rather than just a longer legitimate shortest path?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Any genuine shortest path can use at most V-1 edges (revisiting a vertex would always be wasteful, since the loop could be cut out for an equal-or-shorter path), so V-1 rounds of relaxation are provably enough to discover every legitimate shortest path in the graph. If something still improves on a further, extra round, that improvement can't be explained by a legitimately longer path — the only remaining explanation is a cycle with negative total weight, which could be looped around indefinitely to keep "improving" the distance without limit.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In Floyd-Warshall, why must waypoints be processed one at a time, in a fixed order, rather than all at once?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>By the time waypoint k is being considered, dist[i][k] and dist[k][j] need to already correctly reflect the best routes using only waypoints processed so far (1 through k-1) — this guarantees checking "does k help" is evaluating a genuinely new option, not accidentally relying on some other waypoint that hasn't been fully accounted for yet. Processing them out of order or all simultaneously would risk using partially-updated, not-yet-finalized distances, breaking the correctness of the whole accumulation.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Using the exchange-argument sketch, explain why Kruskal's "always take the cheapest available edge" greedy rule is provably safe.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Take any spanning tree that supposedly skips the single cheapest edge in the graph — adding that edge in creates exactly one cycle, and removing any other edge from that cycle instead restores a valid spanning tree that's now cheaper or equal, since every other edge costs at least as much as the one just swapped in. This means skipping the cheapest edge can never produce a strictly better tree than including it would — so it's always at least as good, and often better, to take the cheapest available edge whenever it doesn't create a cycle.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Graphs aren't really a new set of ideas — they're the reunion where Chapter 9's stack and queue, Chapter 12's heap, and the greedy-safety question first raised back in Chapter 6 all show up to the same problem at once. If those earlier chapters genuinely landed, this one is mostly recognition, not new invention.
+      </div>
+
+      <div class="endnote">
+        Chapter 14 — Graphs, intuition-first. Ready for Chapter 15 (Dynamic Programming) whenever you are — Section 14.8's Floyd-Warshall was already a preview of exactly what's coming.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

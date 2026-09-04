@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 9 — Stacks &amp; Queues | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{min-width:44px; height:38px; padding:0 6px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+.ch.dim{opacity:0.35;}
+
+.stackviz{display:flex; flex-direction:column-reverse; gap:3px; width:120px; margin:20px 0; font-family:var(--mono);}
+.plate{padding:8px; text-align:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.plate.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Nine</div>
+    <div class="toc-title">Stacks &amp; Queues</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">9.1 &nbsp;The cafeteria tray stack</a></li>
+      <li><a href="#s2" data-target="s2">9.2 &nbsp;The ticket-counter line</a></li>
+      <li><a href="#s3" data-target="s3">9.3 &nbsp;Why nesting specifically needs a stack</a></li>
+      <li><a href="#s4" data-target="s4">9.4 &nbsp;The monotonic stack, built from scratch</a></li>
+      <li><a href="#s5" data-target="s5">9.5 &nbsp;The min-stack — remembering without recomputing</a></li>
+      <li><a href="#s6" data-target="s6">9.6 &nbsp;Building one structure from its opposite</a></li>
+      <li><a href="#s7" data-target="s7">9.7 &nbsp;The deque and sliding window maximum</a></li>
+      <li><a href="#s8" data-target="s8">9.8 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s9" data-target="s9">9.9 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 8: Linked Lists</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER NINE OF TEN · INTUITION FIRST</div>
+      <h1>Stacks &amp; Queues</h1>
+      <p>Two of the simplest structures in this whole book, and also two of the most quietly powerful — because the "order you're allowed to remove things" turns out to be exactly the right lens for an entire family of problems that otherwise look like they need something much more complicated.</p>
+      <div class="meta">Finally gives the monotonic stack idea, teased since Chapter 1, its full treatment</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.1</span>The cafeteria tray stack</h2>
+          <p class="section-sub">What a stack actually enforces, and why that matters</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A stack is one of the simplest ideas in this entire book to state, and one of the most surprisingly deep to actually use well. The picture is almost too obvious to need explaining: a stack of cafeteria trays. You can only ever take the tray currently on <em>top</em>, and you can only ever add a new tray to the top too. You physically cannot reach into the middle of the stack and pull out the fifth tray down without first removing everything above it.</p>
+
+          <div class="stackviz">
+            <div class="plate">8</div><div class="plate">3</div><div class="plate hi">19</div>
+          </div>
+          <p style="font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:-10px;">Only the top tray (19) is reachable — push adds here, pop removes here. This is <strong>LIFO</strong>: Last In, First Out.</p>
+
+          <p>This "last in, first out" rule — LIFO — sounds like a limitation, and in one sense it genuinely is: you're giving up the ability to reach arbitrary elements. But the entire value of a stack comes from this exact limitation matching a specific, extremely common real-world pattern: <strong>the most recently opened, most recently started, most recently unresolved thing is exactly the thing that needs to be dealt with next.</strong></p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 WHY THIS PATTERN SHOWS UP EVERYWHERE</span>
+            <p>Think about your own function calls (Chapter 7's leap of faith): when function A calls function B, which calls function C, the computer needs to remember "come back to B once C finishes" and "come back to A once B finishes" — and the natural order to resolve these is exactly LIFO: the <em>most recently</em> started, still-unfinished call is exactly the one that needs to finish <em>next</em>, before anything earlier can continue. This isn't a coincidence — it's precisely why the very memory mechanism used to implement function calls is itself literally called "the call stack," and it's why Chapter 8's "recursion secretly costs memory" story and this chapter's stack picture are, underneath, the exact same structure.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.2</span>The ticket-counter line</h2>
+          <p class="section-sub">The opposite ordering rule, and where it belongs instead</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A queue enforces the exact opposite ordering rule — <strong>first in, first out</strong>, FIFO — and the picture is just as familiar: a line at a ticket counter. The person who's been waiting longest gets served next; new arrivals join at the back, not the front. You can't cut in line, and you can't get served out of turn just because you happened to be standing in a more convenient spot.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🎟️ WHY FIFO MATCHES "FAIRNESS" AND "IN-ORDER PROCESSING"</span>
+            <p>The natural situations where a queue is the right structure are ones where fairness or strict arrival-order genuinely matters: task scheduling (the job that's been waiting longest should generally get processed first), and — very importantly for this book — exploring a graph or tree <em>level by level</em>, where you want to fully finish visiting everything at the current "distance" before moving on to anything farther away. That level-by-level property is exactly what makes a queue the engine behind breadth-first search, which Chapter 14 covers in depth — the queue's FIFO discipline is precisely what guarantees you explore closer things before farther things.</p>
+          </div>
+
+          <p>Worth explicitly contrasting against Section 9.1: a stack is the right tool when "most recent, unresolved" should go next; a queue is the right tool when "longest waiting, oldest unresolved" should go next. Same basic idea — a container with restricted access — with the ordering rule flipped, and that single flip is what determines which real-world situations each one naturally models.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.3</span>Why nesting specifically needs a stack</h2>
+          <p class="section-sub">A worked example that shows the LIFO rule isn't arbitrary here</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>The classic "valid parentheses" problem — checking whether a string like <code>"({[]})"</code> has every bracket properly opened and closed in the right order — is worth walking through slowly, because it's the clearest possible illustration of <em>why</em> LIFO specifically, and not just "some container," is the right fit.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🪆 THE NESTED-DOLLS-OF-BRACKETS ANALOGY</span>
+            <p>Picture nested brackets as nested boxes, one inside another. The very last box you opened has to be the very next one you close — you cannot close an outer box while an inner box is still sitting open inside it; that would leave the inner box permanently sealed inside a closed outer one, with no way to ever get back to it. This is exactly LIFO: the most recently opened bracket is mandatorily the next one that must close, before any earlier-opened bracket can close.</p>
+          </div>
+
+          <p>The algorithm becomes almost embarrassingly direct once you see this: push every opening bracket onto a stack as you encounter it. On every closing bracket, check whether it matches the bracket currently on <em>top</em> of the stack — if it does, pop it (that pair is resolved); if it doesn't, the string is invalid.</p>
+
+          <pre><code>stack = []
+pairs = {<span style="color:#e2b872">')'</span>: <span style="color:#e2b872">'('</span>, <span style="color:#e2b872">']'</span>: <span style="color:#e2b872">'['</span>, <span style="color:#e2b872">'}'</span>: <span style="color:#e2b872">'{'</span>}
+<span class="kw">for</span> ch <span class="kw">in</span> s:
+    <span class="kw">if</span> ch <span class="kw">in</span> <span style="color:#e2b872">"([{"</span>:
+        stack.append(ch)
+    <span class="kw">else</span>:
+        <span class="kw">if</span> <span class="kw">not</span> stack <span class="kw">or</span> stack.pop() != pairs[ch]:
+            <span class="kw">return</span> <span class="kw">False</span>
+<span class="kw">return</span> <span class="kw">not</span> stack   <span class="comment"># nothing left un-closed</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY A QUEUE WOULD GENUINELY BREAK THIS</span>
+            <p>Worth actually trying to imagine the FIFO version, to feel why it's wrong, not just accept that it is: if you used a queue instead of a stack — checking the closing bracket against the <em>oldest</em> still-open bracket rather than the <em>most recent</em> one — then <code>"({[]})"</code> would incorrectly try to match its first <code>]</code> against the outermost <code>(</code>, which is nonsense; the innermost, most-recently-opened bracket is exactly the one that logically must close first, and only LIFO access naturally enforces that. The data structure isn't an arbitrary implementation choice here — it's a direct, necessary match to the actual logical structure (nesting) of the problem being solved.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.4</span>The monotonic stack, built from scratch</h2>
+          <p class="section-sub">The trick teased since Chapter 1, finally earned properly</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a genuinely common problem: given a row of buildings with different heights, for every building, find the <em>next</em> building to its right that's taller. The brute-force approach checks, for every building, every building after it — the familiar O(n²) triangle shape. There's a way to do this in a single O(n) pass, and it's worth building up slowly rather than just handing you the trick.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🏙️ THE SKYLINE-WATCHER ANALOGY</span>
+            <p>Imagine walking down a street of buildings, left to right, keeping a running list of every building you've passed whose "next taller building" question is <em>still unanswered</em>. Here's the key realization: this running list is always, automatically, sorted from tallest (at the bottom, oldest) to shortest (at the top, most recent) — because the moment you encounter a building tall enough to answer an earlier, shorter building's question, that shorter building gets resolved and removed from the list entirely; only buildings that are <em>still taller</em> than everything encountered so far after them remain on the list. This self-maintaining "shortest at the top" order is exactly what "monotonic stack" means — a stack that's kept, by construction, always increasing or always decreasing, never both.</p>
+          </div>
+
+          <pre><code>stack = []   <span class="comment"># holds indices, buildings we haven't resolved yet</span>
+answer = [-1] * len(heights)
+<span class="kw">for</span> i, h <span class="kw">in</span> enumerate(heights):
+    <span class="kw">while</span> stack <span class="kw">and</span> heights[stack[-1]] < h:
+        resolved_index = stack.pop()
+        answer[resolved_index] = i    <span class="comment"># building i is its next-taller answer</span>
+    stack.append(i)</code></pre>
+
+          <p>Trace this on <code>[2, 1, 5, 3, 4]</code> by hand: building 0 (height 2) pushes → stack: [0]. Building 1 (height 1, shorter) can't resolve anything → stack: [0, 1]. Building 2 (height 5) is taller than both buildings on the stack — it resolves building 1 first (answer[1]=2), then resolves building 0 too (answer[0]=2) — then pushes itself → stack: [2]. Building 3 (height 3, shorter than 5) can't resolve anything → stack: [2, 3]. Building 4 (height 4) resolves building 3 (answer[3]=4), but not building 2 (5 > 4, still taller) → stack: [2, 4].</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS IS GENUINELY O(n), PROVEN THE SAME WAY AS CHAPTER 4</span>
+            <p>This has the exact same "while loop inside a for loop" shape that Chapter 4.7 taught you to be suspicious of — and the same resolution applies. Every single building gets pushed onto the stack <em>exactly once</em>, ever, across the entire run. And every building gets popped <em>at most once</em>, ever — once resolved and removed, it never returns to the stack. So the total number of pushes and pops, summed across the <em>entire</em> algorithm, is bounded by 2n, not n² — the inner while loop's total work across the whole run is capped by how many things could ever be popped in total, which is n, exactly the same amortized argument from Chapter 4's sliding window and Chapter 2's cyclic sort. Same proof, new costume.</p>
+          </div>
+
+          <p>This exact pattern — "find the next/previous greater/smaller element" — is one of the highest-value patterns in this entire book to have genuinely internalized, because it quietly powers a surprising number of famous problems once you can recognize the shape: largest rectangle in a histogram, daily temperatures, trapping rain water (one common approach), stock span problems — all of them are this same skyline-watcher idea, wearing a different outfit.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.5</span>The min-stack — remembering without recomputing</h2>
+          <p class="section-sub">A small, clean example of Chapter 2's prefix-sum idea, wearing a stack's clothes</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Design a stack that supports the usual push and pop, but also an O(1) <code>getMin()</code> — instantly telling you the smallest element currently in the stack, at any moment, no matter how many pushes and pops have happened. The naive approach — scanning the whole stack every time <code>getMin()</code> is called — is O(n) per call, and the challenge is getting that down to O(1).</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📋 THE "CARRY THE RUNNING RECORD ALONG WITH YOU" ANALOGY</span>
+            <p>This is genuinely the exact same idea as Chapter 2's prefix sums, just reshaped: instead of recomputing the minimum from scratch every time someone asks, carry along, at every single position in the stack, the answer to "what was the minimum of everything up to and including this point?" — precomputed once, as you go, rather than recomputed on demand.</p>
+          </div>
+
+          <p>Concretely: maintain a second, parallel stack that tracks the running minimum. Every time you push a value onto the main stack, also push the smaller of (this new value, the current running minimum) onto the min-stack. Every time you pop from the main stack, also pop from the min-stack.</p>
+
+          <pre><code>main_stack = []
+min_stack = []
+
+<span class="kw">def</span> push(val):
+    main_stack.append(val)
+    current_min = min(val, min_stack[-1]) <span class="kw">if</span> min_stack <span class="kw">else</span> val
+    min_stack.append(current_min)
+
+<span class="kw">def</span> pop():
+    main_stack.pop()
+    min_stack.pop()
+
+<span class="kw">def</span> get_min():
+    <span class="kw">return</span> min_stack[-1]   <span class="comment"># O(1) — already computed</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY POPPING FROM MIN-STACK IN LOCKSTEP IS SAFE</span>
+            <p>Here's the detail worth actually justifying: when you pop the main stack's top value, is it safe to just blindly pop the min-stack too, without recomputing anything? Yes — because the min-stack's top entry, by construction, was <em>specifically</em> the minimum considering everything up to and including the value you're about to remove. Once that value is gone, the minimum you actually care about going forward is exactly what the min-stack's <em>previous</em> entry already recorded — the minimum up to the point just before the removed value was ever pushed. Nothing needs recomputing because the min-stack was built to already contain the correct answer for every possible "current state" of the main stack, one entry per push, precomputed and carried forward rather than derived on demand.</p>
+          </div>
+
+          <p>The cost of this O(1) <code>getMin()</code> is genuinely honest, not free: O(n) extra space for the parallel min-stack. Exactly Chapter 2's prefix-sum trade-off again — pay with memory, upfront and incrementally, to buy instant answers later, worthwhile specifically because <code>getMin()</code> is expected to be called often.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.6</span>Building one structure from its opposite</h2>
+          <p class="section-sub">A genuinely fun exercise in really understanding what each structure guarantees</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A classic exercise: implement a queue using only two stacks (or a stack using only two queues). This sounds like a strange party trick, but it's actually a great test of whether you genuinely understand LIFO and FIFO, or just their names.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🔄 THE "FLIP THE PILE OVER" ANALOGY</span>
+            <p>Imagine a pile of plates (a stack) that you want to serve people from in FIFO order instead. Here's the trick: if you take the entire pile and flip it upside-down onto a second, empty pile — plate by plate — the plate that used to be at the very <em>bottom</em> of the original pile (the oldest one, the first one ever added) ends up at the very <em>top</em> of the new pile. A stack's "top" is instantly accessible — so the oldest plate, exactly the one FIFO wants served next, is now sitting right where a stack naturally hands things over.</p>
+          </div>
+
+          <pre><code>in_stack = []    <span class="comment"># receives new elements</span>
+out_stack = []   <span class="comment"># serves elements out, in FIFO order</span>
+
+<span class="kw">def</span> enqueue(val):
+    in_stack.append(val)
+
+<span class="kw">def</span> dequeue():
+    <span class="kw">if</span> <span class="kw">not</span> out_stack:
+        <span class="kw">while</span> in_stack:
+            out_stack.append(in_stack.pop())   <span class="comment"># flip the whole pile over</span>
+    <span class="kw">return</span> out_stack.pop()</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY THIS IS STILL AMORTIZED O(1) PER OPERATION, NOT O(n)</span>
+            <p>The "flip the whole pile" step looks expensive — O(n) in the worst case — but notice it only happens when <code>out_stack</code> is completely empty, and crucially, once an element has been flipped into <code>out_stack</code>, it never gets flipped back; it just gets popped off directly on future calls until <code>out_stack</code> empties again. Using the exact same amortized-cost reasoning from Chapter 1.7 and Chapter 4.7: each individual element gets moved from <code>in_stack</code> to <code>out_stack</code> at most once, ever, across its entire lifetime in the structure. Summed over n total operations, the total flipping work across the whole run is bounded by n, giving O(1) amortized cost per operation — genuinely cheap on average, even though any single <code>dequeue()</code> call can occasionally trigger a burst of work.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.7</span>The deque and sliding window maximum</h2>
+          <p class="section-sub">Combining this chapter with Chapter 4, for a genuinely elegant payoff</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>A deque (double-ended queue) allows O(1) push and pop from <em>both</em> ends — neither purely LIFO nor purely FIFO, but flexible at both ends. Its most elegant application: finding the maximum of every fixed-size sliding window (Chapter 4.4's caterpillar) in O(n) total, rather than the naive O(n·k) of recomputing the max for every window position from scratch.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🚶 THE "DON'T BOTHER TALKING TO THE SHORT GUY" ANALOGY</span>
+            <p>Picture a group of people walking in single file, and you want to know, as the group moves, who the tallest person currently within a moving "window" is. Maintain a list of candidates for tallest, kept in decreasing height order from front to back. Here's the trick: whenever a new person joins the back of the window, if they're taller than the person currently at the back of your candidate list, that shorter candidate can never <em>possibly</em> be the answer again — the new, taller person will outlast them in the window and is standing behind them (arrived later), so the shorter one is now permanently irrelevant. Kick them out of your candidate list entirely, and keep checking backward until you hit someone taller (or the list empties). This keeps your candidate list always sorted tallest-to-shortest, front-to-back — and the tallest person in the current window is always sitting right at the front.</p>
+          </div>
+
+          <pre><code>dq = deque()   <span class="comment"># stores indices, front-to-back = tallest-to-shortest</span>
+result = []
+<span class="kw">for</span> i, val <span class="kw">in</span> enumerate(nums):
+    <span class="kw">while</span> dq <span class="kw">and</span> nums[dq[-1]] < val:
+        dq.pop()                 <span class="comment"># the short guy can never win again — evict</span>
+    dq.append(i)
+    <span class="kw">if</span> dq[0] <= i - k:
+        dq.popleft()              <span class="comment"># evict anyone who's aged out of the window</span>
+    <span class="kw">if</span> i >= k - 1:
+        result.append(nums[dq[0]]) <span class="comment"># front of the deque = current window's max</span></code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 THIS IS THE MONOTONIC STACK AGAIN, WITH ONE EXTRA RULE</span>
+            <p>Notice this is genuinely the same skyline-watcher idea from Section 9.4 — evict everything that can never be the answer again — with one addition: elements can now also leave from the <em>front</em>, specifically because they've aged out of the sliding window, a concern the plain monotonic stack never had since it never needed to "forget" anything based on position. The complexity proof is identical in spirit too: every index gets pushed onto the deque exactly once and evicted (from either end) at most once, so total work across the whole run is bounded by 2n — genuinely O(n) for the entire sliding-window-maximum problem, not O(n) per window.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.8</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Reaching for a stack or queue without asking which ordering the problem actually needs</span>
+            <p>Section 9.3 showed nesting problems genuinely need LIFO, and Section 9.2 showed level-by-level or fairness-based problems genuinely need FIFO — but under time pressure, it's easy to grab whichever structure comes to mind first rather than asking "does this problem's logic actually require most-recent-first, or oldest-first?" Getting this backward doesn't crash — it silently produces wrong output, which is a much harder class of bug to catch than an error message.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Popping the min-stack conditionally instead of in lockstep</span>
+            <p>A tempting-looking but wrong "optimization" of the min-stack: only pop the min-stack when the popped main-stack value <em>equals</em> the current minimum, to "save space." This breaks the structure — if a duplicate value that happens to equal the current min gets pushed and later a different, earlier-pushed instance of that same value gets popped from below it, the bookkeeping gets confused about which "layer" of minimum is currently accurate. Always push and pop both stacks together, in strict lockstep, exactly as shown in Section 9.5 — the parallel structure only stays correct if it moves in perfect sync with the main stack, with no exceptions.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Forgetting the deque needs eviction from BOTH ends</span>
+            <p>Section 9.7's sliding-window-maximum deque needs two genuinely separate eviction checks — one for "this element can never be the max again" (evicting from the back, based on value) and one for "this element has aged out of the window" (evicting from the front, based on position). Implementing only one of these two checks produces code that runs without error but silently gives wrong answers, since a stale, out-of-window index left sitting at the front would incorrectly be reported as the current window's maximum.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Assuming a monotonic stack always stores values, never indices</span>
+            <p>Many monotonic stack problems (like Section 9.4's "next taller building") need to report a <em>position</em> (which building, not just what height), which means the stack needs to store indices, not the raw values themselves — you can always look up <code>heights[stack[-1]]</code> when you need the value for comparison. Storing raw values when the answer actually needs positions is an easy, avoidable mismatch that forces awkward workarounds later in the same solution.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s9">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">9.9</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the nested-boxes picture, explain why a queue (FIFO) would genuinely break the valid-parentheses check, not just be "a different but equally valid" approach.</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>A queue would match closing brackets against the <em>oldest</em> still-open bracket rather than the <em>most recently</em> opened one — but nesting logically requires the innermost, most-recently-opened bracket to close first, since it's physically "inside" everything opened before it. Matching against the oldest open bracket instead would try to close an outer box while an inner one is still open, which doesn't correspond to any valid nesting at all — it's not a stylistic difference, the FIFO version answers a different, wrong question.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — In the monotonic stack for "next taller building," why does a building only ever get pushed once and popped at most once?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Each building is pushed exactly once, when it's first encountered walking left to right. Once it gets popped — meaning a later, taller building has resolved its "next taller" answer — it's permanently removed and never re-enters the stack, since there's no mechanism that ever pushes an already-resolved building back on. With n buildings each contributing at most one push and one pop across the whole run, total stack operations are bounded by 2n, which is exactly why the algorithm is O(n) despite the nested while-loop-in-a-for-loop shape.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — Why is it safe for the min-stack to just pop in lockstep with the main stack, without recomputing the minimum?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because every entry in the min-stack was built, at push time, to already record the correct minimum considering everything up to and including that specific position. Once the top value is popped from both stacks together, the min-stack's new top is exactly the minimum that was correct for the state just before the removed value was ever pushed — which is precisely the state you're returning to. Nothing needs recomputing because the correct answer for every possible "past state" was already precomputed and stored in parallel, one entry per push.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — In the two-stacks-make-a-queue trick, why is the amortized cost O(1) per operation despite the occasional full "flip"?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Every individual element gets flipped from in_stack to out_stack at most once during its entire lifetime in the structure — once flipped, it just gets popped directly on future calls without ever being flipped again. So even though a single dequeue() call can occasionally trigger an expensive full flip, the total flipping work summed across all n operations in a long run is bounded by n, not n², giving O(1) amortized cost per operation — the same "expensive but rare, cancels out" reasoning as Chapter 1.7's dynamic array doubling.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — In the sliding window maximum, why does an evicted-from-the-back element get permanently discarded rather than possibly needed again later?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>An element gets evicted from the back specifically when a taller element arrives after it — and since that taller element will remain in every future window that still contains the shorter one (it arrived later, so it "outlasts" the shorter one within any shared window), the shorter element can genuinely never become the maximum of any future window as long as the taller one is still present. It's not a heuristic guess — it's a provable fact that the shorter element is permanently dominated from that point forward.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — What's the actual difference between why a stack is used in Section 9.3 (parentheses) versus Section 9.4 (next taller element) — are they using the LIFO property for the same reason?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Not quite the same reason, though both lean on LIFO. Section 9.3 uses LIFO because the problem's own logical structure (nesting) genuinely requires "most recently opened, first closed." Section 9.4 uses a stack more as a bookkeeping device — maintaining a self-sorted list of "still-unresolved candidates" — where LIFO happens to be the right access pattern because newly arriving information (a taller building) always resolves the most recently added, still-pending candidates first, before potentially reaching further back. Both are genuinely LIFO, but one comes from the problem's inherent nesting structure, the other from how new information happens to resolve pending questions in reverse-recency order.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        A stack and a queue are the same idea — a container with restricted access — with one property flipped. That single flip determines an enormous amount: which real-world problems each one models honestly, and which famous O(n) tricks (monotonic stacks, sliding window maximum) become available once you're willing to give up random access on purpose.
+      </div>
+
+      <div class="endnote">
+        Chapter 9 of 10 — Stacks &amp; Queues, intuition-first. Ready for Chapter 10 (Trees) whenever you are — it's where the family-tree picture from Chapter 7 finally becomes the literal subject of the chapter.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>

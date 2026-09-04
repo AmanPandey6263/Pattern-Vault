@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 6 — Sorting | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7; -webkit-font-smoothing:antialiased;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px; line-height:1.25;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13.5px; color:var(--ink-soft); text-decoration:none; padding:7px 10px; border-radius:5px; margin-bottom:1px; transition:background .15s,color .15s; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-progress{margin-top:30px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:11px; color:var(--ink-faint);}
+.bar{height:3px; background:var(--rule); border-radius:2px; margin-top:8px; overflow:hidden;}
+.bar-fill{height:100%; width:0%; background:var(--accent); transition:width .2s;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+.toc-prev:hover{background:var(--accent-soft);}
+
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:44px; line-height:1.12; margin:10px 0 18px; font-weight:600; letter-spacing:-0.01em;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.masthead .meta{font-family:var(--sans); font-size:12.5px; color:var(--ink-faint); margin-top:20px;}
+
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer; user-select:none;}
+.section-head h2{font-size:26px; margin:0 0 6px; font-weight:600; letter-spacing:-0.005em;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint); margin-bottom:0;}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; color:var(--ink-soft); transition:transform .25s,background .2s; margin-top:2px;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+
+p{margin:0 0 16px; font-size:17.5px;}
+h3{font-size:19px; margin:32px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:24px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;}
+em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;}
+li{font-size:17.5px; margin-bottom:8px;}
+
+.callout{border-radius:8px; padding:18px 20px; margin:22px 0; font-family:var(--sans); font-size:14.5px; line-height:1.65;}
+.callout p{font-family:var(--sans); font-size:14.5px; margin:0;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px; letter-spacing:.03em;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:18px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0; color:inherit;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+
+table{width:100%; border-collapse:collapse; margin:20px 0; font-family:var(--sans); font-size:14px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; padding:9px 14px; border-bottom:2px solid var(--ink);}
+td{padding:11px 14px; border-bottom:1px solid var(--rule);}
+tr:last-child td{border-bottom:none;}
+td:first-child, th:first-child{padding-left:0;}
+
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:22px 24px; margin:20px 0; font-family:var(--mono); font-size:14px; line-height:2;}
+.derivation .step{color:var(--ink-soft); font-size:12px; font-family:var(--sans); margin-top:2px;}
+
+.practice{border:1px solid var(--rule); border-radius:8px; margin:16px 0; overflow:hidden;}
+.practice-q{padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-family:var(--sans); font-size:14.5px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:900px;}
+.practice-a-inner{padding:4px 20px 20px;}
+.practice-a-inner p{font-size:15px;}
+
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:28px 0; font-style:italic; color:var(--ink-soft); font-size:17px;}
+.chip-row{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 24px;}
+.chip{font-family:var(--sans); font-size:12px; padding:5px 11px; border-radius:20px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600;}
+.endnote{margin-top:70px; padding-top:24px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+
+.strchars{display:flex; gap:2px; margin:20px 0; flex-wrap:wrap; font-family:var(--mono);}
+.ch{min-width:44px; height:38px; padding:0 6px; display:flex; align-items:center; justify-content:center; border:1px solid var(--rule); background:var(--paper-raised); border-radius:4px; font-size:14px;}
+.ch.hi{background:var(--accent-soft); border-color:var(--accent); font-weight:700;}
+.ch.warn{background:var(--warn-soft); border-color:var(--warn);}
+.ch.good{background:var(--good-soft); border-color:var(--good);}
+.ch.dim{opacity:0.35;}
+
+@media (max-width:900px){
+  .shell{flex-direction:column;}
+  .toc{position:relative; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  main{padding:32px 22px 80px;}
+  .masthead h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-kicker">DSA Field Notes · Book Six</div>
+    <div class="toc-title">Sorting</div>
+    <ul class="toc-list" id="tocList">
+      <li><a href="#s1" data-target="s1">6.1 &nbsp;The speed limit nobody can beat</a></li>
+      <li><a href="#s2" data-target="s2">6.2 &nbsp;Sorting a hand of cards</a></li>
+      <li><a href="#s3" data-target="s3">6.3 &nbsp;Merge sort — the two-pile merge</a></li>
+      <li><a href="#s4" data-target="s4">6.4 &nbsp;Quicksort — picking a captain</a></li>
+      <li><a href="#s5" data-target="s5">6.5 &nbsp;Breaking the speed limit — counting &amp; radix sort</a></li>
+      <li><a href="#s6" data-target="s6">6.6 &nbsp;Choosing the right sort, honestly</a></li>
+      <li><a href="#s7" data-target="s7">6.7 &nbsp;Where smart people trip up</a></li>
+      <li><a href="#s8" data-target="s8">6.8 &nbsp;Check your understanding</a></li>
+    </ul>
+    <div class="toc-progress">
+      Reading progress
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    </div>
+    <a class="toc-prev" href="#">← Chapter 5: Searching</a>
+  </nav>
+
+  <main>
+    <div class="masthead">
+      <div class="eyebrow">CHAPTER SIX OF TEN · INTUITION FIRST</div>
+      <h1>Sorting</h1>
+      <p>Nearly every algorithm you'll ever call "fast" secretly leans on sorted data somewhere — binary search, two pointers, greedy scheduling. This chapter is about how sorting actually gets done, why there's a hard floor on how fast comparison-based sorting can ever be, and the clever trick that breaks that floor entirely under the right conditions.</p>
+      <div class="meta">Builds directly on Chapter 1's Master Theorem and Chapter 4's window intuition</div>
+    </div>
+
+    <div class="container">
+
+      <section class="section open" id="s1">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.1</span>The speed limit nobody can beat</h2>
+          <p class="section-sub">Why O(n log n) isn't just "the best algorithm we've found" — it's a proven floor</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Here's a genuinely surprising fact worth sitting with before touching any specific sorting algorithm: no matter how clever anyone is, <strong>no comparison-based sorting algorithm can ever beat O(n log n)</strong> in the worst case. Not "no one has found one yet" — it's actually, provably impossible, in the same way it's provably impossible to trisect an arbitrary angle with just a compass and straightedge. Understanding <em>why</em> this ceiling exists makes every sorting algorithm you learn afterward feel like it's approaching a known destination, not wandering blindly.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🌳 THE 20-QUESTIONS TOURNAMENT ANALOGY</span>
+            <p>Imagine a knockout tournament where the only tool you have to figure out the correct final ordering of n people is asking "who's taller, person A or person B?" — one yes/no comparison at a time. Here's the question worth asking: how many different possible final orderings of n people are there? It's n! (n factorial) — every single distinct arrangement is a possibility you have to be able to distinguish between. Each yes/no comparison you make can, at best, cut the number of <em>remaining possible orderings</em> in half — exactly the same halving idea from Chapter 5's binary search. If you start with n! possible orderings and each question can only ever halve that number, how many questions do you need before you've narrowed it down to exactly one? You need at least log₂(n!) questions — there's no way around it, because you literally cannot distinguish between more final orderings than you have information-halving questions to ask.</p>
+          </div>
+
+          <p>The final piece: <code>log₂(n!)</code> works out to be roughly <code>n log n</code> (a classical result — Stirling's approximation, if you ever want to look up the exact derivation). So the minimum number of comparisons any comparison-based sort could possibly need, in the worst case, is O(n log n) — not because nobody's been clever enough to do better, but because doing better would mean distinguishing between more possible orderings than your comparisons could possibly have enough information to tell apart. This is exactly why merge sort and heap sort, both landing precisely at O(n log n), aren't "good enough" compromises — they're touching the actual, provable ceiling.</p>
+
+          <div class="callout callout-why">
+            <span class="label">💡 WHY THIS MATTERS FOR EVERYTHING THAT FOLLOWS IN THIS CHAPTER</span>
+            <p>This ceiling only applies to algorithms that sort <em>purely by comparison</em> — asking "is A bigger than B?" and nothing else. Section 6.5 is about exactly what happens once you're allowed to break that one rule and use more information than just comparisons — and it's the reason counting sort and radix sort can legitimately beat O(n log n), without contradicting anything proven here.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s2">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.2</span>Sorting a hand of cards</h2>
+          <p class="section-sub">The intuition behind the simple O(n²) sorts, before the clever ones</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Before the clever divide-and-conquer sorts, it's worth actually feeling why the simple sorts are O(n²) — because the intuition here directly explains <em>when</em> these "worse" sorts are actually the right practical choice, a fact that surprises people expecting "always use the fancy one."</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🃏 THE CARD-PLAYER'S ANALOGY</span>
+            <p>Picture how you naturally sort a hand of playing cards dealt to you one at a time: you pick up each new card and slide it into its correct position among the cards you're already holding, shifting others over as needed. This is <strong>insertion sort</strong>, and it's worth noticing something about how you'd actually do this in real life: if the cards happen to arrive <em>almost already in order</em>, you barely have to shift anything — each new card slides in nearly instantly. But if they arrive in the worst possible scrambled order, every single new card might need to slide all the way to the front, past every card you're already holding.</p>
+          </div>
+
+          <p>This "almost sorted → almost free" property is genuinely valuable and not just a cute observation: insertion sort's best case is O(n) — a single pass confirming everything's already in place — while its worst case is the familiar O(n²) triangle shape from Chapter 1. This is exactly why insertion sort shows up as a practical building block inside more sophisticated real-world sorting implementations, used specifically for small or nearly-sorted chunks of data where its low overhead beats the setup cost of fancier algorithms.</p>
+
+          <p><strong>Selection sort</strong> takes a different, more rigid approach: repeatedly scan the entire remaining unsorted portion to find the single smallest element, and swap it into place at the front. Unlike insertion sort, this one doesn't get any faster on nearly-sorted input — it always does the full scan regardless, so it's a flat O(n²) in every case, best or worst. <strong>Bubble sort</strong> repeatedly walks the array swapping adjacent out-of-order pairs — genuinely the least practically useful of the three, but worth knowing conceptually because the "swap adjacent out-of-order neighbors" idea reappears in more sophisticated contexts.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧭 THE HONEST TAKEAWAY</span>
+            <p>These aren't "the bad sorts you learn before the real ones" — they're the right tool specifically when n is small (the constant-factor overhead of a fancier algorithm's setup isn't worth it) or when data is known to already be nearly sorted (insertion sort's best case genuinely shines there). Real-world sorting library implementations often use exactly this kind of simple sort internally for small sub-chunks, layered underneath a fancier divide-and-conquer strategy for the bulk of the work — which is a preview of exactly where Section 6.3 is headed.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s3">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.3</span>Merge sort — the two-pile merge</h2>
+          <p class="section-sub">Revisiting Chapter 1's derivation, now with the actual mechanics made vivid</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Chapter 1 derived merge sort's O(n log n) complexity using the cake-cutting picture. Here, let's slow down on the part that made that derivation true in the first place: the actual mechanics of the merge step, because it's a genuinely clever piece of reasoning worth seeing clearly.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">🃏 THE TWO-SORTED-PILES ANALOGY</span>
+            <p>Imagine you have two piles of cards, each individually already sorted face-up, and you want to combine them into one single sorted pile. You don't need to look at the whole pile to know where the next card goes — you only ever need to glance at the <em>top</em> card of each pile. Whichever top card is smaller, that's guaranteed to be the smallest remaining card across <em>both</em> piles combined (because each pile is individually sorted, nothing hiding deeper in either pile could possibly be smaller than what's currently on top) — so you take it, place it in the merged pile, and repeat. One glance, one placement, per card, until both piles are exhausted.</p>
+          </div>
+
+          <pre><code><span class="kw">def</span> merge(left, right):
+    result = []
+    i = j = 0
+    <span class="kw">while</span> i < len(left) <span class="kw">and</span> j < len(right):
+        <span class="kw">if</span> left[i] <= right[j]:
+            result.append(left[i]); i += 1
+        <span class="kw">else</span>:
+            result.append(right[j]); j += 1
+    result.extend(left[i:])   <span class="comment"># whichever pile still has leftovers</span>
+    result.extend(right[j:])
+    <span class="kw">return</span> result</code></pre>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY "GLANCING AT JUST THE TOP" IS PROVABLY SAFE</span>
+            <p>This is worth genuinely proving to yourself, not just accepting: because each individual pile is already sorted, the top card of a pile <em>is</em>, by definition, the smallest remaining card in that specific pile — nothing further down could possibly be smaller. So comparing the two piles' top cards genuinely does compare the two best remaining candidates across the entire merged set, no exceptions. You never need to "peek deeper" to double check, because sortedness already guarantees the top is the best. This is the entire reason the merge step can be done in a single, honest O(n) pass — each glance-and-place is O(1), and there are exactly (size of left) + (size of right) placements total.</p>
+          </div>
+
+          <p>Zoom back out to the full picture: merge sort recursively splits the array in half, down to single elements (trivially "sorted" on their own), then merges pairs back together using exactly this two-pile logic, repeatedly, all the way back up. Chapter 1's Master Theorem derivation showed this comes out to O(n log n) — and now you can actually see <em>why</em> the merge step at each of the log n levels costs a genuine O(n): every element gets glanced at and placed exactly once per level, across all the simultaneous smaller merges happening at that level.</p>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ THE HONEST TRADE-OFF WORTH NAMING</span>
+            <p>Notice the <code>result = []</code> in the merge function — this is genuinely new memory, not sorting in place. Merge sort needs O(n) auxiliary space for this reason, which is the direct cost of the "glance at just the top of each pile" trick — you need somewhere to actually build the merged pile as you go. This is exactly the trade-off that opens the door for quicksort in the next section, which sorts in place but gives up merge sort's guaranteed worst case in exchange.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s4">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.4</span>Quicksort — picking a captain</h2>
+          <p class="section-sub">A different divide-and-conquer idea, with a genuinely different failure mode</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Quicksort splits the problem differently from merge sort: instead of splitting by <em>position</em> (always cutting exactly in half, regardless of values), it splits by <em>value</em>. Pick one element — call it the <strong>pivot</strong> — and rearrange everyone else around it so that everything smaller ends up to its left, everything bigger ends up to its right. The pivot is now sitting in its final, correct position, guaranteed, and you recursively repeat the same process on the left and right chunks independently.</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">👑 THE "PICK A CAPTAIN" ANALOGY</span>
+            <p>Imagine a gym class of mixed heights needing to line up shortest to tallest. Instead of comparing everyone to everyone (the O(n²) approach), pick one student at random to be team captain. Every other student walks up and stands either to the captain's left (if shorter) or right (if taller) — one honest pass, one decision per student. Once everyone's placed, the captain is standing in <em>exactly</em> their correct final position in the whole line — not approximately, exactly, because everyone shorter is genuinely to their left and everyone taller genuinely to their right. Now you have two smaller, completely independent lining-up problems — the "shorter than captain" group and the "taller than captain" group — and you repeat the exact same captain-picking process inside each group, recursively, until every group has shrunk down to a single person.</p>
+          </div>
+
+          <p>The pivot-placement step — walking through the group once, sorting everyone into "smaller" or "bigger" relative to the captain — costs O(n) for a group of size n. If the captain happens to consistently land near the <em>middle</em> of each group, you get the same "halves at every level" shape as merge sort, and the same O(n log n) result falls out.</p>
+
+          <div class="callout callout-why">
+            <span class="label">🧠 WHY QUICKSORT CAN DEGRADE TO O(n²) — AND WHY IT USUALLY DOESN'T</span>
+            <p>Here's the honest catch: what if you consistently pick the <em>worst possible</em> captain — say, always the shortest (or tallest) person in the current group? Then one side of the split has <em>everyone else</em>, and the other side has nobody. You haven't actually split the problem in half at all — you've just peeled off one person and left a group of size n-1 to handle recursively. Repeat this n times, doing O(n) work to peel off one person each time, and you get the familiar O(n) + O(n-1) + O(n-2) + ... triangle shape from Chapter 1 — genuinely O(n²), the worst possible outcome. This specific disaster happens reliably if you always pick, say, "the first element" as captain on an array that's already sorted (or reverse-sorted) — the first element is then always the smallest or largest possible choice, every single time. The practical fix: pick the captain <em>randomly</em> (or use a smarter heuristic like "median of three sampled elements") rather than always the same fixed position — this makes the catastrophic all-or-nothing split essentially vanishingly unlikely on any input you didn't specifically construct to defeat your exact pivot rule, which is why quicksort is trusted in practice despite its technically-bad worst case.</p>
+          </div>
+
+          <p>The upside quicksort gets in exchange for this worst-case risk: it genuinely sorts <em>in place</em>, needing only O(log n) extra space for the recursive call bookkeeping, not merge sort's full O(n) auxiliary array — plus, in practice, it tends to have excellent cache behavior (working on contiguous, nearby memory during partitioning) that often makes it faster in real wall-clock terms than merge sort even though both are "O(n log n)-shaped" in the typical case. Exactly the "worse worst-case Big-O can still mean faster in practice" lesson Chapter 1 warned you to expect.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s5">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.5</span>Breaking the speed limit — counting &amp; radix sort</h2>
+          <p class="section-sub">What happens once you're allowed to stop just comparing</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <p>Section 6.1 proved comparison-based sorting can never beat O(n log n) — but that proof had a very specific, load-bearing assumption baked into it: that the <em>only</em> information you're allowed to extract from your data is "is A bigger than B?" What if you're sorting something where you actually know more than that — say, you know every value is an integer between 0 and 100?</p>
+
+          <div class="callout callout-analogy">
+            <span class="label">📮 THE MAILROOM SORTING ANALOGY</span>
+            <p>Imagine a mailroom with exactly 100 labeled pigeonholes, one for each possible 2-digit zip code prefix. Instead of comparing letters to each other one at a time to figure out their relative order, a sorter can just glance at each letter's zip prefix and drop it directly into the matching pigeonhole — no comparison against other letters needed at all. Walk through all the letters once, dropping each into its designated slot — and then just walk through the pigeonholes in order, from 00 to 99, collecting everything back out. The letters are now sorted, and at no point did you ever ask "is this letter's zip bigger or smaller than that one's?" — you used the value itself as a direct address, exactly the same "value tells you its own home" idea from Chapter 2's cyclic sort.</p>
+          </div>
+
+          <p>This is <strong>counting sort</strong>: build an array of "pigeonhole counts," one slot per possible value, walk through the input once incrementing the count at each value's slot (O(n)), then walk through the pigeonholes in order and reconstruct the sorted output (O(k), where k is the number of distinct possible values). Total: <strong>O(n + k)</strong> — genuinely, provably faster than O(n log n) whenever k is small relative to n, and this doesn't contradict Section 6.1's proof at all, because counting sort never once compares two elements against each other — it sidesteps the entire comparison-based argument by using the value itself as direct positional information.</p>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ THE HONEST LIMITATION — WHY THIS ISN'T ALWAYS THE ANSWER</span>
+            <p>Counting sort's speed depends entirely on k (the range of possible values) being small and known in advance. Sorting a million floating-point salary values with no fixed range, or sorting arbitrary strings, doesn't fit this mailroom picture at all — there's no small, fixed set of pigeonholes to build. This is exactly why counting sort is a specialist tool for a specific situation (small, known integer range), not a general replacement for comparison sorts.</p>
+          </div>
+
+          <p><strong>Radix sort</strong> extends this same pigeonhole idea to numbers with more digits than would be practical to give a direct pigeonhole to (like sorting numbers up to a million — a million pigeonholes is wasteful). Instead of one pass with a huge number of pigeonholes, radix sort does <em>multiple</em> passes, one per digit position, each pass using counting sort with just 10 pigeonholes (one per digit 0-9), processing from the least significant digit to the most significant. Sort by the ones digit first, then — crucially, using a <em>stable</em> sort that preserves relative order among ties — sort by the tens digit, then the hundreds, and so on. By the time you've processed the most significant digit, the numbers come out fully sorted, because each pass refines the ordering established by the previous, less-significant passes without ever disturbing it.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s6">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.6</span>Choosing the right sort, honestly</h2>
+          <p class="section-sub">Not "which is best" — "which fits this specific situation"</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <table>
+            <tr><th>Situation</th><th>Reach for</th><th>Why</th></tr>
+            <tr><td>General purpose, no special structure known</td><td>Quicksort (or your language's built-in)</td><td>excellent average speed, in-place, great cache behavior</td></tr>
+            <tr><td>Need a <em>guaranteed</em> worst case (no exceptions allowed)</td><td>Merge sort or heap sort</td><td>O(n log n) always, no adversarial-input risk</td></tr>
+            <tr><td>Equal elements must keep their original relative order</td><td>Merge sort (or a stable variant of insertion sort)</td><td>stability is a genuine, checkable property — quicksort typically isn't stable</td></tr>
+            <tr><td>Data is small (roughly &lt;20-50 elements) or nearly sorted already</td><td>Insertion sort</td><td>low overhead, and shines specifically on near-sorted input</td></tr>
+            <tr><td>Values are integers within a small, known range</td><td>Counting sort</td><td>breaks the O(n log n) floor entirely — genuinely faster when it applies</td></tr>
+            <tr><td>Multi-digit numbers, range too big for direct counting sort</td><td>Radix sort</td><td>same non-comparison speed, applied digit by digit</td></tr>
+          </table>
+
+          <p>Notice this table isn't ranked "best to worst" — there genuinely isn't a single best sort, only a best <em>fit</em> for a given situation's actual constraints (memory available, stability requirements, whether the worst case is a real risk, what's known about the value range). This mirrors Chapter 1's honest lesson about Big-O not being the only axis that matters — real engineering choice always has to weigh several of these considerations together, not default to whichever algorithm sounds fanciest.</p>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s7">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.7</span>Where smart people trip up</h2>
+          <p class="section-sub">Explained through why the confusion happens</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 1 — Believing counting sort "proves" comparison sorts are bad</span>
+            <p>It's tempting, after seeing counting sort beat O(n log n), to wonder why anyone still uses comparison sorts at all. But counting sort's speed comes at the direct cost of needing a small, known range of values — it fundamentally cannot sort arbitrary comparable objects (strings, custom objects, floating point numbers with no fixed range) the way a comparison sort can. The two aren't competing on a single "which is better" axis — they solve genuinely different problems, and Section 6.1's O(n log n) floor still stands, completely intact, for the actual problem it describes.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 2 — Always defaulting to quicksort without checking for the adversarial-input risk</span>
+            <p>In most everyday situations, quicksort's practical speed makes it the right default — but if you're sorting data where an adversary might deliberately feed you a worst-case input (a public-facing system, a security-sensitive context), or where a single slow outlier request is genuinely unacceptable, quicksort's O(n²) worst case is a real risk, not a theoretical footnote. This is precisely why some real-world library sort implementations deliberately fall back to a guaranteed-O(n log n) algorithm (like heap sort) if quicksort's recursion depth grows suspiciously large — a hybrid approach called introsort, hedging against exactly this risk.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 3 — Assuming any sort that "looks like" divide and conquer is automatically O(n log n)</span>
+            <p>Quicksort's worst case is the clearest counterexample to this assumption — it genuinely is a divide-and-conquer algorithm, and it can still degrade to O(n²) if the "divide" step fails to actually split the problem evenly. Always ask, specifically: does this algorithm's splitting step have a <em>guarantee</em> of roughly-even halves (like merge sort's always-exact-half split), or does it merely <em>usually</em> split evenly (like quicksort's value-dependent split)? That distinction is exactly what separates a provable O(n log n) from a merely typical one.</p>
+          </div>
+
+          <div class="callout callout-pitfall">
+            <span class="label">⚠️ MISTAKE 4 — Forgetting radix sort's inner passes must be stable</span>
+            <p>Radix sort's entire correctness depends on each digit-pass preserving the relative order established by previous, less-significant passes — if the inner counting-sort-per-digit isn't stable, later passes can scramble the ordering that earlier passes carefully built, and the final result comes out wrong in a way that's easy to miss on small test cases where collisions happen to be rare, but shows up reliably at scale.</p>
+          </div>
+
+        </div></div>
+      </section>
+
+      <section class="section" id="s8">
+        <div class="section-head" onclick="toggleSection(this)">
+          <div><h2><span class="section-num">6.8</span>Check your understanding</h2>
+          <p class="section-sub">Explain each one out loud, in your own words, before revealing the answer</p></div>
+          <div class="toggle">+</div>
+        </div>
+        <div class="section-body"><div class="section-inner">
+
+          <div class="chip-row">
+            <span class="chip">6 questions</span>
+            <span class="chip">explain in your own words first</span>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q1 — Using the 20-questions tournament picture, explain why no comparison sort can beat O(n log n).</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>There are n! possible final orderings of n items, and every yes/no comparison can, at absolute best, cut the number of remaining possible orderings in half — the same halving logic as binary search. To narrow n! possibilities down to exactly one, you need at least log₂(n!) comparisons, which works out to roughly n log n. You literally cannot distinguish between more orderings than your comparisons have the information capacity to tell apart — it's an information-theoretic floor, not a limitation of any particular algorithm's cleverness.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q2 — Why is insertion sort's best case O(n) while selection sort's best case is still O(n²)?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Insertion sort's work is directly proportional to how far out of place each new card is — on already-sorted input, every card slides into place almost instantly, so the whole pass is a quick O(n) confirmation. Selection sort always does a full scan of the remaining unsorted portion to find the minimum, every single time, regardless of whether the data happens to already be sorted — it has no way to "notice" and skip ahead when things are already in order, so it's a flat O(n²) no matter what the input looks like.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q3 — In merge sort's merge step, why is it safe to only ever compare the top card of each pile, never looking deeper?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Because each pile is already individually sorted, the top card of a pile is guaranteed, by definition, to be the smallest remaining card in that pile — nothing buried deeper could possibly be smaller. So comparing the two piles' top cards genuinely does compare the two best candidates across both piles combined, with no risk that a smaller card is hiding further down in either pile waiting to be missed.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q4 — Using the "pick a captain" picture, explain exactly how quicksort can degrade to O(n²).</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>If the captain chosen is consistently the smallest or largest person in the group (which happens reliably if you always pick, say, the first element, on data that's already sorted or reverse-sorted), the split isn't even — one side ends up with everyone else, the other side gets nobody. You've only peeled off one person per O(n) partitioning pass, instead of roughly halving the problem, giving the same O(n) + O(n-1) + ... triangle shape as Chapter 1 — genuinely O(n²). Randomizing the captain choice makes this specific disaster scenario vanishingly unlikely on any input not specifically crafted to defeat it.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q5 — Why doesn't counting sort's O(n+k) speed contradict Section 6.1's proof that comparison sorts can't beat O(n log n)?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Section 6.1's proof specifically applies to algorithms that only extract information by comparing two elements against each other. Counting sort never does this at all — it uses each value directly as an address (a pigeonhole position), extracting far more information per element than a single "bigger or smaller" comparison could ever give. It's not beating the proven floor; it's sidestepping the assumption the floor was built on entirely, by using a different, richer source of information than comparisons.</p>
+            </div></div>
+          </div>
+
+          <div class="practice" onclick="togglePractice(this)">
+            <div class="practice-q"><span>Q6 — Why does radix sort need to process digits from least-significant to most-significant, and why must each digit-pass be stable?</span><span class="arrow">›</span></div>
+            <div class="practice-a"><div class="practice-a-inner">
+              <p>Processing least-significant first means each subsequent pass (on a more significant digit) is the "final say" — it can safely reorder based on that digit alone as long as it doesn't disturb the relative order among elements that tie on that digit, which is exactly what stability guarantees. If an earlier, less-significant pass's careful ordering got scrambled by a later pass, the final result would be wrong — the entire correctness of processing digit-by-digit depends on each pass refining, not overwriting, the ordering already established by previous passes.</p>
+            </div></div>
+          </div>
+
+        </div></div>
+      </section>
+
+      <div class="divider-quote">
+        Sorting looks like a solved, boring problem from the outside — but underneath, it's a genuine tour through some of the deepest ideas in this book: information-theoretic limits, the trade-off between guaranteed and typical performance, and what becomes possible the moment you're allowed to stop just comparing.
+      </div>
+
+      <div class="endnote">
+        Chapter 6 of 10 — Sorting, intuition-first. Ready for Chapter 7 (Recursion &amp; Backtracking) whenever you are — it picks the family-tree picture from Chapter 1 back up and goes much further with it.
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleSection(headEl){ headEl.closest('.section').classList.toggle('open'); }
+function togglePractice(el){ el.classList.toggle('open'); }
+const sections = document.querySelectorAll('.section');
+const tocLinks = document.querySelectorAll('.toc-list a');
+const barFill = document.getElementById('barFill');
+function onScroll(){
+  let currentId = sections[0].id;
+  sections.forEach(sec=>{
+    const rect = sec.getBoundingClientRect();
+    if(rect.top <= 140) currentId = sec.id;
+  });
+  tocLinks.forEach(a=>{ a.classList.toggle('active', a.dataset.target === currentId); });
+  const scrollable = document.body.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  barFill.style.width = Math.min(100, Math.max(0,pct)) + '%';
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+tocLinks.forEach(a=>{
+  a.addEventListener('click', ()=>{
+    const target = document.getElementById(a.dataset.target);
+    if(target && !target.classList.contains('open')) target.classList.add('open');
+  });
+});
+</script>
+
+</body>
+</html>
