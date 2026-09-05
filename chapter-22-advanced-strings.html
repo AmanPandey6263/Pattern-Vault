@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 22 — Advanced Strings | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+main{flex:1; min-width:0; padding:56px 64px 140px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:40px; line-height:1.15; margin:10px 0 18px; font-weight:600;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer;}
+.section-head h2{font-size:24px; margin:0 0 6px; font-weight:600;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint);}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; transition:transform .25s,background .2s;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+p{margin:0 0 16px; font-size:17px;}
+h3{font-size:19px; margin:28px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:22px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;} em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;} li{font-size:17px; margin-bottom:8px;}
+.callout{border-radius:8px; padding:16px 20px; margin:20px 0; font-family:var(--sans); font-size:14.5px; line-height:1.6;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.55; margin:16px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-family:var(--sans); font-size:13.5px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11px; text-transform:uppercase; padding:8px 12px; border-bottom:2px solid var(--ink);}
+td{padding:10px 12px; border-bottom:1px solid var(--rule);}
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:20px 22px; margin:18px 0; font-family:var(--mono); font-size:13.5px; line-height:1.9;}
+.derivation .step{color:var(--ink-soft); font-size:11.5px; font-family:var(--sans);}
+.practice{border:1px solid var(--rule); border-radius:8px; margin:14px 0; overflow:hidden;}
+.practice-q{padding:14px 18px; cursor:pointer; display:flex; justify-content:space-between; font-family:var(--sans); font-size:14px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:700px;}
+.practice-a-inner{padding:4px 18px 18px;} .practice-a-inner p{font-size:14.5px;}
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:26px 0; font-style:italic; color:var(--ink-soft); font-size:16px;}
+.endnote{margin-top:60px; padding-top:22px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+.roadmap{margin-top:56px; padding:32px; background:var(--accent-deep); color:#f0ede4; border-radius:12px;}
+.roadmap h3{color:#f0ede4; font-size:21px; margin-top:0;}
+.roadmap p{color:#d8dcd6; font-size:15.5px;}
+.roadmap ul{color:#d8dcd6; font-size:14.5px; font-family:var(--sans); line-height:1.9;}
+.roadmap li strong{color:#f0ede4;}
+@media (max-width:900px){.shell{flex-direction:column;} .toc{position:relative; width:100%; height:auto;} main{padding:32px 22px 80px;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc">
+<div class="toc-kicker">DSA Field Notes · Book Twenty-Two · Final Gap-Filling Chapter</div>
+<div class="toc-title">Advanced Strings</div>
+<ul class="toc-list">
+<li><a href="#s1">22.1 &nbsp;Matching many patterns at once</a></li>
+<li><a href="#s2">22.2 &nbsp;Aho-Corasick — a trie with shortcuts</a></li>
+<li><a href="#s3">22.3 &nbsp;Suffix arrays — every suffix, sorted</a></li>
+<li><a href="#s4">22.4 &nbsp;Where smart people trip up</a></li>
+<li><a href="#s5">22.5 &nbsp;Check your understanding</a></li>
+<li><a href="#s6">22.6 &nbsp;The honest roadmap — what's still on you</a></li>
+</ul>
+<a class="toc-prev" href="#">← Chapter 21: Advanced Dynamic Programming</a>
+</nav>
+<main>
+<div class="masthead">
+<div class="eyebrow">CHAPTER TWENTY-TWO · FINAL GAP-FILLING CHAPTER</div>
+<h1>Advanced Strings</h1>
+<p>Chapter 3 solved "find one pattern in one text." This chapter solves the harder, more common real-world version: find <em>many</em> patterns at once, or answer arbitrary substring questions about one huge text — by combining Chapter 3's KMP failure function with Chapter 13's trie.</p>
+</div>
+<div class="container">
+
+<section class="section open" id="s1">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">22.1</span>Matching many patterns at once</h2><p class="section-sub">Why running KMP once per pattern is genuinely the wrong approach at scale</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Given a text and a dictionary of thousands of patterns (think: a spam filter checking a message against thousands of banned phrases simultaneously), running Chapter 3.5's KMP once per pattern costs O(text_length × number_of_patterns) — for thousands of patterns, that multiplies out to something genuinely too slow.</p>
+
+<div class="callout callout-why">
+<span class="label">💡 THE INSIGHT: MANY PATTERNS SHARE PREFIXES, EXACTLY LIKE CHAPTER 13'S WORDS DID</span>
+<p>Chapter 13 built a trie specifically because many words share prefixes and shouldn't be stored (or searched) redundantly. The exact same observation applies here — thousands of banned phrases very often share common beginnings. Aho-Corasick is the answer: combine all patterns into a single trie (Chapter 13's structure), then add Chapter 3.5's KMP failure-function idea directly on top of it, letting you scan the text <em>once</em>, checking against every pattern simultaneously, in O(text_length + total_pattern_length) — not multiplied together, added.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">22.2</span>Aho-Corasick — a trie with shortcuts</h2><p class="section-sub">KMP's "don't forget what you already know" idea, generalized to a whole trie</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Recall Chapter 3.5's KMP insight exactly: on a mismatch, don't restart from scratch — jump using information the pattern already told you about its own structure (the LPS array). Aho-Corasick asks the same question, but for an entire trie of patterns at once: "if I'm partway down this trie hallway and hit a dead end, is there some <em>other</em> hallway, representing a shorter suffix of what I've matched so far, that I can jump to instead of restarting from the root?"</p>
+
+<div class="callout callout-analogy">
+<span class="label">🔗 THE "FAILURE LINK" AS A GENERALIZED KMP JUMP</span>
+<p>Every node in the Aho-Corasick trie gets a <strong>failure link</strong> — a pointer to the node representing the longest proper suffix of the current path that is <em>also</em> a prefix present somewhere else in the trie (exactly the LPS array's definition, Chapter 3.5, just computed across an entire trie of patterns instead of one single pattern). When scanning the text and hitting a character with no matching child, follow the failure link instead of restarting at the root — you've just reused Chapter 13's shared-structure idea and Chapter 3.5's "don't forget what you matched" idea in the same data structure, simultaneously.</p>
+</div>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY THE TEXT POINTER STILL NEVER MOVES BACKWARD — THE SAME O(n) GUARANTEE AS CHAPTER 3.5</span>
+<p>Exactly as in plain KMP, the pointer scanning through the <em>text</em> only ever advances forward — only the position <em>within the trie</em> jumps backward via failure links, and it does so using precomputed information rather than blind restart. This preserves the same clean linear guarantee: scanning the whole text costs O(text_length), and building the failure links across the whole trie costs O(total_pattern_length) — added together, not multiplied, which is the entire reason this beats running separate KMP passes per pattern.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">22.3</span>Suffix arrays — every suffix, sorted</h2><p class="section-sub">A different generalization: many questions about ONE huge text</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>A different, equally common need: given one enormous text, answer many different substring questions against it (does this pattern appear, what's the longest repeated substring, how many distinct substrings exist) — a suffix array is a sorted list of every possible suffix of the text, represented as starting indices rather than copying the actual substrings (which would waste O(n²) space).</p>
+
+<div class="callout callout-analogy">
+<span class="label">📚 THE "SORT EVERY POSSIBLE ENDING OF THE BOOK" PICTURE</span>
+<p>Imagine every possible way of starting to read a book from some point onward and continuing to the end — "starting from page 1," "starting from page 2," and so on — as distinct "documents," and sorting all of these documents alphabetically. Once sorted, searching for whether a specific phrase appears anywhere in the book becomes Chapter 5's binary search over this sorted list of starting points — since any suffix beginning with your search phrase will be sorted next to other suffixes sharing that same beginning, exactly the same "shared prefixes cluster together" idea from Chapter 13's trie, just expressed through sorted order instead of a tree structure.</p>
+</div>
+
+<div class="callout callout-good">
+<span class="label">✅ WHY THIS IS WORTH KNOWING EXISTS, EVEN WITHOUT FULL IMPLEMENTATION DEPTH HERE</span>
+<p>Building a suffix array naively (sort all n suffixes directly) costs O(n² log n) — genuinely too slow for large texts, since each of the n suffix comparisons can itself cost O(n). Efficient construction (O(n log n) using a clever repeated-doubling comparison scheme, or O(n) with more advanced techniques) is a real, deep topic in its own right, deliberately beyond this book's scope to fully derive — but recognizing "many questions about substrings of one huge, unchanging text" as the signal to reach for a suffix array (or a suffix automaton, a related structure) is itself a valuable, transferable piece of pattern-recognition, even if you'd look up or use a library implementation of the construction algorithm in practice.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">22.4</span>Where smart people trip up</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Reaching for Aho-Corasick when there's only one pattern</span>
+<p>The whole payoff — amortizing the failure-link construction across many patterns — evaporates with a single pattern, where plain KMP is simpler and just as fast. Aho-Corasick earns its complexity specifically when the number of patterns is large enough that per-pattern KMP passes would genuinely add up.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Forgetting that a node's failure link must itself be fully computed before dependent nodes can use it</span>
+<p>Failure links are built level by level (a BFS-order construction, echoing Chapter 14.2's queue-based exploration) — building them in the wrong order means a node's failure link might point to another node whose own failure link hasn't been finalized yet, silently producing incorrect jumps.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Assuming a suffix array is "always" the answer for string problems</span>
+<p>Suffix arrays specifically shine for many queries against one fixed, unchanging text — exactly like Chapter 2.4's prefix-sum trade-off. For a single one-off substring search, or frequently-changing text, this heavy upfront construction is a poor trade, and simpler tools (or a trie, for prefix-specific needs) are the honest choice instead.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">22.5</span>Check your understanding</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q1 — Why is Aho-Corasick better described as "KMP plus a trie" rather than a wholly new idea?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>It reuses Chapter 13's trie to physically merge patterns that share prefixes, avoiding redundant storage and redundant matching work — and it reuses Chapter 3.5's exact "don't restart from scratch on a mismatch" failure-function idea, just generalized so the jump target can be any node in the shared trie rather than a position in a single pattern. Both of its core ideas were already fully derived in earlier chapters; this chapter just shows they combine.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q2 — Why does a suffix array store starting indices rather than the actual suffix substrings themselves?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Storing every suffix as an actual copied substring would need O(n²) total space (the suffixes get progressively shorter, but their total combined length is still quadratic in n) — storing just the starting index of each suffix costs O(n) space total, since comparisons can always be done by looking back at the original text using the stored index, without ever needing a separate physical copy of each suffix.</p></div></div>
+</div>
+
+</div></div>
+</section>
+
+<div class="divider-quote">Nothing in this chapter was a new fundamental idea — Aho-Corasick is Chapter 3 and Chapter 13 meeting each other, and suffix arrays are Chapter 5's binary search meeting Chapter 3's substring reasoning. That's genuinely the pattern across this entire book's "advanced" material: depth comes from combination, not from an ever-growing pile of unrelated tricks.</div>
+
+<div class="roadmap">
+<h3>The honest roadmap — what's still genuinely on you</h3>
+<p>Twenty-two chapters now cover essentially every DSA pattern you'll meet in Striver's A2Z, NeetCode 150, and the large majority of real interview loops — including the gaps flagged earlier: segment/Fenwick trees, SCCs, bridges, bipartite matching, flow, digit/tree/probability DP, and multi-pattern string matching. Here's what no chapter, however well-written, can substitute for:</p>
+<ul>
+<li><strong>Reps.</strong> Understanding why Kadane's works is not the same as your hands knowing it under a 25-minute timer. Solve 15-20 problems per pattern in your A2Z tracker before moving on.</li>
+<li><strong>Speed under pressure.</strong> Timed mocks, not just untimed solving, are what actually train interview performance.</li>
+<li><strong>Language fluency.</strong> Knowing the algorithm and writing bug-free code in your actual interview language (C++/Python/Java) in real time are different skills.</li>
+<li><strong>CS fundamentals adjacent to DSA</strong> — OOP design, OS basics (processes, threads, locks), DBMS (indexing, normalization) — a separate domain from this series, worth its own dedicated study if your target interviews test it.</li>
+<li><strong>Contest-specific tricks</strong> (sqrt decomposition, heavy-light decomposition, persistent structures) — genuinely advanced-competitive-programming territory, only worth it if you're specifically pushing into Codeforces-style contests rather than interview prep.</li>
+</ul>
+<p>Read a chapter, then immediately go solve problems from that exact pattern before moving to the next one. That sequencing — theory, then immediate reps, every single time — is what actually converts this into interview-day performance.</p>
+</div>
+
+<div class="endnote">Chapters 19–22 — the gap-filling set, complete. Combined with Chapters 1–18, this is now a genuinely comprehensive DSA foundation, from first principles through the material that separates "solved the easy/medium bucket" from "can model a novel hard problem from scratch."</div>
+</div>
+</main>
+</div>
+<script>
+function toggleSection(h){h.closest('.section').classList.toggle('open');}
+function togglePractice(e){e.classList.toggle('open');}
+</script>
+</body>
+</html>

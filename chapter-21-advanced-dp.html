@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 21 — Advanced Dynamic Programming | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:40px; line-height:1.15; margin:10px 0 18px; font-weight:600;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer;}
+.section-head h2{font-size:24px; margin:0 0 6px; font-weight:600;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint);}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; transition:transform .25s,background .2s;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+p{margin:0 0 16px; font-size:17px;}
+h3{font-size:19px; margin:28px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:22px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;} em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;} li{font-size:17px; margin-bottom:8px;}
+.callout{border-radius:8px; padding:16px 20px; margin:20px 0; font-family:var(--sans); font-size:14.5px; line-height:1.6;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.55; margin:16px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-family:var(--sans); font-size:13.5px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11px; text-transform:uppercase; padding:8px 12px; border-bottom:2px solid var(--ink);}
+td{padding:10px 12px; border-bottom:1px solid var(--rule);}
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:20px 22px; margin:18px 0; font-family:var(--mono); font-size:13.5px; line-height:1.9;}
+.derivation .step{color:var(--ink-soft); font-size:11.5px; font-family:var(--sans);}
+.practice{border:1px solid var(--rule); border-radius:8px; margin:14px 0; overflow:hidden;}
+.practice-q{padding:14px 18px; cursor:pointer; display:flex; justify-content:space-between; font-family:var(--sans); font-size:14px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:700px;}
+.practice-a-inner{padding:4px 18px 18px;} .practice-a-inner p{font-size:14.5px;}
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:26px 0; font-style:italic; color:var(--ink-soft); font-size:16px;}
+.endnote{margin-top:60px; padding-top:22px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+@media (max-width:900px){.shell{flex-direction:column;} .toc{position:relative; width:100%; height:auto;} main{padding:32px 22px 80px;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc">
+<div class="toc-kicker">DSA Field Notes · Book Twenty-One · Gap-Filling Set</div>
+<div class="toc-title">Advanced Dynamic Programming</div>
+<ul class="toc-list">
+<li><a href="#s1">21.1 &nbsp;Tree DP — combining, but on a tree's shape</a></li>
+<li><a href="#s2">21.2 &nbsp;Digit DP — counting without listing</a></li>
+<li><a href="#s3">21.3 &nbsp;Probability &amp; Expected Value DP</a></li>
+<li><a href="#s4">21.4 &nbsp;Where smart people trip up</a></li>
+<li><a href="#s5">21.5 &nbsp;Check your understanding</a></li>
+</ul>
+<a class="toc-prev" href="#">← Chapter 20: Segment Trees &amp; Fenwick Trees</a>
+</nav>
+<main>
+<div class="masthead">
+<div class="eyebrow">CHAPTER TWENTY-ONE · GAP-FILLING SET</div>
+<h1>Advanced Dynamic Programming</h1>
+<p>Chapter 15 built the four-question process — state, recurrence, base case, fill order. This chapter proves that process genuinely transfers to state shapes that don't look anything like a simple array or 2D grid: a tree's structure, a number's digits, and a probability distribution.</p>
+</div>
+<div class="container">
+
+<section class="section open" id="s1">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">21.1</span>Tree DP — combining, but on a tree's shape</h2><p class="section-sub">Chapter 10's recursive template, with an actual optimization decision layered in</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Chapter 10.3 already gave you the shape: trust the left and right subtrees, combine their results. Tree DP is exactly this, except now there's a genuine <em>choice</em> to optimize over at each node, not just a fixed combination rule.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🏢 THE "INVITE THE EMPLOYEE, OR THEIR BOSS, NEVER BOTH" PROBLEM</span>
+<p>Classic example: a company's org chart is a tree, each employee has a "fun score," and you want to invite the maximum total fun score to a party — with the rule that an employee and their direct manager can never both be invited (awkward). At every node, there are genuinely two different questions worth tracking, not one: "the best total fun score in this subtree, <em>if this person is invited</em>" and "the best total, <em>if this person is not invited</em>." If invited, none of their direct children can be — so you're forced to use each child's "not invited" value. If not invited, each child is free to be whichever is better — invited or not — so you take the max of the two for each child.</p>
+</div>
+
+<pre><code><span class="kw">def</span> solve(node):
+    <span class="kw">if</span> <span class="kw">not</span> node:
+        <span class="kw">return</span> (0, 0)   <span class="comment"># (best if invited, best if not invited)</span>
+    invited, not_invited = node.fun, 0
+    <span class="kw">for</span> child <span class="kw">in</span> node.children:
+        c_inv, c_not = solve(child)
+        invited += c_not              <span class="comment"># child MUST be excluded if node is invited</span>
+        not_invited += max(c_inv, c_not)  <span class="comment"># child is free either way</span>
+    <span class="kw">return</span> (invited, not_invited)
+</code></pre>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY TRACKING TWO VALUES PER NODE, NOT ONE, IS THE ACTUAL NEW IDEA HERE</span>
+<p>Chapter 10's height and diameter each needed only a single number per node because there was no competing constraint to track. Here, "invited" and "not invited" are genuinely different states that lead to different obligations for the children — collapsing them into a single "best score for this subtree" number would lose exactly the information needed to correctly enforce the no-two-adjacent rule higher up the tree. This "track more than one state per node, because a single number can't capture the constraint" idea is the actual generalizable lesson — it reappears constantly in tree DP variants (maximum independent set, minimum vertex cover, tree coloring problems).</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">21.2</span>Digit DP — counting without listing</h2><p class="section-sub">Chapter 7.6's "honest count of real output" lesson, solved without generating the output</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>A classic question: "how many numbers between 1 and N have digit sum divisible by 7?" For N in the billions, actually iterating every number is hopeless. Digit DP answers this by processing digit-by-digit, left to right, tracking just enough state to know if you're still "tied" with N's own digits or already strictly less.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🔒 THE "STILL SHADOWING THE LIMIT, OR ALREADY FREE" IDEA</span>
+<p>Imagine building a number digit by digit, left to right, while a strict chaperone (the number N) watches over your shoulder. As long as every digit you've placed so far exactly matches N's digit in that position, you're "tight" — the chaperone is still restricting your very next digit to be no bigger than N's corresponding digit. The moment you place a digit <em>strictly smaller</em> than N's in that position, the chaperone relaxes completely — every remaining digit can now be anything from 0-9 freely, since your number is already guaranteed smaller than N regardless of what comes after. This "tight vs. free" flag, plus whatever running property you care about (digit sum so far, mod some value), is exactly the DP state.</p>
+</div>
+
+<pre><code><span class="comment"># state: (position, digit_sum_so_far % 7, is_tight)</span>
+<span class="kw">def</span> solve(pos, sum_mod, tight):
+    <span class="kw">if</span> pos == len(N_digits):
+        <span class="kw">return</span> 1 <span class="kw">if</span> sum_mod == 0 <span class="kw">else</span> 0
+    <span class="kw">if</span> (pos, sum_mod, tight) <span class="kw">in</span> memo:
+        <span class="kw">return</span> memo[(pos, sum_mod, tight)]
+    limit = N_digits[pos] <span class="kw">if</span> tight <span class="kw">else</span> 9
+    total = 0
+    <span class="kw">for</span> d <span class="kw">in</span> range(0, limit + 1):
+        total += solve(pos+1, (sum_mod + d) % 7, tight <span class="kw">and</span> d == limit)
+    memo[(pos, sum_mod, tight)] = total
+    <span class="kw">return</span> total
+</code></pre>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY THIS ACTUALLY COUNTS, RATHER THAN LISTS, AND WHY THAT'S THE ENTIRE POINT</span>
+<p>The state space here is genuinely tiny — (number of digit positions) × (7 possible remainders) × (2 tight/free states) — so memoization collapses what would be an O(N) brute-force enumeration into something proportional to the number of <em>digits</em> of N, roughly O(log N). This is Chapter 15.1's overlapping-subproblems requirement in a new outfit: many different actual numbers share the exact same (position, sum_mod, tight) state, and digit DP is precisely the recognition that you never need to enumerate the numbers themselves — only the shared, compressed state that determines everything relevant about the count going forward.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">21.3</span>Probability &amp; Expected Value DP</h2><p class="section-sub">The same four-question process, where the "state" answers "on average," not "at best"</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Instead of asking "what's the best possible outcome," expected-value DP asks "what's the average outcome, weighted by how likely each possibility is" — the recurrence structure is nearly identical to Chapter 15's, but <code>max()</code> or <code>min()</code> gets replaced by a probability-weighted sum.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🎲 THE "WEIGHTED AVERAGE OF WHAT HAPPENS NEXT" PICTURE</span>
+<p>Classic example: expected number of dice rolls to go from 0 to reach exactly N on a number line, where each roll advances you by 1 to 6 (uniformly at random). Define <code>E[i]</code> = expected additional rolls needed, starting from position i. From position i, the very next roll takes you to i+1 through i+6, each with probability 1/6 — so the expected additional rolls from here is 1 (for this roll) plus the average of the expected remaining rolls from each of those six possible landing spots: <code>E[i] = 1 + (1/6) * (E[i+1] + E[i+2] + ... + E[i+6])</code>. This is precisely Chapter 15.3's "last decision" question, except the "decision" isn't something you control — it's a random outcome, and you're averaging over every way it could go, weighted by how likely each way is.</p>
+</div>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY THIS STILL HAS OPTIMAL SUBSTRUCTURE, JUST A DIFFERENT KIND</span>
+<p>The "optimal substructure" Chapter 15.1 demanded isn't about choosing the single best sub-answer here — it's that the expected value from position i genuinely only depends on the expected values of the positions reachable from it, correctly weighted by their probabilities, with no need to reconsider how you arrived at i. This is a real, checkable structural property, not just wishful thinking: the future is independent of the past once you know your current position (a property called the Markov property, if you ever encounter that term), which is exactly what licenses building E[i] purely from E[i+1..i+6] without needing to know the full history of rolls that got you to i.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">21.4</span>Where smart people trip up</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Forgetting the "tight" flag in digit DP, or forgetting to memoize only the free (non-tight) states</span>
+<p>The tight state is genuinely tied to N's specific digits, so results computed while tight aren't reusable across different numbers being counted — but once free, the sub-results depend only on (position, other state), and are safely reusable/memoizable. Some implementations skip memoizing tight states as an optimization; forgetting this distinction (or memoizing tight states incorrectly, mixing them with free ones) is a common, subtle bug.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Writing expected-value recurrences "forward" instead of "backward"</span>
+<p>It's tempting to define E[i] as "expected rolls to reach i from the start," but the clean recurrence in Section 21.3 only works defining E[i] as "expected <em>remaining</em> rolls from i to the end" — because the next step's uncertainty is naturally expressed in terms of what's still ahead, not what's already happened. Getting this direction backward tangles the recurrence into circular dependencies that don't resolve cleanly.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Collapsing tree DP's two-state tracking into one value prematurely</span>
+<p>As Section 21.1 warned, the temptation to just track "best score for this subtree" as a single number loses exactly the information a parent node needs to correctly enforce its own constraint. Before writing a tree DP recurrence, explicitly ask whether a single merged number is actually enough, or whether the problem's constraint requires tracking multiple "flavors" of the same subtree's answer.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">21.5</span>Check your understanding</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q1 — Why does the "invite the employee" tree DP need to track two values per node instead of one?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>A single "best score" number can't tell a parent node whether using it would violate the no-two-adjacent rule — the parent specifically needs to know the child's best score <em>conditioned</em> on whether the child was invited or not, since that determines what the parent is allowed to do. Collapsing to one number loses exactly the information needed to enforce the constraint correctly one level up.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q2 — In digit DP, why does the "tight" flag matter for correctness, not just efficiency?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Without it, there'd be no way to know whether the current digit is still constrained by N's own digit at this position, or free to be anything 0-9 — get this wrong and you'd either allow numbers bigger than N (overcounting) or wrongly restrict numbers that should be allowed (undercounting). It's not an optimization detail, it's the mechanism that keeps the count correctly bounded to exactly [1, N].</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q3 — Why is E[i] defined as "expected remaining rolls from i" rather than "expected rolls to reach i from the start"?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>The recurrence needs to express "what happens next" in terms of the uncertain future, not the already-fixed past — E[i] defined as remaining rolls depends cleanly on E[i+1] through E[i+6], values for positions strictly closer to the goal, giving a clean base case at the goal itself. Defining it as rolls-from-start instead would require knowing future randomness to compute a "past" quantity, creating a circular, unresolvable dependency.</p></div></div>
+</div>
+
+</div></div>
+</section>
+
+<div class="divider-quote">None of these three variants required a new fundamental idea — every one of them is Chapter 15's four-question process, just applied to a state shape (a tree, a digit position, a probability) that doesn't look like a simple array index at first glance.</div>
+<div class="endnote">Chapter 21 — Advanced Dynamic Programming. Next: Chapter 22, Advanced Strings.</div>
+</div>
+</main>
+</div>
+<script>
+function toggleSection(h){h.closest('.section').classList.toggle('open');}
+function togglePractice(e){e.classList.toggle('open');}
+</script>
+</body>
+</html>

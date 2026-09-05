@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 19 — Advanced Graphs | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-list a.active{color:var(--accent-deep); border-left:2px solid var(--accent); background:var(--accent-soft); font-weight:600;}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:40px; line-height:1.15; margin:10px 0 18px; font-weight:600;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer;}
+.section-head h2{font-size:24px; margin:0 0 6px; font-weight:600;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint);}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; transition:transform .25s,background .2s;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+p{margin:0 0 16px; font-size:17px;}
+h3{font-size:19px; margin:28px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:22px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;} em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;} li{font-size:17px; margin-bottom:8px;}
+.callout{border-radius:8px; padding:16px 20px; margin:20px 0; font-family:var(--sans); font-size:14.5px; line-height:1.6;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.55; margin:16px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-family:var(--sans); font-size:13.5px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11px; text-transform:uppercase; padding:8px 12px; border-bottom:2px solid var(--ink);}
+td{padding:10px 12px; border-bottom:1px solid var(--rule);}
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:20px 22px; margin:18px 0; font-family:var(--mono); font-size:13.5px; line-height:1.9;}
+.derivation .step{color:var(--ink-soft); font-size:11.5px; font-family:var(--sans);}
+.practice{border:1px solid var(--rule); border-radius:8px; margin:14px 0; overflow:hidden;}
+.practice-q{padding:14px 18px; cursor:pointer; display:flex; justify-content:space-between; font-family:var(--sans); font-size:14px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:700px;}
+.practice-a-inner{padding:4px 18px 18px;} .practice-a-inner p{font-size:14.5px;}
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:26px 0; font-style:italic; color:var(--ink-soft); font-size:16px;}
+.endnote{margin-top:60px; padding-top:22px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+@media (max-width:900px){.shell{flex-direction:column;} .toc{position:relative; width:100%; height:auto;} main{padding:32px 22px 80px;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc">
+<div class="toc-kicker">DSA Field Notes · Book Nineteen · Gap-Filling Set</div>
+<div class="toc-title">Advanced Graphs</div>
+<ul class="toc-list">
+<li><a href="#s1">19.1 &nbsp;Bridges &amp; Articulation Points</a></li>
+<li><a href="#s2">19.2 &nbsp;Strongly Connected Components</a></li>
+<li><a href="#s3">19.3 &nbsp;Bipartite Graphs &amp; Matching</a></li>
+<li><a href="#s4">19.4 &nbsp;Max Flow — the water pipe network</a></li>
+<li><a href="#s5">19.5 &nbsp;Where smart people trip up</a></li>
+<li><a href="#s6">19.6 &nbsp;Check your understanding</a></li>
+</ul>
+<a class="toc-prev" href="#">← Chapter 18: Math &amp; Number Theory</a>
+</nav>
+<main>
+<div class="masthead">
+<div class="eyebrow">CHAPTER NINETEEN · GAP-FILLING SET</div>
+<h1>Advanced Graphs</h1>
+<p>Chapter 14 gave you the graph fundamentals. This chapter fills the specific holes that show up constantly in real interview loops and contests: finding the "weak points" of a network, finding tightly-knit clusters, and matching things up optimally.</p>
+</div>
+<div class="container">
+
+<section class="section open" id="s1">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.1</span>Bridges &amp; Articulation Points</h2><p class="section-sub">Finding the single points of failure in a network</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>An <strong>articulation point</strong> is a node whose removal splits the graph into multiple disconnected pieces. A <strong>bridge</strong> is the same idea for an edge instead of a node. Think of a road network: an articulation point is a town that, if it burned down, would cut off two regions from each other entirely; a bridge is a single road that, if closed, does the same thing.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🪢 THE "HOW FAR BACK CAN A ROPE REACH" ANALOGY</span>
+<p>Run a DFS and assign every node a <code>disc[]</code> time — the order you first discovered it. Now track a second value, <code>low[]</code> — the earliest discovery time reachable from this node's subtree, <em>including</em> via one "back edge" that loops up to an ancestor. Picture every back edge as a rope thrown from deep in the tree back up to some ancestor. A node u's low[u] tells you: standing at u, how far up the tree can a rope from anywhere in my subtree reach? If none of u's children can throw a rope past u itself (i.e., <code>low[child] >= disc[u]</code>), then removing u genuinely severs that child's whole subtree from the rest of the graph — u is an articulation point. The bridge condition is nearly identical but strictly greater (<code>low[child] > disc[u]</code>): if the child's subtree can't even throw a rope back to u itself, the single edge connecting them is the only link — a bridge.</p>
+</div>
+
+<pre><code>disc = {}; low = {}; timer = [0]
+<span class="kw">def</span> dfs(u, parent):
+    disc[u] = low[u] = timer[0]; timer[0] += 1
+    <span class="kw">for</span> v <span class="kw">in</span> graph[u]:
+        <span class="kw">if</span> v == parent: <span class="kw">continue</span>
+        <span class="kw">if</span> v <span class="kw">not</span> <span class="kw">in</span> disc:
+            dfs(v, u)
+            low[u] = min(low[u], low[v])
+            <span class="kw">if</span> low[v] > disc[u]:
+                record_bridge(u, v)
+            <span class="kw">if</span> low[v] >= disc[u] <span class="kw">and</span> parent <span class="kw">is</span> <span class="kw">not</span> <span class="kw">None</span>:
+                record_articulation_point(u)
+        <span class="kw">else</span>:
+            low[u] = min(low[u], disc[v])   <span class="comment"># back edge — a rope thrown upward</span>
+</code></pre>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY THE ROOT NEEDS SPECIAL-CASE HANDLING</span>
+<p>The root of the DFS tree has no parent to be cut off from — it's only an articulation point if it has <strong>two or more</strong> separate children in the DFS tree (each child subtree with no rope back to another child means the root is the only thing connecting those subtrees together). This is a genuine edge case worth testing explicitly, exactly the kind of boundary condition Chapter 11's BST-range logic trained you to hunt for.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.2</span>Strongly Connected Components</h2><p class="section-sub">Finding clusters where everyone can reach everyone</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>In a directed graph, a Strongly Connected Component (SCC) is a maximal group of nodes where every node can reach every other node via directed edges, both ways. Think of a group chat where everyone can message everyone — versus a broadcast channel where only the admin can post, which isn't strongly connected at all.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🔄 KOSARAJU'S TWO-PASS TRICK</span>
+<p>Here's a genuinely elegant idea: run a DFS on the graph and record nodes by <em>finish time</em> (Chapter 10's postorder — a node is "finished" once everything reachable from it has been fully explored). Then reverse every edge in the graph, and process nodes in <em>decreasing</em> finish-time order, running DFS again — each new DFS tree in this second pass is exactly one SCC. Why does reversing the edges and processing by finish time work? A node that finishes last in the first pass is, informally, "upstream" of everything else — it can reach the most. Reversing the graph and starting from it means you can now only explore what could <em>originally reach</em> it — intersecting "what I can reach" (from pass one) with "what can reach me" (from pass two, on the reversed graph) is precisely the definition of mutual reachability, which is exactly what an SCC is.</p>
+</div>
+
+<p><strong>Tarjan's algorithm</strong> does this in a single DFS pass instead of two, using the exact same <code>low[]</code>/<code>disc[]</code> machinery from Section 19.1 plus an explicit stack tracking "currently on my active path" (echoing Chapter 14.4's directed-cycle two-set distinction) — when a node's low[] equals its own disc[], everything above it on the stack down to that point is one complete SCC, popped off together.</p>
+
+<div class="callout callout-good">
+<span class="label">✅ WHY THIS MATTERS PRACTICALLY</span>
+<p>Collapsing each SCC into a single "super-node" turns any directed graph into a DAG — which means Chapter 14.5's topological sort becomes available again, even on a graph that originally had cycles. This "condense then topologically sort" move is a genuinely common building block in harder graph problems.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.3</span>Bipartite Graphs &amp; Matching</h2><p class="section-sub">Splitting into two teams, and pairing things up optimally</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>A graph is <strong>bipartite</strong> if its nodes can be split into two groups such that every edge connects a node in one group to a node in the other — never within the same group. Think of job applicants and job postings: edges only ever go applicant-to-job, never applicant-to-applicant.</p>
+
+<div class="callout callout-analogy">
+<span class="label">🎨 THE TWO-COLOR TEST</span>
+<p>Checking bipartiteness is just a BFS/DFS coloring exercise: color the start node red, color every neighbor blue, every neighbor-of-neighbor red, alternating strictly. If you ever try to color a node a color it's already been assigned the opposite of, the graph isn't bipartite — you've found an <strong>odd-length cycle</strong>, which is provably the only thing that can break this alternating pattern (an even cycle alternates perfectly back to its start color; an odd cycle forces a contradiction on the last edge).</p>
+</div>
+
+<p><strong>Bipartite matching</strong> asks: what's the maximum number of applicant-job pairs you can form, with each applicant getting at most one job and vice versa? The classic algorithm augments one match at a time using an "augmenting path" — alternating between unmatched and matched edges, and if you find a path from an unmatched applicant to an unmatched job, flipping every edge along that path (matched becomes unmatched, unmatched becomes matched) increases the total match count by exactly one.</p>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY FLIPPING AN AUGMENTING PATH ALWAYS INCREASES THE MATCH COUNT</span>
+<p>An augmenting path alternates unmatched, matched, unmatched, matched, ..., unmatched — starting and ending on unmatched edges, meaning it always has exactly one more unmatched edge than matched edges. Flipping every edge's status along this path turns every previously-unmatched edge into matched and vice versa — since there was one extra unmatched edge, the flip produces a net gain of exactly one matched edge overall, with everything else in the graph completely undisturbed. Repeating this — find an augmenting path, flip it — until no augmenting path can be found any longer, is provably guaranteed (by König's theorem, beyond this book's scope to fully prove) to reach the true maximum matching.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.4</span>Max Flow — the water pipe network</h2><p class="section-sub">How much can actually get from source to sink</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Given a directed graph where every edge has a capacity (like a pipe's maximum water throughput), and a designated source and sink, what's the maximum total flow that can travel from source to sink without exceeding any edge's capacity?</p>
+
+<div class="callout callout-analogy">
+<span class="label">💧 THE FORD-FULKERSON "KEEP FINDING A PATH WITH ROOM" IDEA</span>
+<p>Repeatedly find any path from source to sink that still has spare capacity somewhere along its whole length (the path's total extra capacity is limited by its <em>bottleneck</em> — the single skinniest pipe along the way), and push flow equal to that bottleneck through the entire path. The genuinely clever part: also add a "residual" reverse edge along the same path, letting a future path <em>undo</em> part of an earlier flow decision if a better overall arrangement is later discovered — this residual-edge trick is precisely what prevents the algorithm from getting permanently stuck on an early, suboptimal set of choices. Repeat until no path with any spare capacity exists at all — at that point, the total flow pushed is provably the maximum possible (the max-flow min-cut theorem: the maximum flow always exactly equals the capacity of the smallest "cut" — the cheapest possible set of edges whose removal would fully disconnect source from sink).</p>
+</div>
+
+<div class="callout callout-good">
+<span class="label">✅ WHY THIS SHOWS UP MORE OFTEN THAN "PIPE NETWORK" PROBLEMS SUGGEST</span>
+<p>Max flow is a genuinely surprising Swiss-army-knife: bipartite matching (Section 19.3) is literally a special case of max flow (connect a source to every applicant, every job to a sink, capacity 1 on every edge). Many "assignment" or "scheduling under constraints" problems that don't look like flow at all can be reframed as one, which is exactly why recognizing the shape — "can I model this as capacities flowing from a source to a sink" — is worth having as a mental tool, even without implementing a full flow algorithm from scratch under interview time pressure.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.5</span>Where smart people trip up</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Forgetting to skip the immediate parent edge in bridge-finding</span>
+<p>Without excluding the edge back to the direct parent, every tree edge would incorrectly look like a back edge to itself, making low[u] artificially small and hiding every real bridge and articulation point.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Confusing Kosaraju's finish-time order (need reverse) with a plain topological sort order</span>
+<p>The two look superficially similar (both use DFS finish times) but Kosaraju's second pass specifically needs the graph's edges reversed — running the second DFS on the original graph instead silently produces wrong SCC groupings.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Assuming any two-coloring attempt failing means "no bipartition exists anywhere," rather than checking each connected component separately</span>
+<p>A disconnected graph can have some components that are bipartite and others that aren't — always check per-component, not as one single global pass that might incorrectly abort on the first violation found in an unrelated part of the graph.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s6">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">19.6</span>Check your understanding</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q1 — Why is the bridge condition strictly "&gt;" while the articulation point condition is "&gt;="?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>A bridge requires the child's subtree to have absolutely no rope back to u or higher — even reaching u itself (equal, not just less) means there's still an alternate route through u, so the direct edge isn't the sole connection. An articulation point only requires that removing u specifically would disconnect the child — reaching exactly u (not past it) still means u itself is essential, satisfying the "&gt;=" condition, even though the edge itself isn't uniquely essential.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q2 — Why does an augmenting path in bipartite matching need to start and end on unmatched edges specifically?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Starting and ending on unmatched edges is what guarantees the path has exactly one more unmatched edge than matched edges, which is precisely what makes flipping every edge's status a net gain of one match — a path with equal matched/unmatched counts, or starting/ending on matched edges, wouldn't produce this clean one-more-unmatched imbalance and wouldn't actually increase the total match count when flipped.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q3 — Why does the residual reverse edge in max-flow matter — what would break without it?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Without it, an early greedy flow decision could never be reconsidered — the algorithm could get permanently stuck sending flow along a path that blocks a better overall arrangement, with no mechanism to undo it. The residual edge lets a later path effectively "cancel" part of an earlier decision, which is exactly what's needed to guarantee the algorithm converges to the true global maximum rather than a locally-greedy, suboptimal flow.</p></div></div>
+</div>
+
+</div></div>
+</section>
+
+<div class="divider-quote">These four ideas — bridges, SCCs, bipartite matching, max flow — are the graph techniques that separate "I know BFS/DFS" from "I can model a genuinely novel constraint problem as a graph." They're rarer in day-to-day interview questions than Chapter 14's core toolkit, but they're exactly what shows up when a problem doesn't fit any of the standard shapes.</div>
+<div class="endnote">Chapter 19 — Advanced Graphs. Next: Chapter 20, Segment Trees &amp; Fenwick Trees.</div>
+</div>
+</main>
+</div>
+<script>
+document.querySelectorAll('.section-head').forEach(h=>{});
+function toggleSection(h){h.closest('.section').classList.toggle('open');}
+function togglePractice(e){e.classList.toggle('open');}
+</script>
+</body>
+</html>

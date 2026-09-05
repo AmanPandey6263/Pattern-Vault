@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 20 — Segment Trees &amp; Fenwick Trees | DSA Field Notes</title>
+<style>
+:root{
+  --paper:#f7f5f0; --paper-raised:#ffffff; --ink:#1c1b19; --ink-soft:#4a4740; --ink-faint:#8a8578;
+  --rule:#ddd8cc; --accent:#2b5f6b; --accent-soft:#e4ede9; --accent-deep:#173b43;
+  --warn:#8a4a2b; --warn-soft:#f3e6dc; --good:#3d6b3d; --good-soft:#e7efe3;
+  --code-bg:#232220; --code-text:#e8e4d8; --code-accent:#7fc4a8;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;
+  --mono:'SF Mono','Cascadia Code',Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif); line-height:1.7;}
+.shell{display:flex; max-width:1400px; margin:0 auto;}
+.toc{width:280px; flex-shrink:0; position:sticky; top:0; height:100vh; overflow-y:auto; padding:40px 28px 40px 32px; border-right:1px solid var(--rule);}
+.toc-kicker{font-family:var(--sans); font-size:11px; letter-spacing:.08em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:6px;}
+.toc-title{font-size:22px; font-weight:600; margin:0 0 28px;}
+.toc-list{list-style:none; margin:0; padding:0;}
+.toc-list a{display:block; font-family:var(--sans); font-size:13px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:5px; margin-bottom:1px; border-left:2px solid transparent;}
+.toc-list a:hover{background:var(--accent-soft); color:var(--accent-deep);}
+.toc-prev{display:block; margin-top:18px; font-family:var(--sans); font-size:12px; color:var(--accent-deep); text-decoration:none; padding:8px 10px; border:1px solid var(--rule); border-radius:6px;}
+main{flex:1; min-width:0; padding:56px 64px 120px;}
+.masthead{max-width:720px; margin-bottom:56px;}
+.masthead .eyebrow{font-family:var(--sans); font-size:12px; letter-spacing:.05em; color:var(--accent);}
+.masthead h1{font-size:40px; line-height:1.15; margin:10px 0 18px; font-weight:600;}
+.masthead p{font-size:18px; color:var(--ink-soft); max-width:620px;}
+.container{max-width:720px;}
+.section{margin-bottom:8px; border-top:1px solid var(--rule); padding-top:34px;}
+.section:first-of-type{border-top:none;}
+.section-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; cursor:pointer;}
+.section-head h2{font-size:24px; margin:0 0 6px; font-weight:600;}
+.section-num{font-family:var(--sans); color:var(--accent); font-size:14px; font-weight:600; margin-right:10px;}
+.section-sub{font-family:var(--sans); font-size:13.5px; color:var(--ink-faint);}
+.toggle{flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; font-family:var(--sans); font-size:16px; transition:transform .25s,background .2s;}
+.section.open .toggle{transform:rotate(45deg); background:var(--accent-soft); border-color:var(--accent);}
+.section-body{max-height:0; overflow:hidden; transition:max-height .4s ease;}
+.section.open .section-body{max-height:none;}
+.section-inner{padding:22px 0 40px;}
+p{margin:0 0 16px; font-size:17px;}
+h3{font-size:19px; margin:28px 0 12px; font-weight:600;}
+h4{font-family:var(--sans); font-size:13px; margin:22px 0 10px; font-weight:700; color:var(--accent-deep);}
+strong{font-weight:650;} em{color:var(--ink-soft);}
+ul,ol{margin:0 0 16px; padding-left:22px;} li{font-size:17px; margin-bottom:8px;}
+.callout{border-radius:8px; padding:16px 20px; margin:20px 0; font-family:var(--sans); font-size:14.5px; line-height:1.6;}
+.callout .label{font-weight:700; display:block; margin-bottom:5px; font-size:12px;}
+.callout-analogy{background:#fbf3e3; border-left:3px solid #c98a2e;} .callout-analogy .label{color:#8a5a1a;}
+.callout-why{background:var(--accent-soft); border-left:3px solid var(--accent);} .callout-why .label{color:var(--accent-deep);}
+.callout-pitfall{background:var(--warn-soft); border-left:3px solid var(--warn);} .callout-pitfall .label{color:var(--warn);}
+.callout-good{background:var(--good-soft); border-left:3px solid var(--good);} .callout-good .label{color:var(--good);}
+pre{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.55; margin:16px 0;}
+code{font-family:var(--mono); font-size:.88em; background:rgba(0,0,0,0.05); padding:1px 5px; border-radius:4px;}
+pre code{background:none; padding:0;}
+.comment{color:#8a8577;} .kw{color:var(--code-accent);}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-family:var(--sans); font-size:13.5px;}
+th{text-align:left; font-weight:700; color:var(--ink-soft); font-size:11px; text-transform:uppercase; padding:8px 12px; border-bottom:2px solid var(--ink);}
+td{padding:10px 12px; border-bottom:1px solid var(--rule);}
+.derivation{background:var(--paper-raised); border:1px solid var(--rule); border-radius:8px; padding:20px 22px; margin:18px 0; font-family:var(--mono); font-size:13.5px; line-height:1.9;}
+.derivation .step{color:var(--ink-soft); font-size:11.5px; font-family:var(--sans);}
+.practice{border:1px solid var(--rule); border-radius:8px; margin:14px 0; overflow:hidden;}
+.practice-q{padding:14px 18px; cursor:pointer; display:flex; justify-content:space-between; font-family:var(--sans); font-size:14px; font-weight:600; background:var(--paper-raised);}
+.practice-q .arrow{color:var(--accent); transition:transform .2s;}
+.practice.open .practice-q .arrow{transform:rotate(90deg);}
+.practice-a{max-height:0; overflow:hidden; transition:max-height .35s ease; background:#fbfaf7;}
+.practice.open .practice-a{max-height:700px;}
+.practice-a-inner{padding:4px 18px 18px;} .practice-a-inner p{font-size:14.5px;}
+.divider-quote{border-left:3px solid var(--rule); padding-left:20px; margin:26px 0; font-style:italic; color:var(--ink-soft); font-size:16px;}
+.endnote{margin-top:60px; padding-top:22px; border-top:1px solid var(--rule); font-family:var(--sans); font-size:13px; color:var(--ink-faint);}
+.tree-ascii{background:var(--code-bg); color:var(--code-text); border-radius:8px; padding:16px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.5; margin:16px 0; white-space:pre;}
+@media (max-width:900px){.shell{flex-direction:column;} .toc{position:relative; width:100%; height:auto;} main{padding:32px 22px 80px;}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc">
+<div class="toc-kicker">DSA Field Notes · Book Twenty · Gap-Filling Set</div>
+<div class="toc-title">Segment Trees &amp; Fenwick Trees</div>
+<ul class="toc-list">
+<li><a href="#s1">20.1 &nbsp;The gap prefix sums couldn't fill</a></li>
+<li><a href="#s2">20.2 &nbsp;Segment trees — a tree of pre-merged answers</a></li>
+<li><a href="#s3">20.3 &nbsp;Updates — fixing only what changed</a></li>
+<li><a href="#s4">20.4 &nbsp;Fenwick trees — the lean alternative</a></li>
+<li><a href="#s5">20.5 &nbsp;Where smart people trip up</a></li>
+<li><a href="#s6">20.6 &nbsp;Check your understanding</a></li>
+</ul>
+<a class="toc-prev" href="#">← Chapter 19: Advanced Graphs</a>
+</nav>
+<main>
+<div class="masthead">
+<div class="eyebrow">CHAPTER TWENTY · GAP-FILLING SET</div>
+<h1>Segment Trees &amp; Fenwick Trees</h1>
+<p>Chapter 2.4's prefix sums had one silent limitation, flagged back then but never solved: they fall apart the moment the underlying array actually changes. This chapter is the fix — and it turns out to be Chapter 12's heap-style "precompute, don't recompute" idea, applied to <em>ranges</em> instead of a single min/max.</p>
+</div>
+<div class="container">
+
+<section class="section open" id="s1">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.1</span>The gap prefix sums couldn't fill</h2><p class="section-sub">Fast range queries AND fast updates — a combination nothing else in this book offers</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Recall Chapter 2.4's honest trade-off: prefix sums give O(1) range-sum queries after an O(n) one-time build — but if a single element changes, every prefix sum after it is now wrong, forcing a full O(n) rebuild. If updates happen frequently, interleaved with queries, prefix sums stop being a good deal at all.</p>
+
+<div class="callout callout-why">
+<span class="label">💡 THE GENUINE GAP</span>
+<p>What's actually needed: a structure offering <strong>both</strong> fast range queries and fast point updates — not one at the expense of the other. Arrays give O(1) point updates but O(n) range queries. Prefix sums give O(1) range queries but O(n) updates. Neither wins both. Segment trees and Fenwick trees are two different, genuinely clever answers to exactly this — both land on O(log n) for <em>both</em> operations, a real, honest middle ground rather than a trick that secretly favors one side.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.2</span>Segment trees — a tree of pre-merged answers</h2><p class="section-sub">Chapter 10's recursive template, applied to ranges instead of subtrees</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="callout callout-analogy">
+<span class="label">🏢 THE COMMITTEE-OF-COMMITTEES ANALOGY</span>
+<p>Picture a company where the CEO's "total headcount" figure isn't recomputed from scratch by personally counting every employee — instead, each department manager reports their own department's total, and the CEO just adds up the department totals. Each department manager, in turn, gets sub-team totals reported up to them, rather than counting individually themselves. A segment tree is exactly this org chart, applied to array ranges: the root represents the sum (or min, max, or any other "mergeable" property) of the <em>entire</em> array, each child represents half that range, and so on recursively down to individual elements as the leaves.</p>
+</div>
+
+<div class="tree-ascii">Array: [2, 5, 1, 4, 9, 3]
+
+              sum[0..5]=24
+             /            \
+      sum[0..2]=8      sum[3..5]=16
+       /      \           /      \
+  sum[0,1]=7  [2]=1  sum[3,4]=13  [5]=3
+   /    \                /    \
+ [0]=2  [1]=5          [3]=4  [4]=9</div>
+
+<p>Answering a range query means walking down from the root, and the moment a node's range falls <em>entirely</em> inside the queried range, you use its precomputed value directly and stop descending further into it — exactly the CEO trusting a department manager's total rather than personally re-verifying every employee underneath them.</p>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY QUERIES ARE O(log n) — THE SAME HEIGHT ARGUMENT AS CHAPTER 12</span>
+<p>Any query range decomposes into at most O(log n) of these "fully covered" nodes — because at each level of the tree, a query range can only partially overlap at most 2 nodes (one at each edge of the range) before fully covering everything in between, and there are only log n levels total (this is Chapter 12.3's "complete tree has guaranteed log n height" argument, reused here). So a query touches at most O(log n) fully-covered nodes plus a small, bounded number of partial ones per level — genuinely O(log n) total, not O(n).</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.3</span>Updates — fixing only what changed</h2><p class="section-sub">Why changing one leaf doesn't mean rebuilding the whole tree</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>Updating a single array element means walking from that element's leaf back up to the root, recomputing each ancestor's merged value along the way — since only the ancestors of the changed leaf could possibly be affected, everything else in the tree is provably untouched.</p>
+
+<pre><code><span class="kw">def</span> update(node, node_lo, node_hi, idx, new_val):
+    <span class="kw">if</span> node_lo == node_hi:
+        tree[node] = new_val
+        <span class="kw">return</span>
+    mid = (node_lo + node_hi) // 2
+    <span class="kw">if</span> idx <= mid: update(2*node, node_lo, mid, idx, new_val)
+    <span class="kw">else</span>: update(2*node+1, mid+1, node_hi, idx, new_val)
+    tree[node] = tree[2*node] + tree[2*node+1]   <span class="comment"># re-merge from children, one level up</span>
+</code></pre>
+
+<div class="callout callout-why">
+<span class="label">🧠 WHY THIS IS O(log n), NOT O(n) — THE SAME "ONLY THE PATH MATTERS" IDEA AS CHAPTER 11</span>
+<p>A single leaf has exactly one path back to the root, and that path's length is the tree's height — O(log n) for a balanced segment tree, by construction (segment trees are always built as complete, balanced binary trees on top of the array, regardless of the array's own values — unlike Chapter 11's BST, there's no adversarial-input risk here at all, since the tree's shape depends only on the array's <em>length</em>, never its contents). Every node off that single path is completely unaffected and never touched, which is exactly why the update is genuinely logarithmic, not linear.</p>
+</div>
+
+<p>This query-and-update pairing — both O(log n) — is the entire point: segment trees generalize far beyond sums to any "mergeable" operation (min, max, GCD, even more exotic custom combinations), as long as merging two children's answers can produce the correct parent answer, echoing Chapter 15.3's "define the state, then the combine rule" DP discipline, just applied to a static array structure instead of a table.</p>
+
+</div></div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.4</span>Fenwick trees — the lean alternative</h2><p class="section-sub">Chapter 17's bit tricks, arriving to solve one more problem</p></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<p>A Fenwick tree (Binary Indexed Tree) solves the exact same prefix-sum-with-updates problem as a segment tree, but specifically for sums (not general min/max), using dramatically less code and memory — by directly reusing Chapter 17.3's <code>n & (-n)</code> lowest-set-bit trick.</p>
+
+<div class="callout callout-analogy">
+<span class="label">📇 THE "EACH INDEX OWNS A SPECIFIC RANGE, DETERMINED BY ITS OWN BITS" IDEA</span>
+<p>Each index i in a Fenwick tree is responsible for summarizing a specific range of the original array — and remarkably, the <em>size</em> of that range is exactly determined by i's lowest set bit (Chapter 17.3's isolation trick). Index 12 (binary 1100, lowest set bit worth 4) is responsible for a range of 4 elements; index 8 (1000, lowest set bit worth 8) is responsible for 8. To compute a prefix sum up to index i, repeatedly jump backward by clearing the lowest set bit (<code>i -= i & (-i)</code>, Chapter 17.2's domino trick) — each jump lands you on another index whose pre-summarized range you can add in directly, and because each jump strictly shrinks the number of "on" bits remaining, you're guaranteed to reach 0 in at most log n jumps.</p>
+</div>
+
+<pre><code>tree = [0] * (n + 1)
+<span class="kw">def</span> update(i, delta):
+    <span class="kw">while</span> i <= n:
+        tree[i] += delta
+        i += i & (-i)         <span class="comment"># move to the next index this one contributes to</span>
+
+<span class="kw">def</span> prefix_sum(i):
+    total = 0
+    <span class="kw">while</span> i > 0:
+        total += tree[i]
+        i -= i & (-i)          <span class="comment"># jump back using the lowest-set-bit trick</span>
+    <span class="kw">return</span> total
+</code></pre>
+
+<table>
+<tr><th>Feature</th><th>Segment Tree</th><th>Fenwick Tree</th></tr>
+<tr><td>Operations supported</td><td>any mergeable op (sum, min, max, gcd...)</td><td>mainly sum-like (invertible) operations</td></tr>
+<tr><td>Code complexity</td><td>more code, more flexible</td><td>~10 lines, much leaner</td></tr>
+<tr><td>Memory</td><td>~4n</td><td>~n</td></tr>
+<tr><td>Both O(log n) query and update</td><td>yes</td><td>yes</td></tr>
+</table>
+
+<div class="callout callout-good">
+<span class="label">✅ WHEN TO REACH FOR WHICH</span>
+<p>If the operation is a plain sum (or any operation with a clean inverse, like XOR), Fenwick's leanness usually wins. If you need min/max, or any operation without a clean "undo," a segment tree is the honest choice — Fenwick's whole trick relies on being able to combine contributions additively, which min/max fundamentally can't do the same way.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.5</span>Where smart people trip up</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Trying to build a Fenwick tree for min/max</span>
+<p>Fenwick's update/query logic depends on additive contributions that can be cleanly combined and, implicitly, "removed" — min and max have no such inverse operation, so a naive Fenwick-for-min implementation silently gives wrong answers on certain update patterns. Use a segment tree for min/max instead.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Off-by-one errors from mixing 0-indexed and 1-indexed conventions</span>
+<p>Fenwick trees are conventionally built 1-indexed specifically because the <code>i & (-i)</code> trick breaks down at index 0 (which has no set bits at all). Mixing a 0-indexed input array with a 1-indexed Fenwick tree without a consistent, deliberate offset is one of the most common sources of subtle bugs in this entire structure.</p>
+</div>
+<div class="callout callout-pitfall">
+<span class="label">⚠️ Forgetting that segment tree array size needs roughly 4n, not 2n</span>
+<p>Because a segment tree built on an array whose length isn't a clean power of 2 isn't perfectly balanced at the leaf level, the array-based representation needs extra headroom — allocating only 2n can silently cause index-out-of-range errors on certain array sizes that happen not to trigger it on others.</p>
+</div>
+
+</div></div>
+</section>
+
+<section class="section" id="s6">
+<div class="section-head" onclick="toggleSection(this)">
+<div><h2><span class="section-num">20.6</span>Check your understanding</h2></div>
+<div class="toggle">+</div>
+</div>
+<div class="section-body"><div class="section-inner">
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q1 — Why does updating a single segment-tree leaf only require touching O(log n) nodes, not the whole tree?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Only a node's ancestors depend on its value — every other node in the tree represents a completely different range that never included this leaf, so nothing about it changes. A single leaf has exactly one path to the root, and that path's length is bounded by the tree's height, which is O(log n) since the tree is always built as a complete, balanced structure regardless of the array's actual contents.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q2 — In a Fenwick tree, why does repeatedly clearing the lowest set bit during a prefix-sum query guarantee termination in O(log n) steps?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Each application of i -= i & (-i) removes exactly one "on" switch from i's binary representation (Chapter 17.2's domino trick) — since i can have at most log n switches total, this process must reach zero within at most log n steps, with no possibility of looping longer than that.</p></div></div>
+</div>
+
+<div class="practice" onclick="togglePractice(this)">
+<div class="practice-q"><span>Q3 — Why can't a Fenwick tree be naively adapted for range-minimum queries the same way it handles sums?</span><span class="arrow">›</span></div>
+<div class="practice-a"><div class="practice-a-inner"><p>Fenwick's update mechanism relies on being able to combine and effectively "undo" contributions additively — sum has a clean inverse (subtraction), letting old contributions be cleanly replaced. Min has no such inverse: once you've combined several values into "the minimum so far," you can't recover what the second-smallest was to correctly update after the actual minimum changes, which is exactly why min/max needs a genuine segment tree instead.</p></div></div>
+</div>
+
+</div></div>
+</section>
+
+<div class="divider-quote">This chapter is really two earlier ideas meeting for the first time: Chapter 10's recursive tree template, and Chapter 17's bit tricks — both solving the same "fast query, fast update" problem from two genuinely different angles.</div>
+<div class="endnote">Chapter 20 — Segment Trees &amp; Fenwick Trees. Next: Chapter 21, Advanced Dynamic Programming.</div>
+</div>
+</main>
+</div>
+<script>
+function toggleSection(h){h.closest('.section').classList.toggle('open');}
+function togglePractice(e){e.classList.toggle('open');}
+</script>
+</body>
+</html>
