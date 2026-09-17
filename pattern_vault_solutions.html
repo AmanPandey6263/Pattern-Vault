@@ -1,0 +1,2636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern Vault — Solutions</title>
+<style>
+  :root{
+    --bg:#0e1210;
+    --bg-elev:#141b18;
+    --bg-elev2:#1a2320;
+    --line:#26332e;
+    --line-soft:#1e2823;
+    --ink:#e7ede9;
+    --ink-dim:#9db3a8;
+    --ink-faint:#5f746b;
+    --accent:#5ee6a8;
+    --accent-dim:#2f6b52;
+    --accent-ink:#08150f;
+    --easy:#5ee6a8;
+    --medium:#e6c15e;
+    --hard:#e6715e;
+    --code-bg:#0a0f0d;
+    --radius:4px;
+    --serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f7f9f7;
+      --bg-elev:#ffffff;
+      --bg-elev2:#eef2ef;
+      --line:#d9e0dc;
+      --line-soft:#e5eae7;
+      --ink:#16201b;
+      --ink-dim:#4c5f55;
+      --ink-faint:#7c8f85;
+      --accent:#1f9d63;
+      --accent-dim:#bfe8d4;
+      --accent-ink:#ffffff;
+      --easy:#1f9d63;
+      --medium:#a8790a;
+      --hard:#c0432c;
+      --code-bg:#0e1210;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f7f9f7;
+    --bg-elev:#ffffff;
+    --bg-elev2:#eef2ef;
+    --line:#d9e0dc;
+    --line-soft:#e5eae7;
+    --ink:#16201b;
+    --ink-dim:#4c5f55;
+    --ink-faint:#7c8f85;
+    --accent:#1f9d63;
+    --accent-dim:#bfe8d4;
+    --accent-ink:#ffffff;
+    --easy:#1f9d63;
+    --medium:#a8790a;
+    --hard:#c0432c;
+    --code-bg:#0e1210;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e1210;
+    --bg-elev:#141b18;
+    --bg-elev2:#1a2320;
+    --line:#26332e;
+    --line-soft:#1e2823;
+    --ink:#e7ede9;
+    --ink-dim:#9db3a8;
+    --ink-faint:#5f746b;
+    --accent:#5ee6a8;
+    --accent-dim:#2f6b52;
+    --accent-ink:#08150f;
+    --easy:#5ee6a8;
+    --medium:#e6c15e;
+    --hard:#e6715e;
+    --code-bg:#0a0f0d;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);}
+
+  /* ===== Topbar ===== */
+  .topbar{
+    border-bottom:1px solid var(--line);
+    padding:16px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:30;
+  }
+  .brand{display:flex; flex-direction:column; gap:1px; min-width:0;}
+  .brand .mark{
+    font-family:var(--serif);
+    font-size:20px;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .brand .mark span{color:var(--accent); font-style:italic;}
+  .brand .tag{color:var(--ink-faint); font-size:11px;}
+
+  .topbar-right{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .stat{text-align:right; line-height:1.2;}
+  .stat .n{font-size:16px; color:var(--accent); font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.04em;}
+
+  .theme-toggle{
+    border:1px solid var(--line);
+    background:var(--bg-elev);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:6px 10px;
+    cursor:pointer;
+    font-family:var(--mono);
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .theme-toggle:hover{border-color:var(--accent);}
+
+  /* ===== Layout ===== */
+  .layout{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:calc(100vh - 60px);
+  }
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;}
+    .sidebar{
+      position:static;
+      max-height:none;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+    }
+  }
+
+  .sidebar{
+    border-right:1px solid var(--line);
+    padding:16px;
+    position:sticky;
+    top:61px;
+    align-self:start;
+    max-height:calc(100vh - 61px);
+    overflow-y:auto;
+  }
+  .search-box{
+    width:100%;
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:8px 10px;
+    font-family:var(--mono);
+    font-size:13px;
+    margin-bottom:6px;
+  }
+  .search-box:focus{outline:none; border-color:var(--accent);}
+
+  .filter-row{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
+  .filter-chip{
+    border:1px solid var(--line);
+    background:var(--bg-elev);
+    color:var(--ink-dim);
+    border-radius:999px;
+    padding:3px 10px;
+    font-size:11px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .filter-chip.active{border-color:var(--accent); color:var(--accent); background:var(--accent-dim);}
+
+  .nav-topic{margin-bottom:4px;}
+  .nav-topic-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:7px 8px;
+    cursor:pointer;
+    border-radius:var(--radius);
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .nav-topic-head:hover{background:var(--bg-elev2);}
+  .nav-topic-head .cnt{color:var(--ink-faint); font-size:11px;}
+  .nav-sub{
+    padding:5px 8px 5px 18px;
+    font-size:12px;
+    color:var(--ink-dim);
+    cursor:pointer;
+    border-radius:var(--radius);
+    display:flex;
+    justify-content:space-between;
+  }
+  .nav-sub:hover{background:var(--bg-elev2); color:var(--ink);}
+  .nav-sub.active-sub{color:var(--accent);}
+  .nav-subs{display:none;}
+  .nav-subs.open{display:block;}
+
+  /* ===== Main ===== */
+  .main{padding:20px 26px 60px; max-width:900px;}
+  .topic-header{margin-bottom:18px;}
+  .topic-header h1{
+    font-family:var(--serif);
+    font-size:26px;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .topic-header .desc{color:var(--ink-dim); font-size:13px;}
+
+  .sub-block{margin-bottom:30px;}
+  .sub-block h2{
+    font-size:16px;
+    color:var(--ink);
+    border-bottom:1px solid var(--line);
+    padding-bottom:8px;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .sub-block .subhint{color:var(--ink-faint); font-size:12px; margin:0 0 14px;}
+
+  .problem-card{
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .problem-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+    cursor:pointer;
+  }
+  .problem-head:hover{background:var(--bg-elev2);}
+  .chk{
+    width:16px; height:16px;
+    border:1px solid var(--ink-faint);
+    border-radius:3px;
+    flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    background:transparent;
+  }
+  .chk.done{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-size:11px;}
+  .p-title{flex:1; font-size:13.5px; color:var(--ink);}
+  .p-title.done-text{color:var(--ink-faint); text-decoration:line-through;}
+  .diff-badge{
+    font-size:10.5px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    flex:0 0 auto;
+  }
+  .diff-Easy{color:var(--easy); border:1px solid var(--easy);}
+  .diff-Medium{color:var(--medium); border:1px solid var(--medium);}
+  .diff-Hard{color:var(--hard); border:1px solid var(--hard);}
+  .chevron{color:var(--ink-faint); font-size:11px; transition:transform 0.15s; flex:0 0 auto;}
+  .problem-card.open .chevron{transform:rotate(90deg);}
+
+  .problem-body{
+    display:none;
+    padding:2px 16px 18px;
+    border-top:1px solid var(--line-soft);
+  }
+  .problem-card.open .problem-body{display:block;}
+  .problem-body h4{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-faint);
+    margin:14px 0 6px;
+  }
+  .problem-body p{margin:0; color:var(--ink-dim); font-size:13px; line-height:1.6;}
+  .code-wrap{position:relative;}
+  .code-wrap pre{
+    background:var(--code-bg);
+    color:#d7e6dd;
+    padding:12px 14px;
+    border-radius:var(--radius);
+    overflow-x:auto;
+    font-size:12.5px;
+    line-height:1.55;
+    margin:0;
+  }
+  .copy-btn{
+    position:absolute;
+    top:8px; right:8px;
+    background:var(--bg-elev2);
+    color:var(--ink-dim);
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-size:10.5px;
+    padding:3px 8px;
+    cursor:pointer;
+    font-family:var(--mono);
+  }
+  .copy-btn:hover{color:var(--accent); border-color:var(--accent);}
+
+  .empty-state{color:var(--ink-faint); padding:40px 0; text-align:center; font-size:13px;}
+
+  code.inline{
+    background:var(--bg-elev2);
+    padding:1px 5px;
+    border-radius:3px;
+    font-size:12px;
+  }
+
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="mark">pattern<span>vault</span> — solutions</div>
+    <div class="tag">433-problem DSA reference · progress saved in this browser</div>
+  </div>
+  <div class="topbar-right">
+    <div class="stat"><div class="n" id="statSolved">0</div><div class="l">solved</div></div>
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">total</div></div>
+    <button class="theme-toggle" id="themeToggle">☀︎ / ☾</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <input class="search-box" id="searchBox" placeholder="Search problems…" />
+    <div class="filter-row">
+      <div class="filter-chip active" data-diff="all">All</div>
+      <div class="filter-chip" data-diff="Easy">Easy</div>
+      <div class="filter-chip" data-diff="Medium">Medium</div>
+      <div class="filter-chip" data-diff="Hard">Hard</div>
+    </div>
+    <div id="navTree"></div>
+  </div>
+  <div class="main" id="mainContent"></div>
+</div>
+
+<script>
+window.__DATA__ = [
+{topic:"Array", desc:"Fundamental collection of elements stored at contiguous memory locations.", subs:[
+  {name:"Two-Pointer", hint:"Move two indices toward or away from each other to cut redundant comparisons.", problems:[
+    {title:"Two Sum II - Input Array Is Sorted", diff:"Easy",
+     statement:`Given a 1-indexed array \`numbers\` sorted in non-decreasing order, find two numbers that add up to \`target\` and return their 1-indexed positions.`,
+     approach:`Since the array is sorted, use two pointers, \`lo\` at the start and \`hi\` at the end. If the sum is too small, move \`lo\` right; if too large, move \`hi\` left. Each comparison eliminates one candidate pair permanently.`,
+     code:`def twoSum(numbers: list[int], target: int) -> list[int]:
+    lo, hi = 0, len(numbers) - 1
+    while lo < hi:
+        s = numbers[lo] + numbers[hi]
+        if s == target:
+            return [lo + 1, hi + 1]
+        elif s < target:
+            lo += 1
+        else:
+            hi -= 1
+    return []`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Container With Most Water", diff:"Medium",
+     statement:`Given heights of vertical lines at each index, find two lines that together with the x-axis form a container holding the most water.`,
+     approach:`Start with the widest container. The area is limited by the shorter line. Moving the taller pointer inward can only shrink width without a chance of increasing the limiting height, so always move the *shorter* pointer inward.`,
+     code:`def maxArea(height: list[int]) -> int:
+    lo, hi = 0, len(height) - 1
+    best = 0
+    while lo < hi:
+        h = min(height[lo], height[hi])
+        best = max(best, h * (hi - lo))
+        if height[lo] < height[hi]:
+            lo += 1
+        else:
+            hi -= 1
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"3Sum", diff:"Medium",
+     statement:`Find all unique triplets in an array that sum to zero.`,
+     approach:`Sort the array. Fix the smallest element \`nums[i]\` and use two-pointer on the remaining sorted subarray to find pairs summing to \`-nums[i]\`. Skip duplicate values to avoid duplicate triplets.`,
+     code:`def threeSum(nums: list[int]) -> list[list[int]]:
+    nums.sort()
+    n = len(nums)
+    res = []
+    for i in range(n - 2):
+        if i > 0 and nums[i] == nums[i - 1]:
+            continue
+        if nums[i] > 0:
+            break
+        lo, hi = i + 1, n - 1
+        while lo < hi:
+            s = nums[i] + nums[lo] + nums[hi]
+            if s < 0:
+                lo += 1
+            elif s > 0:
+                hi -= 1
+            else:
+                res.append([nums[i], nums[lo], nums[hi]])
+                lo += 1
+                hi -= 1
+                while lo < hi and nums[lo] == nums[lo - 1]:
+                    lo += 1
+                while lo < hi and nums[hi] == nums[hi + 1]:
+                    hi -= 1
+    return res`,
+     complexity:`Time O(n^2), Space O(1) extra.`},
+    {title:"Sort Colors", diff:"Medium",
+     statement:`Given an array with values 0, 1, 2, sort it in-place in one pass (Dutch National Flag).`,
+     approach:`Maintain three pointers: \`low\` (next 0 boundary), \`mid\` (current), \`high\` (next 2 boundary). Swap toward the correct boundary and advance pointers accordingly.`,
+     code:`def sortColors(nums: list[int]) -> None:
+    low, mid, high = 0, 0, len(nums) - 1
+    while mid <= high:
+        if nums[mid] == 0:
+            nums[low], nums[mid] = nums[mid], nums[low]
+            low += 1
+            mid += 1
+        elif nums[mid] == 1:
+            mid += 1
+        else:
+            nums[mid], nums[high] = nums[high], nums[mid]
+            high -= 1`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Trapping Rain Water", diff:"Hard",
+     statement:`Given non-negative heights forming an elevation map, compute how much water it can trap after raining.`,
+     approach:`Use two pointers tracking running leftMax/rightMax. The side with the smaller running max has its water level fully determined (the far side is at least as tall), so resolve that side and advance it.`,
+     code:`def trap(height: list[int]) -> int:
+    lo, hi = 0, len(height) - 1
+    left_max, right_max = 0, 0
+    water = 0
+    while lo < hi:
+        if height[lo] < height[hi]:
+            left_max = max(left_max, height[lo])
+            water += left_max - height[lo]
+            lo += 1
+        else:
+            right_max = max(right_max, height[hi])
+            water += right_max - height[hi]
+            hi -= 1
+    return water`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Remove Duplicates from Sorted Array", diff:"Easy",
+     statement:`Remove duplicates in-place from a sorted array so each unique element appears once; return the new length.`,
+     approach:`Slow pointer \`k\` marks the end of the unique prefix; fast pointer scans forward. Write new distinct values right after the unique prefix.`,
+     code:`def removeDuplicates(nums: list[int]) -> int:
+    if not nums:
+        return 0
+    k = 1
+    for i in range(1, len(nums)):
+        if nums[i] != nums[k - 1]:
+            nums[k] = nums[i]
+            k += 1
+    return k`,
+     complexity:`Time O(n), Space O(1).`}
+  ]},
+  {name:"Sliding Window", hint:"Maintain a fixed or elastic window to satisfy a running condition.", problems:[
+    {title:"Maximum Average Subarray I", diff:"Easy",
+     statement:`Find the contiguous subarray of length k with the maximum average.`,
+     approach:`Maintain a fixed-size window sum; slide by adding the new element and subtracting the one leaving. Track the max sum (dividing by k is monotonic).`,
+     code:`def findMaxAverage(nums: list[int], k: int) -> float:
+    window_sum = sum(nums[:k])
+    best = window_sum
+    for i in range(k, len(nums)):
+        window_sum += nums[i] - nums[i - k]
+        best = max(best, window_sum)
+    return best / k`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Longest Substring Without Repeating Characters", diff:"Medium",
+     statement:`Find the length of the longest substring without repeating characters.`,
+     approach:`Variable window [left, right] with a hashmap of last-seen index per char. When a repeat is seen inside the window, jump left past its previous occurrence.`,
+     code:`def lengthOfLongestSubstring(s: str) -> int:
+    last_seen = {}
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        if ch in last_seen and last_seen[ch] >= left:
+            left = last_seen[ch] + 1
+        last_seen[ch] = right
+        best = max(best, right - left + 1)
+    return best`,
+     complexity:`Time O(n), Space O(min(n, alphabet)).`},
+    {title:"Minimum Size Subarray Sum", diff:"Medium",
+     statement:`Find the minimal length of a contiguous subarray whose sum is >= target.`,
+     approach:`Expand right, accumulating sum. Whenever sum meets target, shrink from left as much as possible while still meeting it, recording the smallest window.`,
+     code:`def minSubArrayLen(target: int, nums: list[int]) -> int:
+    left = 0
+    total = 0
+    best = float('inf')
+    for right, val in enumerate(nums):
+        total += val
+        while total >= target:
+            best = min(best, right - left + 1)
+            total -= nums[left]
+            left += 1
+    return 0 if best == float('inf') else best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Longest Repeating Character Replacement", diff:"Medium",
+     statement:`Given a string and integer k, you may replace up to k characters; find the longest substring of a single repeating character after replacements.`,
+     approach:`Keep frequency counts inside the window plus maxFreq. Window valid while windowLength - maxFreq <= k. Shrink from left when invalid.`,
+     code:`def characterReplacement(s: str, k: int) -> int:
+    from collections import defaultdict
+    count = defaultdict(int)
+    left = 0
+    max_freq = 0
+    best = 0
+    for right, ch in enumerate(s):
+        count[ch] += 1
+        max_freq = max(max_freq, count[ch])
+        while (right - left + 1) - max_freq > k:
+            count[s[left]] -= 1
+            left += 1
+        best = max(best, right - left + 1)
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Permutation in String", diff:"Medium",
+     statement:`Given s1 and s2, determine if s2 contains a permutation of s1 as a contiguous substring.`,
+     approach:`Slide a fixed window of length len(s1) across s2, comparing 26-letter frequency arrays for equality.`,
+     code:`def checkInclusion(s1: str, s2: str) -> bool:
+    n1, n2 = len(s1), len(s2)
+    if n1 > n2:
+        return False
+    need = [0] * 26
+    window = [0] * 26
+    for ch in s1:
+        need[ord(ch) - 97] += 1
+    for i in range(n2):
+        window[ord(s2[i]) - 97] += 1
+        if i >= n1:
+            window[ord(s2[i - n1]) - 97] -= 1
+        if window == need:
+            return True
+    return False`,
+     complexity:`Time O(26*n2), Space O(1).`},
+    {title:"Sliding Window Maximum", diff:"Hard",
+     statement:`Given an array and window size k, return the maximum of each sliding window.`,
+     approach:`Monotonic decreasing deque of indices; front always holds current window's max index. Pop smaller trailing values, push new index, pop expired front index.`,
+     code:`from collections import deque
+
+def maxSlidingWindow(nums: list[int], k: int) -> list[int]:
+    dq = deque()
+    result = []
+    for i, val in enumerate(nums):
+        while dq and nums[dq[-1]] <= val:
+            dq.pop()
+        dq.append(i)
+        if dq[0] <= i - k:
+            dq.popleft()
+        if i >= k - 1:
+            result.append(nums[dq[0]])
+    return result`,
+     complexity:`Time O(n) amortized, Space O(k).`},
+    {title:"Fruit Into Baskets", diff:"Medium",
+     statement:`Given an array of fruit types, find the longest subarray containing at most 2 distinct types.`,
+     approach:`Longest substring with at most 2 distinct elements. Keep a frequency map; shrink from left whenever distinct count exceeds 2.`,
+     code:`def totalFruit(fruits: list[int]) -> int:
+    from collections import defaultdict
+    count = defaultdict(int)
+    left = 0
+    best = 0
+    for right, fruit in enumerate(fruits):
+        count[fruit] += 1
+        while len(count) > 2:
+            count[fruits[left]] -= 1
+            if count[fruits[left]] == 0:
+                del count[fruits[left]]
+            left += 1
+        best = max(best, right - left + 1)
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Minimum Window Substring", diff:"Hard",
+     statement:`Given s and t, find the smallest substring of s that contains all characters of t (with multiplicity).`,
+     approach:`Track need (freq map of t) and window (running counts in s). formed counts how many distinct chars currently meet their requirement. Expand right until formed == required, then shrink left while valid, updating the best window.`,
+     code:`def minWindow(s: str, t: str) -> str:
+    from collections import Counter
+    if not s or not t:
+        return ""
+    need = Counter(t)
+    window = {}
+    required = len(need)
+    formed = 0
+    left = 0
+    best_len, best_l, best_r = float('inf'), 0, 0
+
+    for right, ch in enumerate(s):
+        window[ch] = window.get(ch, 0) + 1
+        if ch in need and window[ch] == need[ch]:
+            formed += 1
+
+        while formed == required:
+            if right - left + 1 < best_len:
+                best_len = right - left + 1
+                best_l, best_r = left, right
+            left_ch = s[left]
+            window[left_ch] -= 1
+            if left_ch in need and window[left_ch] < need[left_ch]:
+                formed -= 1
+            left += 1
+
+    return "" if best_len == float('inf') else s[best_l:best_r + 1]`,
+     complexity:`Time O(|s| + |t|), Space O(|s| + |t|).`}
+  ]},
+  {name:"Prefix Sum", hint:"Precompute cumulative sums so any range sum answers in O(1).", problems:[
+    {title:"Range Sum Query - Immutable", diff:"Easy",
+     statement:`Answer multiple queries for the sum of elements between indices i and j (inclusive) efficiently.`,
+     approach:`Precompute prefix sums, prefix[0]=0. sumRange(i,j) = prefix[j+1] - prefix[i].`,
+     code:`class NumArray:
+    def __init__(self, nums: list[int]):
+        self.prefix = [0] * (len(nums) + 1)
+        for i, v in enumerate(nums):
+            self.prefix[i + 1] = self.prefix[i] + v
+
+    def sumRange(self, i: int, j: int) -> int:
+        return self.prefix[j + 1] - self.prefix[i]`,
+     complexity:`Build O(n); each query O(1).`},
+    {title:"Find Pivot Index", diff:"Easy",
+     statement:`Find the leftmost index where the sum to its left equals the sum to its right.`,
+     approach:`Compute total sum. Walk left to right tracking left_sum; right sum is total - left_sum - nums[i].`,
+     code:`def pivotIndex(nums: list[int]) -> int:
+    total = sum(nums)
+    left_sum = 0
+    for i, v in enumerate(nums):
+        if left_sum == total - left_sum - v:
+            return i
+        left_sum += v
+    return -1`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Subarray Sum Equals K", diff:"Medium",
+     statement:`Count the number of contiguous subarrays whose sum equals k.`,
+     approach:`If prefix[j]-prefix[i]==k, subarray (i,j] sums to k. Maintain a running prefix sum and hashmap counting prefix-sum occurrences; add count[running-k] at each step.`,
+     code:`def subarraySum(nums: list[int], k: int) -> int:
+    from collections import defaultdict
+    count = defaultdict(int)
+    count[0] = 1
+    running = 0
+    result = 0
+    for v in nums:
+        running += v
+        result += count[running - k]
+        count[running] += 1
+    return result`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Product of Array Except Self", diff:"Medium",
+     statement:`Return an array where each element is the product of all others, without division, O(n) time.`,
+     approach:`Build prefix products left-to-right into result, then multiply in suffix products right-to-left with a running variable.`,
+     code:`def productExceptSelf(nums: list[int]) -> list[int]:
+    n = len(nums)
+    res = [1] * n
+    prefix = 1
+    for i in range(n):
+        res[i] = prefix
+        prefix *= nums[i]
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        res[i] *= suffix
+        suffix *= nums[i]
+    return res`,
+     complexity:`Time O(n), Space O(1) extra.`},
+    {title:"Continuous Subarray Sum", diff:"Medium",
+     statement:`Given an array and integer k, determine if it has a contiguous subarray of size >= 2 whose sum is a multiple of k.`,
+     approach:`Equal prefix-sum remainders (mod k) mark a subarray summing to a multiple of k. Track earliest index per remainder (seed remainder 0 at index -1).`,
+     code:`def checkSubarraySum(nums: list[int], k: int) -> bool:
+    seen = {0: -1}
+    running = 0
+    for i, v in enumerate(nums):
+        running += v
+        if k != 0:
+            running %= k
+        if running in seen:
+            if i - seen[running] >= 2:
+                return True
+        else:
+            seen[running] = i
+    return False`,
+     complexity:`Time O(n), Space O(min(n, k)).`},
+    {title:"Contiguous Array", diff:"Medium",
+     statement:`Find the maximum length of a contiguous subarray with an equal number of 0s and 1s.`,
+     approach:`Treat 0 as -1, 1 as +1. Equal counts means running sum 0 between two indices. Store first index per running sum (seed 0 at -1); a repeat gives a candidate length.`,
+     code:`def findMaxLength(nums: list[int]) -> int:
+    first_index = {0: -1}
+    running = 0
+    best = 0
+    for i, v in enumerate(nums):
+        running += 1 if v == 1 else -1
+        if running in first_index:
+            best = max(best, i - first_index[running])
+        else:
+            first_index[running] = i
+    return best`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Kadane's Algorithm", hint:"Track the best subarray sum ending at each index and update the global max.", problems:[
+    {title:"Maximum Subarray", diff:"Medium",
+     statement:`Find the contiguous subarray with the largest sum.`,
+     approach:`Kadane's: cur is the best sum ending at the current index (extend or restart). Track a running global best.`,
+     code:`def maxSubArray(nums: list[int]) -> int:
+    cur = best = nums[0]
+    for v in nums[1:]:
+        cur = max(v, cur + v)
+        best = max(best, cur)
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Maximum Product Subarray", diff:"Medium",
+     statement:`Find the contiguous subarray with the largest product.`,
+     approach:`Track both running max and running min product ending at each index, since a negative flips the sign and a very negative min can become the largest via another negative.`,
+     code:`def maxProduct(nums: list[int]) -> int:
+    cur_max = cur_min = best = nums[0]
+    for v in nums[1:]:
+        candidates = (v, cur_max * v, cur_min * v)
+        cur_max, cur_min = max(candidates), min(candidates)
+        best = max(best, cur_max)
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Best Time to Buy and Sell Stock", diff:"Easy",
+     statement:`Given daily stock prices, find max profit from one buy and one later sell.`,
+     approach:`Track min price seen so far; at each day the best sell profit is price - min_so_far. Keep the running max.`,
+     code:`def maxProfit(prices: list[int]) -> int:
+    min_price = float('inf')
+    best = 0
+    for p in prices:
+        min_price = min(min_price, p)
+        best = max(best, p - min_price)
+    return best`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Max Absolute Sum of Any Subarray", diff:"Medium",
+     statement:`Find the maximum absolute value of the sum of any contiguous subarray.`,
+     approach:`Run Kadane twice: once for max subarray sum, once for min subarray sum (mirrored). Answer is max(abs(maxSum), abs(minSum)).`,
+     code:`def maxAbsoluteSum(nums: list[int]) -> int:
+    max_end = min_end = 0
+    best_max = best_min = 0
+    for v in nums:
+        max_end = max(0, max_end) + v
+        min_end = min(0, min_end) + v
+        best_max = max(best_max, max_end)
+        best_min = min(best_min, min_end)
+    return max(best_max, -best_min)`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"House Robber", diff:"Medium",
+     statement:`Given non-negative amounts in houses in a line, find max sum obtainable without robbing two adjacent houses.`,
+     approach:`Two running variables: take (best if current house robbed), skip (best if not). take = skip_prev + nums[i]; skip = max(take_prev, skip_prev).`,
+     code:`def rob(nums: list[int]) -> int:
+    take, skip = 0, 0
+    for v in nums:
+        take, skip = skip + v, max(take, skip)
+    return max(take, skip)`,
+     complexity:`Time O(n), Space O(1).`}
+  ]}
+]},
+{topic:"Strings", desc:"Sequence of characters and common string manipulation patterns.", subs:[
+  {name:"Two-Pointer (Palindrome)", hint:"Compare from both ends and move inward until the condition fails.", problems:[
+    {title:"Valid Palindrome", diff:"Easy",
+     statement:`Given a string, determine if it is a palindrome after converting uppercase to lowercase and removing non-alphanumeric characters.`,
+     approach:`Two pointers from both ends, skipping non-alphanumeric characters, comparing lowercase versions.`,
+     code:`def isPalindrome(s: str) -> bool:
+    lo, hi = 0, len(s) - 1
+    while lo < hi:
+        while lo < hi and not s[lo].isalnum():
+            lo += 1
+        while lo < hi and not s[hi].isalnum():
+            hi -= 1
+        if s[lo].lower() != s[hi].lower():
+            return False
+        lo += 1
+        hi -= 1
+    return True`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Valid Palindrome II", diff:"Easy",
+     statement:`Determine if a string can become a palindrome after deleting at most one character.`,
+     approach:`Two pointers moving inward; on the first mismatch, check if skipping either the left or right character yields a palindrome for the rest.`,
+     code:`def validPalindrome(s: str) -> bool:
+    def is_pal(lo, hi):
+        while lo < hi:
+            if s[lo] != s[hi]:
+                return False
+            lo += 1
+            hi -= 1
+        return True
+
+    lo, hi = 0, len(s) - 1
+    while lo < hi:
+        if s[lo] != s[hi]:
+            return is_pal(lo + 1, hi) or is_pal(lo, hi - 1)
+        lo += 1
+        hi -= 1
+    return True`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Longest Palindromic Substring", diff:"Medium",
+     statement:`Find the longest palindromic substring within a string.`,
+     approach:`Expand around every center (once for odd length, once for even length), tracking the longest expansion.`,
+     code:`def longestPalindrome(s: str) -> str:
+    if not s:
+        return ""
+
+    def expand(lo, hi):
+        while lo >= 0 and hi < len(s) and s[lo] == s[hi]:
+            lo -= 1
+            hi += 1
+        return lo + 1, hi - 1
+
+    start, end = 0, 0
+    for i in range(len(s)):
+        l1, r1 = expand(i, i)
+        if r1 - l1 > end - start:
+            start, end = l1, r1
+        l2, r2 = expand(i, i + 1)
+        if r2 - l2 > end - start:
+            start, end = l2, r2
+    return s[start:end + 1]`,
+     complexity:`Time O(n^2), Space O(1).`},
+    {title:"Palindromic Substrings", diff:"Medium",
+     statement:`Count how many palindromic substrings exist in a string (different positions counted separately).`,
+     approach:`Same expand-around-center technique, counting every successful expansion for odd and even centers.`,
+     code:`def countSubstrings(s: str) -> int:
+    count = 0
+
+    def expand(lo, hi):
+        nonlocal count
+        while lo >= 0 and hi < len(s) and s[lo] == s[hi]:
+            count += 1
+            lo -= 1
+            hi += 1
+
+    for i in range(len(s)):
+        expand(i, i)
+        expand(i, i + 1)
+    return count`,
+     complexity:`Time O(n^2), Space O(1).`},
+    {title:"Reverse Words in a String", diff:"Medium",
+     statement:`Given a string with words separated by possibly multiple spaces, reverse the order of words, collapsing extra whitespace.`,
+     approach:`Python's split() with no args splits on whitespace runs and discards empties; reverse the list and join with a single space.`,
+     code:`def reverseWords(s: str) -> str:
+    return " ".join(reversed(s.split()))`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Sliding Window (String)", hint:"Maintain a moving window and adjust its size to satisfy character constraints.", problems:[
+    {title:"Longest Substring Without Repeating Characters", diff:"Medium",
+     statement:`Find the length of the longest substring without repeating characters.`,
+     approach:`Same as Array > Sliding Window entry: last-seen-index hashmap with a variable window.`,
+     code:`def lengthOfLongestSubstring(s: str) -> int:
+    last_seen = {}
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        if ch in last_seen and last_seen[ch] >= left:
+            left = last_seen[ch] + 1
+        last_seen[ch] = right
+        best = max(best, right - left + 1)
+    return best`,
+     complexity:`Time O(n), Space O(min(n, alphabet)).`},
+    {title:"Find All Anagrams in a String", diff:"Medium",
+     statement:`Given s and p, return the starting indices of all substrings of s that are anagrams of p.`,
+     approach:`Fixed-size sliding window of length len(p); record every index where the window's 26-letter frequency array equals p's.`,
+     code:`def findAnagrams(s: str, p: str) -> list[int]:
+    n1, n2 = len(p), len(s)
+    if n1 > n2:
+        return []
+    need = [0] * 26
+    window = [0] * 26
+    for ch in p:
+        need[ord(ch) - 97] += 1
+    result = []
+    for i in range(n2):
+        window[ord(s[i]) - 97] += 1
+        if i >= n1:
+            window[ord(s[i - n1]) - 97] -= 1
+        if i >= n1 - 1 and window == need:
+            result.append(i - n1 + 1)
+    return result`,
+     complexity:`Time O(26*n), Space O(1).`},
+    {title:"Minimum Window Substring", diff:"Hard",
+     statement:`Given s and t, find the smallest substring of s that contains all characters of t (with multiplicity).`,
+     approach:`Same as Array > Sliding Window entry: need/window/formed counters with a variable window.`,
+     code:`def minWindow(s: str, t: str) -> str:
+    from collections import Counter
+    if not s or not t:
+        return ""
+    need = Counter(t)
+    window = {}
+    required = len(need)
+    formed = 0
+    left = 0
+    best_len, best_l, best_r = float('inf'), 0, 0
+
+    for right, ch in enumerate(s):
+        window[ch] = window.get(ch, 0) + 1
+        if ch in need and window[ch] == need[ch]:
+            formed += 1
+
+        while formed == required:
+            if right - left + 1 < best_len:
+                best_len = right - left + 1
+                best_l, best_r = left, right
+            left_ch = s[left]
+            window[left_ch] -= 1
+            if left_ch in need and window[left_ch] < need[left_ch]:
+                formed -= 1
+            left += 1
+
+    return "" if best_len == float('inf') else s[best_l:best_r + 1]`,
+     complexity:`Time O(|s| + |t|), Space O(|s| + |t|).`},
+    {title:"Longest Substring with At Most K Distinct Characters", diff:"Medium",
+     statement:`Find the length of the longest substring containing at most k distinct characters.`,
+     approach:`Variable window with a frequency map; shrink from left whenever distinct-key count exceeds k.`,
+     code:`def lengthOfLongestSubstringKDistinct(s: str, k: int) -> int:
+    from collections import defaultdict
+    count = defaultdict(int)
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        count[ch] += 1
+        while len(count) > k:
+            count[s[left]] -= 1
+            if count[s[left]] == 0:
+                del count[s[left]]
+            left += 1
+        best = max(best, right - left + 1)
+    return best`,
+     complexity:`Time O(n), Space O(k).`},
+    {title:"Repeated DNA Sequences", diff:"Medium",
+     statement:`Given a DNA string of A/C/G/T, find all 10-letter substrings that occur more than once.`,
+     approach:`Slide a fixed window of size 10, hashing each window in a count map; emit a sequence once its count reaches exactly 2.`,
+     code:`def findRepeatedDnaSequences(s: str) -> list[str]:
+    from collections import defaultdict
+    count = defaultdict(int)
+    result = []
+    for i in range(len(s) - 9):
+        seq = s[i:i + 10]
+        count[seq] += 1
+        if count[seq] == 2:
+            result.append(seq)
+    return result`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Group Anagrams", diff:"Medium",
+     statement:`Given an array of strings, group the anagrams together.`,
+     approach:`Anagrams share identical character-frequency signatures; use the sorted string (or letter-count tuple) as a hashmap key.`,
+     code:`def groupAnagrams(strs: list[str]) -> list[list[str]]:
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for word in strs:
+        key = tuple(sorted(word))
+        groups[key].append(word)
+    return list(groups.values())`,
+     complexity:`Time O(n*k log k), Space O(n*k).`}
+  ]}
+]},
+{topic:"HashMap", desc:"Key-value pair data structure for O(1) average time complexity lookups.", subs:[
+  {name:"Frequency Map / Counting", hint:"Count elements to find the majority, top-k frequent, or sort by frequency.", problems:[
+    {title:"Majority Element", diff:"Easy",
+     statement:`Given an array where one element appears more than n/2 times, find that element.`,
+     approach:`Boyer-Moore voting: maintain a candidate and counter; matching increments, mismatch decrements; counter hitting zero adopts a new candidate. The majority element survives as the final candidate.`,
+     code:`def majorityElement(nums: list[int]) -> int:
+    candidate, count = None, 0
+    for v in nums:
+        if count == 0:
+            candidate = v
+        count += 1 if v == candidate else -1
+    return candidate`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Top K Frequent Elements", diff:"Medium",
+     statement:`Given an array, return the k most frequent elements.`,
+     approach:`Count frequencies with a hashmap, then use a heap to pull the k highest-count elements, avoiding a full sort of all distinct values.`,
+     code:`def topKFrequent(nums: list[int], k: int) -> list[int]:
+    from collections import Counter
+    import heapq
+    count = Counter(nums)
+    return heapq.nlargest(k, count.keys(), key=count.get)`,
+     complexity:`Time O(n log k), Space O(n).`},
+    {title:"Sort Characters By Frequency", diff:"Medium",
+     statement:`Given a string, sort its characters by decreasing frequency.`,
+     approach:`Count frequencies, sort distinct characters by descending count, rebuild the string by repeating each character per its count.`,
+     code:`def frequencySort(s: str) -> str:
+    from collections import Counter
+    count = Counter(s)
+    return "".join(ch * freq for ch, freq in count.most_common())`,
+     complexity:`Time O(n log n), Space O(n).`},
+    {title:"Valid Anagram", diff:"Easy",
+     statement:`Given two strings, determine if one is an anagram of the other.`,
+     approach:`Two strings are anagrams iff equal length and identical character-frequency counts.`,
+     code:`def isAnagram(s: str, t: str) -> bool:
+    if len(s) != len(t):
+        return False
+    from collections import Counter
+    return Counter(s) == Counter(t)`,
+     complexity:`Time O(n), Space O(1) (bounded alphabet).`}
+  ]},
+  {name:"Prefix-Sum with Map", hint:"Track cumulative sums; the map stores first occurrence to solve subarray-sum problems.", problems:[
+    {title:"Subarray Sum Equals K", diff:"Medium",
+     statement:`Count the number of contiguous subarrays whose sum equals k.`,
+     approach:`Same as Array > Prefix Sum entry: running prefix sum + hashmap of prefix-sum occurrence counts.`,
+     code:`def subarraySum(nums: list[int], k: int) -> int:
+    from collections import defaultdict
+    count = defaultdict(int)
+    count[0] = 1
+    running = 0
+    result = 0
+    for v in nums:
+        running += v
+        result += count[running - k]
+        count[running] += 1
+    return result`,
+     complexity:`Time O(n), Space O(n).`}
+  ]}
+]}
+,
+{topic:"Binary Search", desc:"Efficient search algorithm that divides the search interval in half.", subs:[
+  {name:"Classic Binary Search", hint:"Divide-and-conquer to narrow the search space in a sorted array.", problems:[
+    {title:"Binary Search", diff:"Easy",
+     statement:`Given a sorted array of unique integers and a target, return its index or -1 if not found.`,
+     approach:`Standard binary search: compare the middle element to the target and halve the search range each step.`,
+     code:`def search(nums: list[int], target: int) -> int:
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Search Insert Position", diff:"Easy",
+     statement:`Given a sorted array and a target, return the index if found, or the index where it would be inserted to keep the array sorted.`,
+     approach:`This is exactly the "lower bound" binary search: find the leftmost index where nums[mid] >= target.`,
+     code:`def searchInsert(nums: list[int], target: int) -> int:
+    lo, hi = 0, len(nums)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if nums[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Search in Rotated Sorted Array", diff:"Medium",
+     statement:`Given a sorted array rotated at an unknown pivot, and a target, return its index or -1.`,
+     approach:`At each step, one half of [lo, mid] / [mid, hi] is guaranteed to be sorted (no rotation inside it). Determine which half is sorted, then check whether the target lies in that half's range to decide which side to keep searching.`,
+     code:`def search(nums: list[int], target: int) -> int:
+    lo, hi = 0, len(nums) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[lo] <= nums[mid]:
+            if nums[lo] <= target < nums[mid]:
+                hi = mid - 1
+            else:
+                lo = mid + 1
+        else:
+            if nums[mid] < target <= nums[hi]:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+    return -1`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Find Minimum in Rotated Sorted Array", diff:"Medium",
+     statement:`Given a sorted array rotated at an unknown pivot with no duplicates, find the minimum element.`,
+     approach:`Compare nums[mid] to nums[hi]. If nums[mid] > nums[hi], the minimum must be to the right of mid (rotation point is there); otherwise it's at mid or to the left.`,
+     code:`def findMin(nums: list[int]) -> int:
+    lo, hi = 0, len(nums) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if nums[mid] > nums[hi]:
+            lo = mid + 1
+        else:
+            hi = mid
+    return nums[lo]`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Peak Index in a Mountain Array", diff:"Medium",
+     statement:`Given a mountain array (strictly increasing then strictly decreasing), find the index of the peak.`,
+     approach:`Compare arr[mid] to arr[mid+1]. If arr[mid] < arr[mid+1], we're still on the ascending slope so the peak is to the right; otherwise the peak is at mid or to the left.`,
+     code:`def peakIndexInMountainArray(arr: list[int]) -> int:
+    lo, hi = 0, len(arr) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if arr[mid] < arr[mid + 1]:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Search a 2D Matrix", diff:"Medium",
+     statement:`Given an m x n matrix where each row is sorted and the first element of each row is greater than the last element of the previous row, search for a target value.`,
+     approach:`The whole matrix is effectively one sorted 1D array of length m*n. Binary search over that virtual index space, converting mid to (row, col) via divmod by the row width.`,
+     code:`def searchMatrix(matrix: list[list[int]], target: int) -> bool:
+    m, n = len(matrix), len(matrix[0])
+    lo, hi = 0, m * n - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        val = matrix[mid // n][mid % n]
+        if val == target:
+            return True
+        elif val < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return False`,
+     complexity:`Time O(log(m*n)), Space O(1).`}
+  ]},
+  {name:"Lower / Upper Bound", hint:"Find the first/last occurrence or smallest/largest index satisfying a condition.", problems:[
+    {title:"Find First and Last Position of Element in Sorted Array", diff:"Medium",
+     statement:`Given a sorted array, find the starting and ending index of a given target value.`,
+     approach:`Run two lower-bound binary searches: one for the leftmost index where nums[mid] >= target, and one (using a strict "<=" trick) for the leftmost index past the last occurrence, then subtract 1.`,
+     code:`def searchRange(nums: list[int], target: int) -> list[int]:
+    def find(leftmost):
+        lo, hi = 0, len(nums)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if nums[mid] < target or (not leftmost and nums[mid] == target):
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
+
+    left = find(True)
+    if left == len(nums) or nums[left] != target:
+        return [-1, -1]
+    right = find(False) - 1
+    return [left, right]`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"First Bad Version", diff:"Easy",
+     statement:`Given versions 1..n where all versions after a first bad version are also bad, and an API isBadVersion(v), find the first bad version using the minimum number of calls.`,
+     approach:`Lower-bound binary search on the boolean predicate isBadVersion: find the leftmost version for which it returns true.`,
+     code:`def firstBadVersion(n: int, isBadVersion) -> int:
+    lo, hi = 1, n
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if isBadVersion(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"H-Index II", diff:"Medium",
+     statement:`Given a sorted (ascending) array of citation counts, find the researcher's h-index.`,
+     approach:`Binary search for the leftmost index mid where citations[mid] >= n - mid (meaning n - mid papers have at least that many citations). The answer is n - lo once the search converges.`,
+     code:`def hIndex(citations: list[int]) -> int:
+    n = len(citations)
+    lo, hi = 0, n - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if citations[mid] >= n - mid:
+            hi = mid - 1
+        else:
+            lo = mid + 1
+    return n - lo`,
+     complexity:`Time O(log n), Space O(1).`},
+    {title:"Count of Smaller Numbers After Self", diff:"Hard",
+     statement:`Given an array, return counts[i] = the number of elements to the right of i that are smaller than nums[i].`,
+     approach:`Sort indices with a merge sort variant: whenever merging, an element taken from the right half before an element from the left half means that right-half value is smaller and appeared after — accumulate a running right_count and add it to each left-half element's total when it's finally placed.`,
+     code:`def countSmaller(nums: list[int]) -> list[int]:
+    n = len(nums)
+    indices = list(range(n))
+    counts = [0] * n
+
+    def merge_sort(lst):
+        if len(lst) <= 1:
+            return lst
+        mid = len(lst) // 2
+        left = merge_sort(lst[:mid])
+        right = merge_sort(lst[mid:])
+        merged = []
+        i = j = 0
+        right_count = 0
+        while i < len(left) and j < len(right):
+            if nums[right[j]] < nums[left[i]]:
+                right_count += 1
+                merged.append(right[j]); j += 1
+            else:
+                counts[left[i]] += right_count
+                merged.append(left[i]); i += 1
+        while i < len(left):
+            counts[left[i]] += right_count
+            merged.append(left[i]); i += 1
+        while j < len(right):
+            merged.append(right[j]); j += 1
+        return merged
+
+    merge_sort(indices)
+    return counts`,
+     complexity:`Time O(n log n), Space O(n).`},
+    {title:"Single Element in a Sorted Array", diff:"Medium",
+     statement:`Given a sorted array where every element appears exactly twice except one, find that single element.`,
+     approach:`Before the single element, pairs align so the first of each pair sits at an even index. Binary search: force mid to an even index, and if nums[mid] == nums[mid+1] the single element is to the right, otherwise at mid or to the left.`,
+     code:`def singleNonDuplicate(nums: list[int]) -> int:
+    lo, hi = 0, len(nums) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if mid % 2 == 1:
+            mid -= 1
+        if nums[mid] == nums[mid + 1]:
+            lo = mid + 2
+        else:
+            hi = mid
+    return nums[lo]`,
+     complexity:`Time O(log n), Space O(1).`}
+  ]},
+  {name:"Binary Search on Answers", hint:"Treat the answer space as sorted, then binary search for the feasible value.", problems:[
+    {title:"Koko Eating Bananas", diff:"Medium",
+     statement:`Given piles of bananas and h hours, find the minimum eating speed k (bananas/hour) so all piles are eaten within h hours (each pile takes ceil(pile/k) hours, one pile at a time).`,
+     approach:`Feasibility is monotonic in speed: higher speed never takes more hours. Binary search speed from 1 to max(piles), checking total hours needed at each candidate speed.`,
+     code:`import math
+
+def minEatingSpeed(piles: list[int], h: int) -> int:
+    def hours_needed(speed):
+        return sum(math.ceil(p / speed) for p in piles)
+
+    lo, hi = 1, max(piles)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if hours_needed(mid) <= h:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(n log(max(piles))), Space O(1).`},
+    {title:"Capacity To Ship Packages Within D Days", diff:"Medium",
+     statement:`Given package weights and a number of days, find the minimum ship capacity so all packages (loaded in order) ship within that many days.`,
+     approach:`Feasibility (days needed for a given capacity) is monotonic. Binary search capacity between max(weights) and sum(weights), greedily simulating how many days a candidate capacity requires.`,
+     code:`def shipWithinDays(weights: list[int], days: int) -> int:
+    def days_needed(capacity):
+        d, cur = 1, 0
+        for w in weights:
+            if cur + w > capacity:
+                d += 1
+                cur = 0
+            cur += w
+        return d
+
+    lo, hi = max(weights), sum(weights)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if days_needed(mid) <= days:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(n log(sum(weights))), Space O(1).`},
+    {title:"Split Array Largest Sum", diff:"Hard",
+     statement:`Split an array into m non-empty contiguous subarrays to minimize the largest subarray sum.`,
+     approach:`Same shape as the shipping-capacity problem: binary search the "largest sum cap", greedily counting how many parts are needed to keep every part's sum under that cap.`,
+     code:`def splitArray(nums: list[int], m: int) -> int:
+    def parts_needed(cap):
+        parts, cur = 1, 0
+        for v in nums:
+            if cur + v > cap:
+                parts += 1
+                cur = 0
+            cur += v
+        return parts
+
+    lo, hi = max(nums), sum(nums)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if parts_needed(mid) <= m:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(n log(sum(nums))), Space O(1).`},
+    {title:"Minimum Number of Days to Make m Bouquets", diff:"Medium",
+     statement:`Given bloom days for flowers, m bouquets needed, each requiring k adjacent bloomed flowers, find the minimum day all m bouquets can be made (or -1 if impossible).`,
+     approach:`Binary search the day. Feasibility check: scan the flowers, counting consecutive already-bloomed runs and converting each full run of k into a bouquet (resetting the streak), then compare the total bouquets made to m.`,
+     code:`def minDays(bloomDay: list[int], m: int, k: int) -> int:
+    if m * k > len(bloomDay):
+        return -1
+
+    def can_make(day):
+        bouquets, consecutive = 0, 0
+        for b in bloomDay:
+            if b <= day:
+                consecutive += 1
+                if consecutive == k:
+                    bouquets += 1
+                    consecutive = 0
+            else:
+                consecutive = 0
+        return bouquets >= m
+
+    lo, hi = min(bloomDay), max(bloomDay)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if can_make(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(n log(max(bloomDay))), Space O(1).`},
+    {title:"Magnetic Force Between Two Balls", diff:"Medium",
+     statement:`Given basket positions and m balls to place, maximize the minimum distance between any two balls.`,
+     approach:`Binary search the minimum-distance value (this time searching for the largest feasible value, so move lo up on success). Feasibility: greedily place balls, always jumping to the next position at least min_dist away from the last placed ball.`,
+     code:`def maxDistance(position: list[int], m: int) -> int:
+    position.sort()
+
+    def can_place(min_dist):
+        count, last = 1, position[0]
+        for p in position[1:]:
+            if p - last >= min_dist:
+                count += 1
+                last = p
+        return count >= m
+
+    lo, hi = 1, position[-1] - position[0]
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if can_place(mid):
+            lo = mid
+        else:
+            hi = mid - 1
+    return lo`,
+     complexity:`Time O(n log(max_gap)), Space O(1) after sort.`},
+    {title:"Find the Smallest Divisor Given a Threshold", diff:"Medium",
+     statement:`Given an array and a threshold, find the smallest divisor such that the sum of ceil(num/divisor) over all elements is <= threshold.`,
+     approach:`Feasibility (the resulting sum) shrinks as the divisor grows, so binary search the divisor from 1 to max(nums), checking the resulting ceiling-sum at each candidate.`,
+     code:`import math
+
+def smallestDivisor(nums: list[int], threshold: int) -> int:
+    def total(div):
+        return sum(math.ceil(n / div) for n in nums)
+
+    lo, hi = 1, max(nums)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if total(mid) <= threshold:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo`,
+     complexity:`Time O(n log(max(nums))), Space O(1).`},
+    {title:"Median of Two Sorted Arrays", diff:"Hard",
+     statement:`Given two sorted arrays, find the median of the combined array in better than O(m+n) time.`,
+     approach:`Binary search a partition index i in the smaller array; the mirrored partition j = (m+n+1)/2 - i in the other array splits the combined array into two halves of (almost) equal size. Adjust i until the largest element on the left side of the partition is <= the smallest element on the right side on both arrays — that partition point gives the median directly.`,
+     code:`def findMedianSortedArrays(nums1: list[int], nums2: list[int]) -> float:
+    if len(nums1) > len(nums2):
+        nums1, nums2 = nums2, nums1
+    m, n = len(nums1), len(nums2)
+    lo, hi = 0, m
+    while lo <= hi:
+        i = (lo + hi) // 2
+        j = (m + n + 1) // 2 - i
+        left1 = nums1[i - 1] if i > 0 else float('-inf')
+        right1 = nums1[i] if i < m else float('inf')
+        left2 = nums2[j - 1] if j > 0 else float('-inf')
+        right2 = nums2[j] if j < n else float('inf')
+        if left1 <= right2 and left2 <= right1:
+            if (m + n) % 2 == 1:
+                return max(left1, left2)
+            return (max(left1, left2) + min(right1, right2)) / 2
+        elif left1 > right2:
+            hi = i - 1
+        else:
+            lo = i + 1`,
+     complexity:`Time O(log(min(m,n))), Space O(1).`},
+    {title:"Kth Smallest Element in a Sorted Matrix", diff:"Medium",
+     statement:`Given an n x n matrix where each row and column is sorted ascending, find the kth smallest element.`,
+     approach:`Binary search the value range [matrix[0][0], matrix[n-1][n-1]]. For each candidate value, count how many matrix elements are <= it using a staircase walk from the bottom-left corner (O(n) per count), then narrow the range based on whether that count reaches k.`,
+     code:`def kthSmallest(matrix: list[list[int]], k: int) -> int:
+    n = len(matrix)
+
+    def count_le(x):
+        cnt = 0
+        row, col = n - 1, 0
+        while row >= 0 and col < n:
+            if matrix[row][col] <= x:
+                cnt += row + 1
+                col += 1
+            else:
+                row -= 1
+        return cnt
+
+    lo, hi = matrix[0][0], matrix[-1][-1]
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if count_le(mid) < k:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo`,
+     complexity:`Time O(n log(max-min)), Space O(1).`}
+  ]},
+  {name:"Search in 2D Matrix", hint:"Apply binary search row-wise, column-wise, or on the flattened array.", problems:[
+    {title:"Search a 2D Matrix II", diff:"Medium",
+     statement:`Given a matrix where each row is sorted ascending left-to-right and each column is sorted ascending top-to-bottom (but rows aren't globally ordered like in Search a 2D Matrix), search for a target.`,
+     approach:`Start at the top-right corner. If the current value is bigger than target, the entire column below is even bigger, so move left; if smaller, the entire row to the left is even smaller, so move down. This staircase walk visits O(m+n) cells.`,
+     code:`def searchMatrix(matrix: list[list[int]], target: int) -> bool:
+    row, col = 0, len(matrix[0]) - 1
+    while row < len(matrix) and col >= 0:
+        val = matrix[row][col]
+        if val == target:
+            return True
+        elif val > target:
+            col -= 1
+        else:
+            row += 1
+    return False`,
+     complexity:`Time O(m + n), Space O(1).`},
+    {title:"Kth Smallest Element in a Sorted Matrix", diff:"Medium",
+     statement:`Given an n x n matrix sorted by row and column, find the kth smallest element.`,
+     approach:`Identical problem and solution to the entry under Binary Search on Answers — the staircase-count binary search. See that entry.`,
+     code:`# See "Kth Smallest Element in a Sorted Matrix" under
+# Binary Search on Answers — identical solution.`,
+     complexity:`Time O(n log(max-min)), Space O(1).`},
+    {title:"Count Negative Numbers in a Sorted Matrix", diff:"Easy",
+     statement:`Given a matrix sorted in non-increasing order both row-wise and column-wise, count the number of negative numbers.`,
+     approach:`Same staircase idea as Search a 2D Matrix II: start top-right; if the current cell is negative, everything below it in that column is negative too, so count the whole remaining column-tail and move left; otherwise move down.`,
+     code:`def countNegatives(grid: list[list[int]]) -> int:
+    m, n = len(grid), len(grid[0])
+    count = 0
+    row, col = 0, n - 1
+    while row < m and col >= 0:
+        if grid[row][col] < 0:
+            count += m - row
+            col -= 1
+        else:
+            row += 1
+    return count`,
+     complexity:`Time O(m + n), Space O(1).`},
+    {title:"Find a Peak Element II", diff:"Hard",
+     statement:`Given an m x n matrix where no two adjacent cells are equal, find any cell that is strictly greater than all its (up to four) neighbors.`,
+     approach:`Binary search over rows. For the middle row, find its column-wise maximum. If that maximum is also bigger than the cell directly below it, the peak lies in the top half (including this row); if a cell below is bigger, the peak lies in the bottom half. This is a 1D "peak index" binary search lifted one dimension, using O(n) work per row to find the row's max.`,
+     code:`def findPeakGrid(mat: list[list[int]]) -> list[int]:
+    top, bottom = 0, len(mat) - 1
+    while top <= bottom:
+        mid = (top + bottom) // 2
+        max_col = mat[mid].index(max(mat[mid]))
+        up = mat[mid - 1][max_col] if mid > 0 else -1
+        down = mat[mid + 1][max_col] if mid < len(mat) - 1 else -1
+        if mat[mid][max_col] > up and mat[mid][max_col] > down:
+            return [mid, max_col]
+        elif down > mat[mid][max_col]:
+            top = mid + 1
+        else:
+            bottom = mid - 1
+    return [-1, -1]`,
+     complexity:`Time O(m log n) (n work per row, log m rows visited), Space O(1).`}
+  ]}
+]},
+{topic:"Recursion", desc:"Solving problems by breaking them down into smaller, self-similar subproblems.", subs:[
+  {name:"Linear Recursion", hint:"Solve a problem by reducing it to a simpler instance of the same problem.", problems:[
+    {title:"Factorial Trailing Zeroes", diff:"Medium",
+     statement:`Given an integer n, return the number of trailing zeroes in n! (factorial).`,
+     approach:`Trailing zeroes come from factors of 10 = 2*5, and factors of 5 are always the bottleneck. The count of multiples of 5 in 1..n, plus multiples of 25, plus multiples of 125, etc., gives the answer — expressed recursively as n//5 plus the same count for n//5.`,
+     code:`def trailingZeroes(n: int) -> int:
+    if n == 0:
+        return 0
+    return n // 5 + trailingZeroes(n // 5)`,
+     complexity:`Time O(log n), Space O(log n) (call stack).`},
+    {title:"Power of Two", diff:"Easy",
+     statement:`Given an integer n, determine if it is a power of two.`,
+     approach:`Repeatedly halve n as long as it's even; if it ever becomes odd and isn't 1, it wasn't a power of two.`,
+     code:`def isPowerOfTwo(n: int) -> bool:
+    if n <= 0:
+        return False
+    if n == 1:
+        return True
+    if n % 2 != 0:
+        return False
+    return isPowerOfTwo(n // 2)`,
+     complexity:`Time O(log n), Space O(log n) (call stack).`},
+    {title:"Pow(x, n)", diff:"Medium",
+     statement:`Implement pow(x, n), computing x raised to the integer power n.`,
+     approach:`Fast exponentiation by squaring: recursively compute the result for n//2 and square it, multiplying in one extra factor of x when n is odd. Negative exponents are handled via 1 / pow(x, -n).`,
+     code:`def myPow(x: float, n: int) -> float:
+    if n < 0:
+        return 1 / myPow(x, -n)
+    if n == 0:
+        return 1.0
+    half = myPow(x, n // 2)
+    if n % 2 == 0:
+        return half * half
+    return half * half * x`,
+     complexity:`Time O(log n), Space O(log n) (call stack).`},
+    {title:"Reverse String", diff:"Easy",
+     statement:`Reverse a string in place, given as a character array.`,
+     approach:`Recursively swap the outermost pair of characters, then recurse on the inner subarray, shrinking the range by one from each side every call.`,
+     code:`def reverseString(s: list[str]) -> None:
+    def helper(lo, hi):
+        if lo >= hi:
+            return
+        s[lo], s[hi] = s[hi], s[lo]
+        helper(lo + 1, hi - 1)
+    helper(0, len(s) - 1)`,
+     complexity:`Time O(n), Space O(n) (call stack).`}
+  ]},
+  {name:"Non-Linear Recursion", hint:"Make multiple recursive calls at each step and combine their results.", problems:[
+    {title:"Fibonacci Number", diff:"Easy",
+     statement:`Compute the nth Fibonacci number (F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2)).`,
+     approach:`Two recursive calls per step naively leads to exponential blowup, so memoize each computed value in a dictionary to reduce it to linear work.`,
+     code:`def fib(n: int, memo: dict = {}) -> int:
+    if n in (0, 1):
+        return n
+    if n in memo:
+        return memo[n]
+    memo[n] = fib(n - 1, memo) + fib(n - 2, memo)
+    return memo[n]`,
+     complexity:`Time O(n), Space O(n) with memoization.`},
+    {title:"Climbing Stairs", diff:"Easy",
+     statement:`Given n stairs, where each step you can climb 1 or 2 stairs, count the distinct ways to reach the top.`,
+     approach:`ways(n) = ways(n-1) + ways(n-2) — the same recurrence as Fibonacci — memoized to avoid recomputation.`,
+     code:`def climbStairs(n: int, memo: dict = None) -> int:
+    if memo is None:
+        memo = {}
+    if n <= 2:
+        return n
+    if n in memo:
+        return memo[n]
+    memo[n] = climbStairs(n - 1, memo) + climbStairs(n - 2, memo)
+    return memo[n]`,
+     complexity:`Time O(n), Space O(n) with memoization.`},
+    {title:"Unique Paths", diff:"Medium",
+     statement:`Given an m x n grid, count the number of unique paths from the top-left to the bottom-right corner, moving only right or down.`,
+     approach:`paths(m, n) = paths(m-1, n) + paths(m, n-1) (arrive from above or from the left), with the base case of a single row or column having exactly one path. Memoize on (m, n) to avoid recomputation.`,
+     code:`def uniquePaths(m: int, n: int, memo: dict = None) -> int:
+    if memo is None:
+        memo = {}
+    if m == 1 or n == 1:
+        return 1
+    if (m, n) in memo:
+        return memo[(m, n)]
+    memo[(m, n)] = uniquePaths(m - 1, n, memo) + uniquePaths(m, n - 1, memo)
+    return memo[(m, n)]`,
+     complexity:`Time O(m*n), Space O(m*n) with memoization.`},
+    {title:"Decode Ways", diff:"Medium",
+     statement:`Given a digit string, count the number of ways it can be decoded into letters (A=1 ... Z=26).`,
+     approach:`From position i, either decode a single digit (if not '0') and recurse on i+1, or decode the two-digit pair (if it's <= 26) and recurse on i+2. Memoize by index to avoid recomputation.`,
+     code:`def numDecodings(s: str) -> int:
+    memo = {}
+
+    def helper(i):
+        if i == len(s):
+            return 1
+        if s[i] == '0':
+            return 0
+        if i in memo:
+            return memo[i]
+        res = helper(i + 1)
+        if i + 1 < len(s) and int(s[i:i + 2]) <= 26:
+            res += helper(i + 2)
+        memo[i] = res
+        return res
+
+    return helper(0)`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Divide & Conquer", hint:"Split the problem into smaller subproblems, solve recursively, and combine.", problems:[
+    {title:"Merge Sort (implementation)", diff:"Medium",
+     statement:`Implement merge sort: sort an array by recursively splitting it in half, sorting each half, and merging.`,
+     approach:`Recursively sort the left and right halves, then merge the two sorted halves in linear time by repeatedly taking the smaller of the two fronts.`,
+     code:`def mergeSort(arr: list[int]) -> list[int]:
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = mergeSort(arr[:mid])
+    right = mergeSort(arr[mid:])
+    merged = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i]); i += 1
+        else:
+            merged.append(right[j]); j += 1
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged`,
+     complexity:`Time O(n log n), Space O(n).`},
+    {title:"Quick Sort (implementation)", diff:"Medium",
+     statement:`Implement quicksort: sort an array by partitioning around a pivot and recursively sorting each partition.`,
+     approach:`Pick a pivot (middle element here, for simplicity), partition the rest into elements less than, equal to, and greater than the pivot, then recursively sort the less-than and greater-than partitions and concatenate.`,
+     code:`def quickSort(arr: list[int]) -> list[int]:
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    mid = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quickSort(left) + mid + quickSort(right)`,
+     complexity:`Time O(n log n) average, O(n^2) worst case. Space O(n).`},
+    {title:"Maximum Subarray (D&C)", diff:"Medium",
+     statement:`Find the contiguous subarray with the largest sum, using a divide-and-conquer approach (Kadane's O(n) is the usual production solution, but D&C is the canonical recursion-pattern example).`,
+     approach:`Split the array in half. The best subarray either lies entirely in the left half, entirely in the right half, or crosses the midpoint. The crossing case is found by extending the best suffix sum ending at mid and the best prefix sum starting at mid+1.`,
+     code:`def maxSubArrayDC(nums: list[int]) -> int:
+    def helper(lo, hi):
+        if lo == hi:
+            return nums[lo]
+        mid = (lo + hi) // 2
+        left_max = helper(lo, mid)
+        right_max = helper(mid + 1, hi)
+
+        best_left, s = nums[mid], 0
+        for i in range(mid, lo - 1, -1):
+            s += nums[i]
+            best_left = max(best_left, s)
+
+        best_right, s = nums[mid + 1], 0
+        for i in range(mid + 1, hi + 1):
+            s += nums[i]
+            best_right = max(best_right, s)
+
+        cross = best_left + best_right
+        return max(left_max, right_max, cross)
+
+    return helper(0, len(nums) - 1)`,
+     complexity:`Time O(n log n), Space O(log n) (call stack).`},
+    {title:"Different Ways to Add Parentheses", diff:"Medium",
+     statement:`Given an expression of digits and operators (+, -, *), return all possible results from adding parentheses in every possible way to group numbers and operators.`,
+     approach:`For each operator in the expression, treat it as the "last" operation applied: recursively compute all results of the left substring and the right substring, then combine every pair with that operator. Memoize by substring to avoid recomputation across overlapping calls.`,
+     code:`def diffWaysToCompute(expression: str, memo: dict = None) -> list[int]:
+    if memo is None:
+        memo = {}
+    if expression in memo:
+        return memo[expression]
+    if expression.isdigit():
+        return [int(expression)]
+
+    results = []
+    for i, ch in enumerate(expression):
+        if ch in "+-*":
+            left = diffWaysToCompute(expression[:i], memo)
+            right = diffWaysToCompute(expression[i + 1:], memo)
+            for l in left:
+                for r in right:
+                    if ch == '+':
+                        results.append(l + r)
+                    elif ch == '-':
+                        results.append(l - r)
+                    else:
+                        results.append(l * r)
+    memo[expression] = results
+    return results`,
+     complexity:`Time O(Catalan(n)) in the worst case (exponential), Space likewise — bounded in practice by memoization on overlapping substrings.`},
+    {title:"The Skyline Problem", diff:"Hard",
+     statement:`Given a list of buildings as (left, right, height) triples, compute the skyline (the outline formed by the union of all rectangles) as a list of [x, height] key points.`,
+     approach:`Convert every building into a "start" event (at its left edge, adds a height) and an "end" event (at its right edge, removes that height). Sweep events left to right in x-order; maintain the currently active heights in a max-heap (lazily removing expired buildings). Whenever the current maximum height changes, record a new key point.`,
+     code:`import heapq
+
+def getSkyline(buildings: list[list[int]]) -> list[list[int]]:
+    events = []
+    for l, r, h in buildings:
+        events.append((l, -h, r))
+        events.append((r, 0, 0))
+    events.sort()
+
+    result = []
+    live = [(0, float('inf'))]  # (-height, end_x)
+    for x, neg_h, r in events:
+        while live[0][1] <= x:
+            heapq.heappop(live)
+        if neg_h != 0:
+            heapq.heappush(live, (neg_h, r))
+        cur_height = -live[0][0]
+        if not result or result[-1][1] != cur_height:
+            result.append([x, cur_height])
+    return result`,
+     complexity:`Time O(n log n), Space O(n).`}
+  ]},
+  {name:"Recursion on LinkedList/Stack", hint:"Process a structure recursively by handling the first/last element and recursing on the rest.", problems:[
+    {title:"Reverse Linked List", diff:"Easy",
+     statement:`Reverse a singly linked list.`,
+     approach:`Recurse to the end of the list first. On the way back up, each node points its "next" node's next pointer back at itself, and detaches its own forward link — reversing the list one link at a time as the recursion unwinds.`,
+     code:`class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def reverseList(head: ListNode) -> ListNode:
+    if head is None or head.next is None:
+        return head
+    new_head = reverseList(head.next)
+    head.next.next = head
+    head.next = None
+    return new_head`,
+     complexity:`Time O(n), Space O(n) (call stack).`},
+    {title:"Reverse a Stack Using Recursion", diff:"Medium",
+     statement:`Reverse the order of elements in a stack, using only recursion (no extra explicit data structure like a second stack or queue).`,
+     approach:`Pop the top element, recursively reverse what remains, then use a helper (insert_at_bottom) to slide that popped element all the way down to the bottom of the now-reversed remainder.`,
+     code:`def reverseStack(stack: list) -> None:
+    if not stack:
+        return
+    top = stack.pop()
+    reverseStack(stack)
+    insert_at_bottom(stack, top)
+
+def insert_at_bottom(stack: list, item) -> None:
+    if not stack:
+        stack.append(item)
+        return
+    top = stack.pop()
+    insert_at_bottom(stack, item)
+    stack.append(top)`,
+     complexity:`Time O(n^2), Space O(n) (call stack).`},
+    {title:"Swap Nodes in Pairs", diff:"Medium",
+     statement:`Given a linked list, swap every two adjacent nodes.`,
+     approach:`Recursively swap the rest of the list first (from the third node onward), then swap the first pair, pointing the second node's next at the first node and the first node's next at the already-swapped remainder.`,
+     code:`def swapPairs(head: ListNode) -> ListNode:
+    if head is None or head.next is None:
+        return head
+    second = head.next
+    head.next = swapPairs(second.next)
+    second.next = head
+    return second`,
+     complexity:`Time O(n), Space O(n) (call stack).`},
+    {title:"Remove Duplicates from Sorted List II", diff:"Medium",
+     statement:`Given a sorted linked list, remove all nodes that have duplicate values, keeping only distinct values.`,
+     approach:`If the head's value matches the next node's value, skip past every node with that same value entirely and recurse on what's left. Otherwise, keep the head and recursively process the rest of the list.`,
+     code:`def deleteDuplicates(head: ListNode) -> ListNode:
+    if head is None or head.next is None:
+        return head
+    if head.val == head.next.val:
+        cur = head.next
+        while cur and cur.val == head.val:
+            cur = cur.next
+        return deleteDuplicates(cur)
+    else:
+        head.next = deleteDuplicates(head.next)
+        return head`,
+     complexity:`Time O(n), Space O(n) (call stack).`}
+  ]},
+  {name:"Subsequences", hint:"Explore all subsets by choosing to include or exclude each element.", problems:[
+    {title:"Subsets", diff:"Medium",
+     statement:`Given an array of distinct integers, return all possible subsets (the power set).`,
+     approach:`Backtracking: at each recursive call, first record the current path as a valid subset, then try extending it with each remaining element (only ones after the current start index, to avoid duplicate orderings), undoing the choice after each recursive branch.`,
+     code:`def subsets(nums: list[int]) -> list[list[int]]:
+    result = []
+
+    def backtrack(start, path):
+        result.append(path[:])
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            backtrack(i + 1, path)
+            path.pop()
+
+    backtrack(0, [])
+    return result`,
+     complexity:`Time O(n * 2^n), Space O(n) (call stack) plus O(2^n) output.`},
+    {title:"Letter Case Permutation", diff:"Medium",
+     statement:`Given a string of letters and digits, return all strings obtainable by transforming each letter into lowercase or uppercase (digits stay unchanged).`,
+     approach:`At each character, branch: if it's a letter, recurse once with it lowercased and once uppercased; if it's a digit, there's only one choice. Undo the character after each branch (standard backtracking).`,
+     code:`def letterCasePermutation(s: str) -> list[str]:
+    result = []
+
+    def backtrack(idx, path):
+        if idx == len(s):
+            result.append("".join(path))
+            return
+        ch = s[idx]
+        if ch.isalpha():
+            path.append(ch.lower())
+            backtrack(idx + 1, path)
+            path.pop()
+            path.append(ch.upper())
+            backtrack(idx + 1, path)
+            path.pop()
+        else:
+            path.append(ch)
+            backtrack(idx + 1, path)
+            path.pop()
+
+    backtrack(0, [])
+    return result`,
+     complexity:`Time O(n * 2^L) where L is the number of letters, Space O(n).`},
+    {title:"Generate Parentheses", diff:"Medium",
+     statement:`Given n pairs of parentheses, generate all combinations of well-formed parenthesis strings.`,
+     approach:`Backtrack, tracking counts of opens and closes used so far. Only add '(' if fewer than n opens have been used; only add ')' if fewer closes than opens have been used so far (guaranteeing validity at every prefix).`,
+     code:`def generateParenthesis(n: int) -> list[str]:
+    result = []
+
+    def backtrack(path, open_count, close_count):
+        if len(path) == 2 * n:
+            result.append("".join(path))
+            return
+        if open_count < n:
+            path.append('(')
+            backtrack(path, open_count + 1, close_count)
+            path.pop()
+        if close_count < open_count:
+            path.append(')')
+            backtrack(path, open_count, close_count + 1)
+            path.pop()
+
+    backtrack([], 0, 0)
+    return result`,
+     complexity:`Time O(4^n / sqrt(n)) (Catalan-number growth), Space O(n) (call stack).`}
+  ]}
+]}
+,
+{topic:"Stack", desc:"LIFO (Last In First Out) data structure patterns.", subs:[
+  {name:"Monotonic Stack", hint:"Keep a monotonic stack to find next/prev greater or smaller, histogram ranges, or collisions.", problems:[
+    {title:"Next Greater Element I", diff:"Easy",
+     statement:`Given two arrays where nums1 is a subset of nums2, for each element of nums1 find its next greater element in nums2, or -1 if none exists.`,
+     approach:`Build a "next greater" map for every element of nums2 in one pass using a decreasing monotonic stack: whenever the current number is bigger than the stack's top, that top has found its next-greater value, so pop and record it. Then look up each nums1 element in the map.`,
+     code:`def nextGreaterElement(nums1: list[int], nums2: list[int]) -> list[int]:
+    next_greater = {}
+    stack = []
+    for num in nums2:
+        while stack and stack[-1] < num:
+            next_greater[stack.pop()] = num
+        stack.append(num)
+    return [next_greater.get(n, -1) for n in nums1]`,
+     complexity:`Time O(m + n), Space O(n).`},
+    {title:"Daily Temperatures", diff:"Medium",
+     statement:`Given daily temperatures, return for each day the number of days to wait for a warmer temperature (0 if none).`,
+     approach:`Keep a decreasing monotonic stack of indices whose "warmer day" hasn't been found yet. Whenever the current temperature beats the stack's top, pop it and record the day gap.`,
+     code:`def dailyTemperatures(temperatures: list[int]) -> list[int]:
+    result = [0] * len(temperatures)
+    stack = []
+    for i, t in enumerate(temperatures):
+        while stack and temperatures[stack[-1]] < t:
+            j = stack.pop()
+            result[j] = i - j
+        stack.append(i)
+    return result`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Largest Rectangle in Histogram", diff:"Hard",
+     statement:`Given bar heights of a histogram, find the area of the largest rectangle that fits within it.`,
+     approach:`Maintain an increasing monotonic stack of bar indices. When a shorter bar is encountered, pop taller bars and compute the rectangle they could have formed — width is the gap between the current index and the new stack top (or from the start if empty). Appending a sentinel 0-height bar at the end flushes everything remaining.`,
+     code:`def largestRectangleArea(heights: list[int]) -> int:
+    stack = []
+    max_area = 0
+    heights = heights + [0]
+    for i, h in enumerate(heights):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Trapping Rain Water", diff:"Hard",
+     statement:`Given non-negative heights forming an elevation map, compute how much water it can trap after raining.`,
+     approach:`Identical problem and solution to the entry under Array > Two-Pointer. See that entry for the two-pointer O(n)/O(1) walkthrough. (A monotonic-stack solution also exists but the two-pointer version is simpler and equally efficient.)`,
+     code:`# See "Trapping Rain Water" under Array > Two-Pointer —
+# identical two-pointer O(n)/O(1) solution.`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Asteroid Collision", diff:"Medium",
+     statement:`Given asteroids moving right (positive) or left (negative) at the same speed, simulate collisions — the smaller asteroid explodes, equal ones both explode — and return the final state.`,
+     approach:`Process left to right with a stack representing currently "surviving" asteroids moving right (they can still collide with a future left-mover). A new left-moving asteroid only threatens the stack's top if that top is moving right; resolve any such collisions before deciding whether the new asteroid survives to be pushed.`,
+     code:`def asteroidCollision(asteroids: list[int]) -> list[int]:
+    stack = []
+    for a in asteroids:
+        alive = True
+        while alive and a < 0 and stack and stack[-1] > 0:
+            if stack[-1] < -a:
+                stack.pop()
+                continue
+            elif stack[-1] == -a:
+                stack.pop()
+            alive = False
+        if alive:
+            stack.append(a)
+    return stack`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Online Stock Span", diff:"Medium",
+     statement:`Design a class that, given daily stock prices one at a time, returns the "span" — the number of consecutive previous days (including today) with price <= today's price.`,
+     approach:`Keep a stack of (price, span) pairs. When a new price arrives, pop and absorb every entry whose price is <= the new price (their spans get folded into the new entry's span), since they're now all "covered" by today.`,
+     code:`class StockSpanner:
+    def __init__(self):
+        self.stack = []  # (price, span)
+
+    def next(self, price: int) -> int:
+        span = 1
+        while self.stack and self.stack[-1][0] <= price:
+            span += self.stack.pop()[1]
+        self.stack.append((price, span))
+        return span`,
+     complexity:`Time O(1) amortized per call, Space O(n).`},
+    {title:"Sum of Subarray Minimums", diff:"Medium",
+     statement:`Given an array, find the sum of the minimum values of every contiguous subarray, modulo 10^9+7.`,
+     approach:`For each element, count how many subarrays have it as the minimum: that's (distance to the previous strictly-smaller element) * (distance to the next strictly-smaller-or-equal element). Compute both distances in linear time with two monotonic-stack passes, then sum value*left*right for every index.`,
+     code:`def sumSubarrayMins(arr: list[int]) -> int:
+    MOD = 10**9 + 7
+    n = len(arr)
+    left, right = [0] * n, [0] * n
+    stack = []
+    for i in range(n):
+        while stack and arr[stack[-1]] >= arr[i]:
+            stack.pop()
+        left[i] = i - (stack[-1] if stack else -1)
+        stack.append(i)
+    stack = []
+    for i in range(n - 1, -1, -1):
+        while stack and arr[stack[-1]] > arr[i]:
+            stack.pop()
+        right[i] = (stack[-1] if stack else n) - i
+        stack.append(i)
+    return sum(arr[i] * left[i] * right[i] for i in range(n)) % MOD`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Expression Evaluation", hint:"Use two stacks or postfix evaluation to handle numbers and operators.", problems:[
+    {title:"Evaluate Reverse Polish Notation", diff:"Medium",
+     statement:`Evaluate an arithmetic expression given in Reverse Polish (postfix) Notation.`,
+     approach:`Scan tokens left to right. A number is pushed; an operator pops the top two operands, applies itself, and pushes the result back.`,
+     code:`def evalRPN(tokens: list[str]) -> int:
+    stack = []
+    for tok in tokens:
+        if tok in ('+', '-', '*', '/'):
+            b = stack.pop()
+            a = stack.pop()
+            if tok == '+': stack.append(a + b)
+            elif tok == '-': stack.append(a - b)
+            elif tok == '*': stack.append(a * b)
+            else: stack.append(int(a / b))
+        else:
+            stack.append(int(tok))
+    return stack[0]`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Basic Calculator", diff:"Hard",
+     statement:`Implement a calculator that evaluates an expression string containing +, -, parentheses, and non-negative integers (no * or /).`,
+     approach:`Track a running result and current sign while accumulating digits into a number. On '(', push the current result and sign onto a stack and reset; on ')', fold the parenthesized result back using the popped sign and outer result.`,
+     code:`def calculate(s: str) -> int:
+    stack = []
+    sign = 1
+    result = 0
+    num = 0
+    for ch in s:
+        if ch.isdigit():
+            num = num * 10 + int(ch)
+        elif ch == '+':
+            result += sign * num
+            num = 0
+            sign = 1
+        elif ch == '-':
+            result += sign * num
+            num = 0
+            sign = -1
+        elif ch == '(':
+            stack.append(result)
+            stack.append(sign)
+            result = 0
+            sign = 1
+        elif ch == ')':
+            result += sign * num
+            num = 0
+            result *= stack.pop()
+            result += stack.pop()
+            sign = 1
+    result += sign * num
+    return result`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Basic Calculator II", diff:"Medium",
+     statement:`Implement a calculator that evaluates an expression string containing +, -, *, / and non-negative integers (no parentheses), respecting operator precedence.`,
+     approach:`Track the previous operator seen. For +/- push the (signed) number directly. For * and /, pop the last pushed number, apply the operation immediately, and push the result back — this handles precedence without an explicit precedence table since the stack only ever holds "resolved" addends.`,
+     code:`def calculate(s: str) -> int:
+    stack = []
+    num = 0
+    sign = '+'
+    s = s.replace(' ', '') + '+'
+    for ch in s:
+        if ch.isdigit():
+            num = num * 10 + int(ch)
+        else:
+            if sign == '+': stack.append(num)
+            elif sign == '-': stack.append(-num)
+            elif sign == '*': stack.append(stack.pop() * num)
+            elif sign == '/':
+                prev = stack.pop()
+                stack.append(int(prev / num))
+            sign = ch
+            num = 0
+    return sum(stack)`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Decode String", diff:"Medium",
+     statement:`Given an encoded string like "3[a2[c]]", decode it by expanding k[...] into k repetitions of its contents (nesting allowed).`,
+     approach:`Use a stack of (partial_string, repeat_count) frames. On '[', push a fresh frame with the pending number. On ']', pop the completed frame and fold it (repeated k times) into the string just below it on the stack. Plain characters get appended to the current top frame's string.`,
+     code:`def decodeString(s: str) -> str:
+    stack = [["", 1]]
+    num = ""
+    for ch in s:
+        if ch.isdigit():
+            num += ch
+        elif ch == '[':
+            stack.append(["", int(num)])
+            num = ""
+        elif ch == ']':
+            st, k = stack.pop()
+            stack[-1][0] += st * k
+        else:
+            stack[-1][0] += ch
+    return stack[0][0]`,
+     complexity:`Time O(n * max_repeat), Space O(n).`}
+  ]},
+  {name:"Stack Simulation / Undo Operation", hint:"Simulate operations with a stack — pop on undo, remove adjacent duplicates, collapse characters.", problems:[
+    {title:"Valid Parentheses", diff:"Easy",
+     statement:`Given a string of brackets ( ) [ ] { }, determine if it is valid (every opening bracket is closed by the same type, in the correct order).`,
+     approach:`Push every opening bracket. On a closing bracket, it must match the most recently opened (top of stack) bracket — if not, or if the stack is empty, the string is invalid.`,
+     code:`def isValid(s: str) -> bool:
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+    for ch in s:
+        if ch in '([{':
+            stack.append(ch)
+        else:
+            if not stack or stack[-1] != pairs[ch]:
+                return False
+            stack.pop()
+    return not stack`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Remove All Adjacent Duplicates In String", diff:"Easy",
+     statement:`Repeatedly remove adjacent pairs of identical letters until no more removals are possible; return the final string.`,
+     approach:`Push characters onto a stack; whenever the incoming character equals the stack's top, they cancel — pop instead of pushing.`,
+     code:`def removeDuplicates(s: str) -> str:
+    stack = []
+    for ch in s:
+        if stack and stack[-1] == ch:
+            stack.pop()
+        else:
+            stack.append(ch)
+    return "".join(stack)`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Backspace String Compare", diff:"Easy",
+     statement:`Given two strings containing letters and '#' (backspace, deletes the previous character), determine if they represent the same final string after applying all backspaces.`,
+     approach:`Build each string's final form with a stack: normal characters push, '#' pops (if non-empty). Compare the two resulting stacks.`,
+     code:`def backspaceCompare(s: str, t: str) -> bool:
+    def build(string):
+        stack = []
+        for ch in string:
+            if ch != '#':
+                stack.append(ch)
+            elif stack:
+                stack.pop()
+        return "".join(stack)
+    return build(s) == build(t)`,
+     complexity:`Time O(n + m), Space O(n + m).`},
+    {title:"Remove K Digits", diff:"Medium",
+     statement:`Given a non-negative integer string and k, remove k digits to make the smallest possible number (no leading zeroes, unless the result is "0").`,
+     approach:`Greedy monotonic increasing stack: whenever the current digit is smaller than the stack's top and we still have removals left, pop the top (removing a "worse" leading digit makes the number smaller). If removals remain after the scan, trim from the end. Finally strip leading zeroes.`,
+     code:`def removeKdigits(num: str, k: int) -> str:
+    stack = []
+    for digit in num:
+        while k and stack and stack[-1] > digit:
+            stack.pop()
+            k -= 1
+        stack.append(digit)
+    while k:
+        stack.pop()
+        k -= 1
+    result = "".join(stack).lstrip('0')
+    return result if result else "0"`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Parenthesis & Scoring", hint:"Track balance, nesting depth, or a running score for parenthesis strings.", problems:[
+    {title:"Valid Parentheses", diff:"Easy",
+     statement:`Given a string of brackets, determine if it is valid.`,
+     approach:`Identical problem and solution to the entry under Stack Simulation / Undo Operation. See that entry.`,
+     code:`# See "Valid Parentheses" under Stack Simulation / Undo Operation —
+# identical bracket-matching-stack solution.`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Score of Parentheses", diff:"Medium",
+     statement:`Given a balanced parentheses string, compute its score: "()" = 1, AB (concatenation) = A's score + B's score, and (A) = 2 * A's score.`,
+     approach:`Use a stack of partial scores, one frame per open bracket depth. On '(', push a fresh 0. On ')', pop the innermost score; if it was 0 (an immediate "()"), it contributes 1, otherwise it contributes double; fold that contribution into the new top of stack (the enclosing depth).`,
+     code:`def scoreOfParentheses(s: str) -> int:
+    stack = [0]
+    for ch in s:
+        if ch == '(':
+            stack.append(0)
+        else:
+            v = stack.pop()
+            stack[-1] += max(2 * v, 1)
+    return stack[0]`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Minimum Add to Make Parentheses Valid", diff:"Medium",
+     statement:`Given a string of parentheses, find the minimum number of parentheses to add to make it valid.`,
+     approach:`Track how many unmatched '(' are currently open. Each ')' either closes one of them, or (if none are open) is itself unmatched and needs a future '(' inserted. The answer is unmatched opens remaining plus unmatched closes encountered.`,
+     code:`def minAddToMakeValid(s: str) -> int:
+    open_needed = 0
+    close_needed = 0
+    for ch in s:
+        if ch == '(':
+            open_needed += 1
+        else:
+            if open_needed > 0:
+                open_needed -= 1
+            else:
+                close_needed += 1
+    return open_needed + close_needed`,
+     complexity:`Time O(n), Space O(1).`},
+    {title:"Longest Valid Parentheses", diff:"Hard",
+     statement:`Given a string of ( and ), find the length of the longest valid (well-formed) parentheses substring.`,
+     approach:`Keep a stack of indices, seeded with -1 as a base marker. Push indices of '('. On ')', pop; if the stack becomes empty, this ')' has no matching base so push its own index as the new base. Otherwise the current valid-substring length is the distance from the current index to the new top of stack.`,
+     code:`def longestValidParentheses(s: str) -> int:
+    stack = [-1]
+    best = 0
+    for i, ch in enumerate(s):
+        if ch == '(':
+            stack.append(i)
+        else:
+            stack.pop()
+            if not stack:
+                stack.append(i)
+            else:
+                best = max(best, i - stack[-1])
+    return best`,
+     complexity:`Time O(n), Space O(n).`}
+  ]},
+  {name:"Stack-Based Design", hint:"Design a stack variant supporting extra operations like min, increment, or max-pop.", problems:[
+    {title:"Min Stack", diff:"Medium",
+     statement:`Design a stack supporting push, pop, top, and retrieving the minimum element, all in O(1).`,
+     approach:`Maintain a parallel stack that, at each position, stores the minimum seen from the bottom up to that position. Pushing computes min(new value, current min); popping pops both stacks together.`,
+     code:`class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        m = val if not self.min_stack else min(val, self.min_stack[-1])
+        self.min_stack.append(m)
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]`,
+     complexity:`Time O(1) per operation, Space O(n).`},
+    {title:"Implement Queue using Stacks", diff:"Easy",
+     statement:`Implement a FIFO queue using only two stacks.`,
+     approach:`Push always goes onto an "in" stack. To pop or peek, if the "out" stack is empty, drain the entire "in" stack into it (which reverses the order), then operate on "out". This amortizes each element's reversal cost across all its future pops.`,
+     code:`class MyQueue:
+    def __init__(self):
+        self.in_stack = []
+        self.out_stack = []
+
+    def push(self, x: int) -> None:
+        self.in_stack.append(x)
+
+    def _transfer(self):
+        if not self.out_stack:
+            while self.in_stack:
+                self.out_stack.append(self.in_stack.pop())
+
+    def pop(self) -> int:
+        self._transfer()
+        return self.out_stack.pop()
+
+    def peek(self) -> int:
+        self._transfer()
+        return self.out_stack[-1]
+
+    def empty(self) -> bool:
+        return not self.in_stack and not self.out_stack`,
+     complexity:`Time O(1) amortized per operation, Space O(n).`},
+    {title:"Implement Stack using Queues", diff:"Easy",
+     statement:`Implement a LIFO stack using only one queue.`,
+     approach:`After pushing a new element to the back of the queue, rotate the queue by popping-and-re-pushing every other element in front of it — this moves the new element to the front, making the queue's front always the most-recently-pushed item (i.e. behave like a stack top).`,
+     code:`from collections import deque
+
+class MyStack:
+    def __init__(self):
+        self.q = deque()
+
+    def push(self, x: int) -> None:
+        self.q.append(x)
+        for _ in range(len(self.q) - 1):
+            self.q.append(self.q.popleft())
+
+    def pop(self) -> int:
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[0]
+
+    def empty(self) -> bool:
+        return not self.q`,
+     complexity:`Time O(n) push (rotation), O(1) pop/top. Space O(n).`},
+    {title:"Design a Stack With Increment Operation", diff:"Medium",
+     statement:`Design a stack with a fixed max size supporting push, pop, and increment(k, val) which adds val to the bottom k elements.`,
+     approach:`Store elements in a plain list capped at maxSize. increment simply adds val to the bottom min(k, current size) elements directly — straightforward since k and stack size are both bounded and the operation is infrequent relative to push/pop in typical use.`,
+     code:`class CustomStack:
+    def __init__(self, maxSize: int):
+        self.max_size = maxSize
+        self.stack = []
+
+    def push(self, x: int) -> None:
+        if len(self.stack) < self.max_size:
+            self.stack.append(x)
+
+    def pop(self) -> int:
+        return self.stack.pop() if self.stack else -1
+
+    def increment(self, k: int, val: int) -> None:
+        for i in range(min(k, len(self.stack))):
+            self.stack[i] += val`,
+     complexity:`Time O(1) push/pop, O(k) increment. Space O(maxSize).`},
+    {title:"Max Stack", diff:"Hard",
+     statement:`Design a stack supporting push, pop, top, peekMax, and popMax (remove the maximum element, even if it isn't on top, keeping the rest of the stack's relative order).`,
+     approach:`Tag every pushed value with a unique id, keep a max-heap of (value, id) for fast max lookup, and track a "removed" id set for lazy deletion — popMax removes the max-heap's top and marks its id removed rather than physically restructuring the underlying stack; the stack itself lazily skips past removed ids when accessed.`,
+     code:`import heapq
+
+class MaxStack:
+    def __init__(self):
+        self.stack = []
+        self.removed = set()
+        self.heap = []
+        self.id = 0
+
+    def push(self, x: int) -> None:
+        self.id += 1
+        self.stack.append((x, self.id))
+        heapq.heappush(self.heap, (-x, -self.id))
+
+    def pop(self) -> int:
+        while self.stack[-1][1] in self.removed:
+            self.stack.pop()
+        x, i = self.stack.pop()
+        self.removed.add(i)
+        return x
+
+    def top(self) -> int:
+        while self.stack[-1][1] in self.removed:
+            self.stack.pop()
+        return self.stack[-1][0]
+
+    def peekMax(self) -> int:
+        while -self.heap[0][1] in self.removed:
+            heapq.heappop(self.heap)
+        return -self.heap[0][0]
+
+    def popMax(self) -> int:
+        while -self.heap[0][1] in self.removed:
+            heapq.heappop(self.heap)
+        x, neg_i = heapq.heappop(self.heap)
+        self.removed.add(-neg_i)
+        return -x`,
+     complexity:`Time O(log n) amortized per operation, Space O(n).`}
+  ]},
+  {name:"Stack + Greedy", hint:"Combine a monotonic stack with a greedy choice to build an optimal string or subsequence.", problems:[
+    {title:"Remove Duplicate Letters", diff:"Medium",
+     statement:`Given a string, remove duplicate letters so every letter appears exactly once, keeping the result the smallest possible in lexicographic order (and preserving relative order of first occurrences).`,
+     approach:`Greedy monotonic stack: for each character, if it's not already in the result, pop any stack-top character that is lexicographically larger AND still has a later occurrence available (so removing it now doesn't lose it forever). Track a "last occurrence index" map and an in-stack set to make both checks O(1).`,
+     code:`def removeDuplicateLetters(s: str) -> str:
+    last_occurrence = {ch: i for i, ch in enumerate(s)}
+    stack = []
+    in_stack = set()
+    for i, ch in enumerate(s):
+        if ch in in_stack:
+            continue
+        while stack and stack[-1] > ch and last_occurrence[stack[-1]] > i:
+            in_stack.remove(stack.pop())
+        stack.append(ch)
+        in_stack.add(ch)
+    return "".join(stack)`,
+     complexity:`Time O(n), Space O(1) (bounded alphabet).`},
+    {title:"Remove K Digits", diff:"Medium",
+     statement:`Given a non-negative integer string and k, remove k digits to make the smallest possible number.`,
+     approach:`Identical problem and solution to the entry under Stack Simulation / Undo Operation — the greedy monotonic increasing stack. See that entry.`,
+     code:`# See "Remove K Digits" under Stack Simulation / Undo Operation —
+# identical greedy monotonic-stack solution.`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"132 Pattern", diff:"Medium",
+     statement:`Given an array, determine if there exists a subsequence nums[i] < nums[k] < nums[j] with i < j < k (a "1-3-2" pattern).`,
+     approach:`Scan left to right, treating each element as a candidate "3" (the largest of the triple). Keep a decreasing stack of (candidate_three, min_value_seen_before_it) pairs. Pop any stack entries whose "3" value is <= the current number (they can never be the "3" of a valid pattern anymore). If the current number falls strictly between a stack entry's stored min-before and that entry's value, a valid "1 < 2 < 3" pattern (read as k=current, j=entry, i=stored min) has been found.`,
+     code:`def find132pattern(nums: list[int]) -> bool:
+    stack = []  # (candidate "3", min value seen before it)
+    min_so_far = float('inf')
+    for num in nums:
+        while stack and stack[-1][0] <= num:
+            stack.pop()
+        if stack and stack[-1][1] < num < stack[-1][0]:
+            return True
+        stack.append((num, min_so_far))
+        min_so_far = min(min_so_far, num)
+    return False`,
+     complexity:`Time O(n), Space O(n).`},
+    {title:"Create Maximum Number", diff:"Hard",
+     statement:`Given two arrays of digits and an integer k, create the maximum number of length k using digits from both arrays (preserving each array's relative digit order), choosing how many digits to take from each.`,
+     approach:`For every valid split (i digits from nums1, k-i from nums2), extract the lexicographically maximum length-i subsequence from each array using a greedy monotonic decreasing stack, then merge the two chosen subsequences greedily (always take from whichever remaining suffix is lexicographically larger). Keep the best merged result across all splits.`,
+     code:`def maxNumber(nums1: list[int], nums2: list[int], k: int) -> list[int]:
+    def max_subsequence(nums, length):
+        stack = []
+        drop = len(nums) - length
+        for num in nums:
+            while stack and drop > 0 and stack[-1] < num:
+                stack.pop()
+                drop -= 1
+            stack.append(num)
+        return stack[:length]
+
+    def merge(a, b):
+        result = []
+        while a or b:
+            if a > b:
+                result.append(a[0]); a = a[1:]
+            else:
+                result.append(b[0]); b = b[1:]
+        return result
+
+    result = [0] * k
+    for i in range(max(0, k - len(nums2)), min(k, len(nums1)) + 1):
+        candidate = merge(max_subsequence(nums1, i), max_subsequence(nums2, k - i))
+        if candidate > result:
+            result = candidate
+    return result`,
+     complexity:`Time O(k * (m+n)^2) in the worst case (dominated by list-slicing comparisons), Space O(m+n).`},
+    {title:"Smallest Subsequence of Distinct Characters", diff:"Medium",
+     statement:`Given a string of lowercase letters, return the lexicographically smallest subsequence that contains every distinct character exactly once.`,
+     approach:`This is the exact same problem as Remove Duplicate Letters — every character in the input is, by definition, being "deduplicated" to one occurrence in lexicographically smallest order. See that entry for the identical greedy monotonic-stack solution.`,
+     code:`# See "Remove Duplicate Letters" above —
+# identical greedy monotonic-stack solution (same problem).`,
+     complexity:`Time O(n), Space O(1) (bounded alphabet).`}
+  ]},
+  {name:"Recursive Stack", hint:"Use recursion itself as the call stack to reverse, sort, or peel a stack's structure.", problems:[
+    {title:"Reverse a Stack Using Recursion", diff:"Medium",
+     statement:`Reverse a stack using only recursion (no auxiliary explicit stack/queue).`,
+     approach:`Identical problem and solution to the entry under Recursion > Recursion on LinkedList/Stack. See that entry (pop, recurse, then insert-at-bottom).`,
+     code:`# See "Reverse a Stack Using Recursion" under
+# Recursion > Recursion on LinkedList/Stack — identical solution.`,
+     complexity:`Time O(n^2), Space O(n) (call stack).`},
+    {title:"Sort a Stack Using Recursion", diff:"Medium",
+     statement:`Sort a stack (ascending, with the smallest on top) using only recursion.`,
+     approach:`Pop the top element, recursively sort the rest, then use a helper to insert the popped element back into its correct sorted position by recursively popping larger elements out of the way, inserting, and pushing them back.`,
+     code:`def sortStack(stack: list) -> None:
+    if not stack:
+        return
+    top = stack.pop()
+    sortStack(stack)
+    insert_sorted(stack, top)
+
+def insert_sorted(stack: list, item) -> None:
+    if not stack or item > stack[-1]:
+        stack.append(item)
+        return
+    top = stack.pop()
+    insert_sorted(stack, item)
+    stack.append(top)`,
+     complexity:`Time O(n^2), Space O(n) (call stack).`},
+    {title:"Remove Outermost Parentheses", diff:"Easy",
+     statement:`Given a valid parentheses string that is a concatenation of primitive valid parentheses strings, remove the outermost parentheses of every primitive substring.`,
+     approach:`Track nesting depth as you scan. A '(' is "outermost" (and should be dropped) exactly when it opens at depth 0 (before incrementing); a ')' is outermost when it closes back down to depth 0. Every other bracket gets kept.`,
+     code:`def removeOuterParentheses(s: str) -> str:
+    result = []
+    depth = 0
+    for ch in s:
+        if ch == '(':
+            if depth > 0:
+                result.append(ch)
+            depth += 1
+        else:
+            depth -= 1
+            if depth > 0:
+                result.append(ch)
+    return "".join(result)`,
+     complexity:`Time O(n), Space O(n).`}
+  ]}
+]}
+];
+
+
+</script>
+<script>
+(function(){
+  const DATA = window.__DATA__;
+  const STORAGE_KEY = "pv_solved_v1";
+  const THEME_KEY = "pv_theme_v1";
+
+  function loadSolved(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveSolved(obj){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){}
+  }
+  let solved = loadSolved();
+
+  function loadTheme(){
+    try{ return localStorage.getItem(THEME_KEY) || ""; }catch(e){ return ""; }
+  }
+  function saveTheme(t){
+    try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+  }
+  let theme = loadTheme();
+  if(theme) document.documentElement.setAttribute("data-theme", theme);
+
+  document.getElementById("themeToggle").addEventListener("click", function(){
+    const cur = document.documentElement.getAttribute("data-theme");
+    let next;
+    if(!cur){
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      next = prefersDark ? "light" : "dark";
+    } else {
+      next = cur === "dark" ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", next);
+    saveTheme(next);
+  });
+
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function problemKey(topic, sub, title){
+    return topic + "::" + sub + "::" + title;
+  }
+
+  let activeDiff = "all";
+  let searchTerm = "";
+  let currentTopicIdx = 0;
+
+  const navTree = document.getElementById("navTree");
+  const mainContent = document.getElementById("mainContent");
+  const statSolved = document.getElementById("statSolved");
+  const statTotal = document.getElementById("statTotal");
+
+  function totalCount(){
+    let t = 0;
+    DATA.forEach(topic => topic.subs.forEach(sub => t += sub.problems.length));
+    return t;
+  }
+  function solvedCount(){
+    return Object.keys(solved).filter(k => solved[k]).length;
+  }
+  function updateStats(){
+    statSolved.textContent = solvedCount();
+    statTotal.textContent = totalCount();
+  }
+
+  function matchesFilters(p){
+    if(activeDiff !== "all" && p.diff !== activeDiff) return false;
+    if(searchTerm){
+      const hay = p.title.toLowerCase();
+      if(!hay.includes(searchTerm.toLowerCase())) return false;
+    }
+    return true;
+  }
+
+  function renderNav(){
+    navTree.innerHTML = "";
+    DATA.forEach((topic, ti) => {
+      let topicCount = 0;
+      topic.subs.forEach(sub => sub.problems.forEach(p => { if(matchesFilters(p)) topicCount++; }));
+
+      const topicDiv = document.createElement("div");
+      topicDiv.className = "nav-topic";
+
+      const head = document.createElement("div");
+      head.className = "nav-topic-head";
+      head.innerHTML = "<span>" + escapeHtml(topic.topic) + "</span><span class='cnt'>" + topicCount + "</span>";
+      head.addEventListener("click", () => {
+        currentTopicIdx = ti;
+        renderMain();
+        const subs = topicDiv.querySelector(".nav-subs");
+        subs.classList.toggle("open");
+      });
+      topicDiv.appendChild(head);
+
+      const subsDiv = document.createElement("div");
+      subsDiv.className = "nav-subs" + (ti === currentTopicIdx ? " open" : "");
+      topic.subs.forEach(sub => {
+        const subCount = sub.problems.filter(matchesFilters).length;
+        const subEl = document.createElement("div");
+        subEl.className = "nav-sub";
+        subEl.innerHTML = "<span>" + escapeHtml(sub.name) + "</span><span class='cnt'>" + subCount + "</span>";
+        subEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          currentTopicIdx = ti;
+          renderMain();
+          setTimeout(() => {
+            const target = document.getElementById("sub-" + ti + "-" + topic.subs.indexOf(sub));
+            if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+          }, 30);
+        });
+        subsDiv.appendChild(subEl);
+      });
+      topicDiv.appendChild(subsDiv);
+      navTree.appendChild(topicDiv);
+    });
+  }
+
+  function renderCode(code){
+    return escapeHtml(code);
+  }
+
+  function makeProblemCard(topic, sub, p, ti, si, pi){
+    const key = problemKey(topic.topic, sub.name, p.title);
+    const isDone = !!solved[key];
+
+    const card = document.createElement("div");
+    card.className = "problem-card";
+    card.id = "prob-" + ti + "-" + si + "-" + pi;
+
+    const head = document.createElement("div");
+    head.className = "problem-head";
+
+    const chk = document.createElement("div");
+    chk.className = "chk" + (isDone ? " done" : "");
+    chk.textContent = isDone ? "✓" : "";
+    chk.addEventListener("click", (e) => {
+      e.stopPropagation();
+      solved[key] = !solved[key];
+      saveSolved(solved);
+      updateStats();
+      chk.classList.toggle("done");
+      chk.textContent = solved[key] ? "✓" : "";
+      titleSpan.classList.toggle("done-text", !!solved[key]);
+    });
+
+    const titleSpan = document.createElement("div");
+    titleSpan.className = "p-title" + (isDone ? " done-text" : "");
+    titleSpan.textContent = p.title;
+
+    const badge = document.createElement("div");
+    badge.className = "diff-badge diff-" + p.diff;
+    badge.textContent = p.diff;
+
+    const chev = document.createElement("div");
+    chev.className = "chevron";
+    chev.textContent = "▸";
+
+    head.appendChild(chk);
+    head.appendChild(titleSpan);
+    head.appendChild(badge);
+    head.appendChild(chev);
+    head.addEventListener("click", () => {
+      card.classList.toggle("open");
+    });
+
+    const body = document.createElement("div");
+    body.className = "problem-body";
+    body.innerHTML =
+      "<h4>Problem</h4><p>" + escapeHtml(p.statement) + "</p>" +
+      "<h4>Approach</h4><p>" + escapeHtml(p.approach) + "</p>" +
+      "<h4>Python Solution</h4>" +
+      "<div class='code-wrap'><button class='copy-btn'>Copy</button><pre><code>" + renderCode(p.code) + "</code></pre></div>" +
+      "<h4>Complexity</h4><p>" + escapeHtml(p.complexity) + "</p>";
+
+    card.appendChild(head);
+    card.appendChild(body);
+
+    setTimeout(() => {
+      const copyBtn = body.querySelector(".copy-btn");
+      if(copyBtn){
+        copyBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          navigator.clipboard && navigator.clipboard.writeText(p.code).then(() => {
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => { copyBtn.textContent = "Copy"; }, 1200);
+          }).catch(() => {});
+        });
+      }
+    }, 0);
+
+    return card;
+  }
+
+  function renderMain(){
+    mainContent.innerHTML = "";
+    const topic = DATA[currentTopicIdx];
+    if(!topic) return;
+
+    const header = document.createElement("div");
+    header.className = "topic-header";
+    header.innerHTML = "<h1>" + escapeHtml(topic.topic) + "</h1><div class='desc'>" + escapeHtml(topic.desc) + "</div>";
+    mainContent.appendChild(header);
+
+    let anyVisible = false;
+
+    topic.subs.forEach((sub, si) => {
+      const visibleProblems = sub.problems.filter(matchesFilters);
+      if(visibleProblems.length === 0) return;
+      anyVisible = true;
+
+      const block = document.createElement("div");
+      block.className = "sub-block";
+      block.id = "sub-" + currentTopicIdx + "-" + si;
+
+      const h2 = document.createElement("h2");
+      h2.textContent = sub.name;
+      block.appendChild(h2);
+
+      const hint = document.createElement("p");
+      hint.className = "subhint";
+      hint.textContent = sub.hint;
+      block.appendChild(hint);
+
+      sub.problems.forEach((p, pi) => {
+        if(!matchesFilters(p)) return;
+        block.appendChild(makeProblemCard(topic, sub, p, currentTopicIdx, si, pi));
+      });
+
+      mainContent.appendChild(block);
+    });
+
+    if(!anyVisible){
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "No problems match your search/filter in this topic.";
+      mainContent.appendChild(empty);
+    }
+  }
+
+  document.getElementById("searchBox").addEventListener("input", (e) => {
+    searchTerm = e.target.value.trim();
+    renderNav();
+    renderMain();
+  });
+
+  document.querySelectorAll(".filter-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      activeDiff = chip.getAttribute("data-diff");
+      renderNav();
+      renderMain();
+    });
+  });
+
+  updateStats();
+  renderNav();
+  renderMain();
+})();
+
+</script>
+</body>
+</html>
